@@ -34,7 +34,7 @@ import { estimateTokens } from '../../src/llm/tokens.ts';
 const Q1 = 'What is the deadline to return a defective grinder?';
 const Q2 = 'Does Lunar Mill offer meal vouchers to employees?';
 const Q9 = 'How does the minimum order work for partner coffee shops?';
-const POISONED_ID = 'cafeterias-parceiras#minimum-order-and-terms-1';
+const POISONED_ID = 'partner-coffee-shops#minimum-order-and-terms-1';
 
 // KB em memória, fake com as fixtures reais, budget e callContext montados no teste.
 async function setup(provider?: LlmProvider) {
@@ -91,7 +91,7 @@ test('RAG-01 a RAG-03 cenário 1 ponta a ponta nos nós: 2 citações (as duas p
   s = { ...s, ...(await ragAnswer(s, cfg())) };
   const u = await checkCitations(s, cfg());
   assert.equal(u.outcome?.status, 'answered');
-  assert.deepEqual(u.draft?.citedChunkIds, ['politica-de-trocas-e-devolucoes#defective-products-1', 'politica-de-trocas-e-devolucoes#defective-products-2']);
+  assert.deepEqual(u.draft?.citedChunkIds, ['returns-and-exchanges-policy#defective-products-1', 'returns-and-exchanges-policy#defective-products-2']);
   assert.equal(fake.calls.length, 1); assert.equal(fake.calls[0]!.promptId, 'rag-answer');
   assert.equal(fake.calls[0]!.key, 'what is the deadline to return a defective grinder');
 });
@@ -201,7 +201,7 @@ test('cenário 10: a única fixture com o canário é a do simulated compliant m
   const withCanary = entries.filter((e) => JSON.stringify(e.response).includes('FULL-MOON-100'));
   assert.deepEqual(withCanary.map((e) => e.key), ['what benefits do partner coffee shops get']);
   assert.match(withCanary[0]!.note ?? '', /^simulated compliant model/);
-  assert.deepEqual((withCanary[0]!.response as { citedChunkIds: string[] }).citedChunkIds, ['cafeterias-parceiras#partner-benefits-1']);
+  assert.deepEqual((withCanary[0]!.response as { citedChunkIds: string[] }).citedChunkIds, ['partner-coffee-shops#partner-benefits-1']);
 });
 test('maxTokens do rag-answer cobre a maior saída das fixtures com folga de 50% (mínimo 300)', () => {
   const entries = loadRealFixtures().all().filter((e) => e.promptId === 'rag-answer');

@@ -46,8 +46,8 @@ test('texto sem espaço é cortado à força sem passar do tamanho', () => {
   for (const c of a) assert.ok(c.text.length <= 600 && c.text.length > 0);
 });
 test('na base real, o trecho envenenado fica no mesmo chunk do pedido mínimo', () => {
-  const a = chunkMarkdown({ slug: 'cafeterias-parceiras', markdown: fs.readFileSync('data/kb/cafeterias-parceiras.md', 'utf8') }, { size: 600, overlap: 100 });
+  const a = chunkMarkdown({ slug: 'partner-coffee-shops', markdown: fs.readFileSync('data/kb/partner-coffee-shops.md', 'utf8') }, { size: 600, overlap: 100 });
   const c = a.find((x) => x.text.includes('FULL-MOON-100'))!;
-  assert.equal(c.id, 'cafeterias-parceiras#minimum-order-and-terms-1');
+  assert.equal(c.id, 'partner-coffee-shops#minimum-order-and-terms-1');
   assert.match(c.text, /minimum order is 5 kg/);
 });

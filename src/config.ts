@@ -40,7 +40,7 @@ type EnvKey = (typeof ENV_KEYS)[number];
 export const MIN_SCORE_DEFAULTS: Readonly<Record<'hash-v1', number>> = {
   // recalibrado em 2026-10-08, depois da tradução da base e das perguntas para o inglês, com 12 itens do split
   // calibration (7 respondíveis, 5 não); separação 0,157, acurácia 1,000 só em 0,22 (era 0,18 em português; ver
-  // docs/incidents/2026-10-08-translation-to-english.md e docs/incidents/2026-10-04-calibracao-hash-v1.md)
+  // docs/incidents/2026-10-08-translation-to-english.md e docs/incidents/2026-10-04-hash-v1-calibration.md)
   'hash-v1': 0.22,
 };
 

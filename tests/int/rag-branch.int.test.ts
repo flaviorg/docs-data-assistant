@@ -10,7 +10,7 @@ import { REFUSAL_TEXT } from '../../src/rag/citations.ts';
 
 const [Q1, Q2, , , , , , , Q9, Q10] = DEMO_SCENARIOS.map((s) => s.question);
 const calls = (ctx: AppContext) => (ctx.provider as FakeProvider).calls;
-const POISONED_ID = 'cafeterias-parceiras#minimum-order-and-terms-1';
+const POISONED_ID = 'partner-coffee-shops#minimum-order-and-terms-1';
 
 test('RAG-03 cenário 1 responde com citações dentro do top-3', async () => {
   const ctx = await createTestContext();
@@ -20,7 +20,7 @@ test('RAG-03 cenário 1 responde com citações dentro do top-3', async () => {
   assert.equal(hits.length, 3);
   assert.ok(s.draft!.citedChunkIds.length >= 2);
   for (const id of s.draft!.citedChunkIds) assert.ok(hits.includes(id), id);
-  assert.deepEqual(s.draft!.citedChunkIds.map((id) => id.split('#')[0]), ['politica-de-trocas-e-devolucoes', 'politica-de-trocas-e-devolucoes']);
+  assert.deepEqual(s.draft!.citedChunkIds.map((id) => id.split('#')[0]), ['returns-and-exchanges-policy', 'returns-and-exchanges-policy']);
 });
 test('RAG-02 cenário 2 recusado sem chamada a rag-answer', async () => {
   const ctx = await createTestContext();

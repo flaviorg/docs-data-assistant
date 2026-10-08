@@ -19,22 +19,22 @@ jobs:
           node-version: '24.x'
           cache: npm
 
-      - name: Instalar dependências
+      - name: Install dependencies
         run: npm ci
 
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Testes (sem rede)
+      - name: Tests (no network)
         run: npm test
 
-      - name: Eval gate (perfil fake)
+      - name: Eval gate (fake profile)
         run: npm run eval -- --out eval/reports/ci-fake.md
 
-      - name: Matriz ataque × camada
+      - name: Attack × layer matrix
         run: npm run layers
 
-      - name: Publicar o relatório do eval
+      - name: Upload the eval report
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:

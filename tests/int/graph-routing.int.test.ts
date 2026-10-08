@@ -103,7 +103,7 @@ test('contexto em memória: schema sem dado pessoal, índice com 8 documentos e 
   const ctx = await createTestContext();
   assert.match(ctx.schemaText, /CREATE TABLE orders/); assert.doesNotMatch(ctx.schemaText, /customer_contacts/);
   assert.equal(ctx.store.counts().documents, 8);
-  assert.ok(ctx.getChunk('cafeterias-parceiras#minimum-order-and-terms-1')?.flagged);
+  assert.ok(ctx.getChunk('partner-coffee-shops#minimum-order-and-terms-1')?.flagged);
   assert.equal(ctx.provider.name, 'fake'); assert.ok(ctx.fixtures);
   ctx.close(); ctx.close();
 });

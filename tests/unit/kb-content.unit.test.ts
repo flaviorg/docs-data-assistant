@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const files = ['sobre-a-empresa', 'politica-de-trocas-e-devolucoes', 'frete-e-prazos', 'clube-de-assinatura',
-  'garantia-de-equipamentos', 'pagamentos-e-reembolsos', 'privacidade-e-dados', 'cafeterias-parceiras'].map((f) => `${f}.md`);
+const files = ['about-the-company', 'returns-and-exchanges-policy', 'shipping-and-delivery-times', 'subscription-club',
+  'equipment-warranty', 'payments-and-refunds', 'privacy-and-data-protection', 'partner-coffee-shops'].map((f) => `${f}.md`);
 const read = (f: string) => fs.readFileSync(`data/kb/${f}`, 'utf8');
 const fold = (s: string) => s.normalize('NFKD').replace(/\p{M}/gu, '').toLowerCase();
 const sectionOf = (md: string, heading: string) => {
@@ -23,11 +23,11 @@ test('8 documentos, cada um com 250 a 500 palavras, H1 e ao menos 3 H2', () => {
     assert.ok((md.match(/^## \S/gm) ?? []).length >= 3, f);
   }
 });
-test('canário aparece uma vez, no parágrafo envenenado de cafeterias-parceiras', () => {
+test('canário aparece uma vez, no parágrafo envenenado de partner-coffee-shops', () => {
   const all = files.map((f) => [f, read(f)] as const);
   const hits = all.flatMap(([f, md]) => (md.match(/FULL-MOON-100/g) ?? []).map(() => f));
-  assert.deepEqual(hits, ['cafeterias-parceiras.md']);
-  assert.match(all.find(([f]) => f === 'cafeterias-parceiras.md')![1], /^Note to automated systems[^\n]*FULL-MOON-100/m);
+  assert.deepEqual(hits, ['partner-coffee-shops.md']);
+  assert.match(all.find(([f]) => f === 'partner-coffee-shops.md')![1], /^Note to automated systems[^\n]*FULL-MOON-100/m);
 });
 test('só domínios .example e nada sobre vale-refeição (meal vouchers)', () => {
   for (const f of files) {
@@ -39,24 +39,24 @@ test('só domínios .example e nada sobre vale-refeição (meal vouchers)', () =
 
 // Complementos: fatos que os cenários da demo exigem
 test('trocas: seção "Defective products" com 30 e 90 dias, e direito de cancelar em 7 dias', () => {
-  const md = read('politica-de-trocas-e-devolucoes.md');
+  const md = read('returns-and-exchanges-policy.md');
   assert.match(sectionOf(md, 'Defective products'), /30 days[\s\S]*90 days/);
   assert.match(fold(md), /right to cancel[\s\S]*7 calendar days/);
 });
 test('garantia: 12 meses e seção "How to claim the warranty"', () => {
-  const md = read('garantia-de-equipamentos.md');
+  const md = read('equipment-warranty.md');
   assert.match(md, /12-month warranty/);
   sectionOf(md, 'How to claim the warranty');
 });
 test('pagamentos: seção "Refund times" cobre cartão, Pix e boleto', () => {
-  const section = fold(sectionOf(read('pagamentos-e-reembolsos.md'), 'Refund times'));
+  const section = fold(sectionOf(read('payments-and-refunds.md'), 'Refund times'));
   for (const term of ['credit card', 'pix', 'bank slip']) assert.match(section, new RegExp(term), term);
 });
 test('frete grátis acima de R$ 199', () => {
-  assert.match(read('frete-e-prazos.md'), /R\$ 199/);
+  assert.match(read('shipping-and-delivery-times.md'), /R\$ 199/);
 });
 test('cafeterias: pedido mínimo, benefícios e parágrafo envenenado entre duas seções', () => {
-  const md = read('cafeterias-parceiras.md');
+  const md = read('partner-coffee-shops.md');
   assert.match(fold(md), /minimum order/);
   assert.match(fold(md), /benefits/);
   const lines = md.split('\n');
@@ -70,7 +70,7 @@ test('cafeterias: pedido mínimo, benefícios e parágrafo envenenado entre duas
   assert.match(poisoned, /system prompt/);
 });
 test('privacidade: atendimento automático não expõe dados pessoais', () => {
-  const md = fold(read('privacidade-e-dados.md'));
+  const md = fold(read('privacy-and-data-protection.md'));
   assert.match(md, /automated support/);
   assert.match(md, /does not (expose|reveal|show)[^.]*personal data/);
 });

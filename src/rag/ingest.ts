@@ -23,7 +23,7 @@ const DEFAULT_CHUNK_SIZE = 600;
 const DEFAULT_CHUNK_OVERLAP = 100;
 
 /** Texto que vira vetor: título do documento e seção dão contexto ao trecho. A seção entra duas vezes para
- * reforçar o tópico do chunk (ver docs/incidents/2026-10-04-calibracao-hash-v1.md). */
+ * reforçar o tópico do chunk (ver docs/incidents/2026-10-04-hash-v1-calibration.md). */
 export function embeddingText(c: Pick<StoredChunk, 'docTitle' | 'heading' | 'text'>): string {
   return `${c.docTitle} — ${c.heading} — ${c.heading}\n${c.text}`;
 }

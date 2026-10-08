@@ -13,7 +13,7 @@ export const AskRequestSchema = z.strictObject({
 });
 
 export const CitationSchema = z.object({
-  chunkId: z.string(),        // ex.: "politica-de-trocas-e-devolucoes#produtos-com-defeito-1"
+  chunkId: z.string(),        // ex.: "returns-and-exchanges-policy#defective-products-1"
   docTitle: z.string(),
   heading: z.string(),
   score: z.number(),

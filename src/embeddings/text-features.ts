@@ -19,7 +19,7 @@ export const STOPWORDS: ReadonlySet<string> = new Set([
   'anything', 'nothing', 'everything', 'one', 'ones', 'per', 'via', 'etc', 'like', 'let', 'lets', 'until', 'till',
   'within', 'upon', 'since', 'whether', 'though', 'although', 'unless',
   // Andaime de pergunta: verbos que enquadram a dúvida e quase nunca aparecem nos documentos. Sem casar com nada,
-  // eles só baixavam o cosseno das perguntas respondíveis (ver docs/incidents/2026-10-04-calibracao-hash-v1.md).
+  // eles só baixavam o cosseno das perguntas respondíveis (ver docs/incidents/2026-10-04-hash-v1-calibration.md).
   'want', 'wants', 'wanted', 'need', 'needs', 'needed', 'know', 'tell', 'please', 'happen', 'happens', 'happened',
   'get', 'gets', 'got', 'getting', 'take', 'takes', 'took', 'make', 'makes', 'made', 'work', 'works', 'exist', 'exists',
   'offer', 'offers', 'possible', 'able', 'way', 'long', 'kind', 'thing', 'things', 'someone', 'anybody', 'nobody',

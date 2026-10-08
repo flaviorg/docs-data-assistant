@@ -24,11 +24,11 @@ test('RAG-05 ingerir duas vezes não recria chunks nem vetores', async () => {
 });
 test('alterar um documento recria só os chunks dele e recalcula todos os vetores', async () => {
   const { store, kbDir } = await freshCopy(); const first = await ingestKnowledgeBase({ store, kbDir });
-  const before = new Map(store.allChunks().filter((c) => c.docSlug !== 'frete-e-prazos').map((c) => [c.id, c.text]));
-  fs.appendFileSync(path.join(kbDir, 'frete-e-prazos.md'), '\nNova frase sobre entregas expressas.\n');
+  const before = new Map(store.allChunks().filter((c) => c.docSlug !== 'shipping-and-delivery-times').map((c) => [c.id, c.text]));
+  fs.appendFileSync(path.join(kbDir, 'shipping-and-delivery-times.md'), '\nNova frase sobre entregas expressas.\n');
   const r = await ingestKnowledgeBase({ store, kbDir });
   assert.equal(r.changed, 1);
-  assert.equal(r.chunksRecreated, store.allChunks().filter((c) => c.docSlug === 'frete-e-prazos').length);
+  assert.equal(r.chunksRecreated, store.allChunks().filter((c) => c.docSlug === 'shipping-and-delivery-times').length);
   assert.equal(r.vectorsRecomputed, store.counts().chunks);
   assert.notEqual(r.fingerprint, first.fingerprint);
   for (const [id, text] of before) assert.equal(store.getChunk(id)?.text, text);
@@ -42,10 +42,10 @@ test('GRD-04 o chunk envenenado fica flagged, redigido e com o span guardado', a
 });
 test('documento apagado tem os chunks removidos', async () => {
   const { store, kbDir } = await freshCopy(); await ingestKnowledgeBase({ store, kbDir });
-  fs.rmSync(path.join(kbDir, 'clube-de-assinatura.md'));
+  fs.rmSync(path.join(kbDir, 'subscription-club.md'));
   const r = await ingestKnowledgeBase({ store, kbDir });
   assert.equal(r.removed, 1);
-  assert.equal(store.allChunks().some((c) => c.docSlug === 'clube-de-assinatura'), false);
+  assert.equal(store.allChunks().some((c) => c.docSlug === 'subscription-club'), false);
 });
 
 // Complementos
@@ -85,7 +85,7 @@ test('loadEmbedder sem IDF gravado exige reindexação; índice vazio ingere sem
 test('o texto embedado inclui título e seção: a busca acha a seção pelo nome', async () => {
   const { store, embedder } = await ingestToMemory();
   const [q] = await embedder.embed(['Order tracking']);
-  assert.equal(store.search(q!, 1)[0]?.chunk.id, 'frete-e-prazos#order-tracking-1');
+  assert.equal(store.search(q!, 1)[0]?.chunk.id, 'shipping-and-delivery-times#order-tracking-1');
 });
 test('CLI ingest grava app.db, imprime o relatório e a segunda execução não recria nada', () => {
   const dir = makeTempDir('dda');

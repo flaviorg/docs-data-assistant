@@ -1,47 +1,49 @@
-# Incidentes
+# Incidents
 
-Registro de problemas reais encontrados durante a construção: comportamento de API diferente do esperado, métrica reprovada, teste que pegou um desenho errado. Nada aqui afetou usuários (o projeto não tinha sido publicado). O objetivo é deixar a causa e o teste que impede a volta à vista de quem mexer no código depois.
+A record of real problems found during the build: an API that behaved differently than expected, a failing metric, a test that caught a wrong design. None of this affected users (the project had not been published). The goal is to keep the cause and the test that prevents a regression in view of whoever touches the code later.
 
-Regra do projeto (`specs/constitution.md`): quando uma métrica do eval falha, corrige-se o mecanismo ou recalibra-se o limiar no split `calibration`, e a decisão é registrada aqui. Perguntas-ouro e fixtures não são reescritas para passar.
+Project rule (`specs/constitution.md`): when an eval metric fails, the mechanism is fixed or the threshold is recalibrated on the `calibration` split, and the decision is recorded here. Golden questions and fixtures are not rewritten to pass.
 
-## Modelo
+The incidents dated 2026-10-04 were written while the product was still in Portuguese and were translated on 2026-10-08. Questions, messages and test descriptions quoted in them are given in English; test names in the code are still in Portuguese, so each test is identified by file and, where there is one, by its EARS ID.
 
-Copie para `docs/incidents/AAAA-MM-DD-<assunto-curto>.md`:
+## Template
+
+Copy to `docs/incidents/YYYY-MM-DD-<short-subject>.md`:
 
 ```markdown
-# AAAA-MM-DD: <título em uma linha>
+# YYYY-MM-DD: <one-line title>
 
-## Contexto
-Onde estávamos (tarefa, componente, versão da biblioteca) e o que se esperava.
+## Context
+Where we were (task, component, library version) and what was expected.
 
-## Sintoma
-O que foi observado, com a mensagem ou o número exato.
+## Symptom
+What was observed, with the exact message or number.
 
-## Causa
-Por que aconteceu. Se for comportamento de biblioteca, como foi confirmado.
+## Cause
+Why it happened. If it is library behavior, how it was confirmed.
 
-## Correção
-O que mudou no código ou no desenho, e o que deliberadamente não mudou.
+## Correction
+What changed in the code or the design, and what deliberately did not change.
 
-## Teste que impede a volta
-Arquivo e nome do teste (ou comando) que falha se o problema voltar.
+## Test that prevents regression
+File and test name (or command) that fails if the problem comes back.
 ```
 
-## Registro
+## Log
 
-| Data | Incidente | Área |
+| Date | Incident | Area |
 |---|---|---|
-| 2026-10-04 | [`prepare()` descarta instruções extras em silêncio](2026-10-04-prepare-descarta-instrucoes.md) | SQL |
-| 2026-10-04 | [`readOnly` não vale em memória compartilhada](2026-10-04-readonly-nao-vale-em-memoria-compartilhada.md) | SQL |
-| 2026-10-04 | [`LIKE` negado pelo authorizer](2026-10-04-like-negado-pelo-authorizer.md) | SQL |
-| 2026-10-04 | [Separação do `hash-v1` abaixo da meta na primeira calibração](2026-10-04-calibracao-hash-v1.md) | RAG |
-| 2026-10-04 | [Estado de caos compartilhado entre requisições](2026-10-04-caos-compartilhado-entre-requisicoes.md) | Cliente de LLM |
-| 2026-10-04 | [Redundância falsa do `query_only` na matriz de camadas](2026-10-04-redundancia-falsa-na-matriz.md) | Eval |
-| 2026-10-04 | [Item legítimo bloqueado no eval fake (`docs-003`)](2026-10-04-falso-bloqueio-docs-003-no-eval-fake.md) | Eval |
-| 2026-10-04 | [Produto cartesiano passava pela política e travava o servidor](2026-10-04-produto-cartesiano-trava-o-servidor.md) | SQL |
-| 2026-10-04 | [`Worker.terminate()` não interrompe uma consulta do `node:sqlite`](2026-10-04-terminate-nao-interrompe-sqlite.md) | SQL |
-| 2026-10-04 | [Guarda de saída não via o motivo da rota nem o ID de citação descartado](2026-10-04-guarda-de-saida-sem-motivo-da-rota.md) | Guardrails |
-| 2026-10-04 | [Bloco SQL da resposta passava ao largo da guarda de saída](2026-10-04-bloco-sql-fora-da-guarda-de-saida.md) | Guardrails |
-| 2026-10-04 | [A pergunta podia forjar um trecho no prompt do RAG](2026-10-04-pergunta-forja-trecho-do-rag.md) | Guardrails |
-| 2026-10-04 | [Funções de texto permitidas alocavam centenas de MB dentro do prazo](2026-10-04-funcoes-de-texto-sem-teto.md) | SQL |
+| 2026-10-04 | [`prepare()` silently drops extra statements](2026-10-04-prepare-drops-statements.md) | SQL |
+| 2026-10-04 | [`readOnly` does not hold on shared memory](2026-10-04-readonly-fails-on-shared-memory.md) | SQL |
+| 2026-10-04 | [`LIKE` denied by the authorizer](2026-10-04-like-denied-by-authorizer.md) | SQL |
+| 2026-10-04 | [`hash-v1` separation below target on the first calibration](2026-10-04-hash-v1-calibration.md) | RAG |
+| 2026-10-04 | [Chaos state shared across requests](2026-10-04-chaos-shared-across-requests.md) | LLM client |
+| 2026-10-04 | [False `query_only` redundancy in the layer matrix](2026-10-04-false-redundancy-in-matrix.md) | Eval |
+| 2026-10-04 | [Legitimate item blocked in the fake eval (`docs-003`)](2026-10-04-false-block-docs-003-in-fake-eval.md) | Eval |
+| 2026-10-04 | [A Cartesian product got through the policy and froze the server](2026-10-04-cartesian-product-freezes-server.md) | SQL |
+| 2026-10-04 | [`Worker.terminate()` does not interrupt a `node:sqlite` query](2026-10-04-terminate-does-not-interrupt-sqlite.md) | SQL |
+| 2026-10-04 | [The output guard did not see the route reason or the dropped citation ID](2026-10-04-output-guard-missed-route-reason.md) | Guardrails |
+| 2026-10-04 | [The answer's SQL block bypassed the output guard](2026-10-04-sql-block-bypassed-output-guard.md) | Guardrails |
+| 2026-10-04 | [The question could forge a passage in the RAG prompt](2026-10-04-question-forges-rag-passage.md) | Guardrails |
+| 2026-10-04 | [Allowed text functions allocated hundreds of MB within the deadline](2026-10-04-uncapped-text-functions.md) | SQL |
 | 2026-10-08 | [Refusal threshold recalibrated after translating the product to English](2026-10-08-translation-to-english.md) | RAG |

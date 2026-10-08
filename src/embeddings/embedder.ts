@@ -1,4 +1,4 @@
-// Contrato do embedder (spec 002). O v1 tem só o hash-v1; o marco opcional M9 acrescenta outro id (docs/adr/001-embedder-plugavel.md).
+// Contrato do embedder (spec 002). O v1 tem só o hash-v1; o marco opcional M9 acrescenta outro id (docs/adr/001-pluggable-embedder.md).
 export type EmbedderId = 'hash-v1';
 
 export interface Embedder {

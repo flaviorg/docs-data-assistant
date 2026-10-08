@@ -33,7 +33,7 @@ test('primeira chamada semeia e indexa; segunda não muda nada', async () => {
 test('documento editado reindexa; app.db apagado reingere', async () => {
   const kbDir = copyKb();
   const cfg = tmpConfig(); await ensureData(cfg, { kbDir });
-  fs.appendFileSync(path.join(kbDir, 'frete-e-prazos.md'), '\nNova regra de entrega.\n');
+  fs.appendFileSync(path.join(kbDir, 'shipping-and-delivery-times.md'), '\nNova regra de entrega.\n');
   assert.equal((await ensureData(cfg, { kbDir })).ingest.changed, 1);
   fs.rmSync(cfg.paths.appDb); assert.equal((await ensureData(cfg, { kbDir })).ingest.added, 8);
 });
@@ -61,7 +61,7 @@ test('sales.db existente não é semeado de novo (nem sobrescrito)', async () =>
 });
 test('documento apagado sai do índice na próxima execução', async () => {
   const kbDir = copyKb(); const cfg = tmpConfig(); await ensureData(cfg, { kbDir });
-  fs.rmSync(path.join(kbDir, 'sobre-a-empresa.md'));
+  fs.rmSync(path.join(kbDir, 'about-the-company.md'));
   const r = await ensureData(cfg, { kbDir });
   assert.equal(r.ingest.removed, 1); assert.equal(r.ingest.unchanged, 7);
 });

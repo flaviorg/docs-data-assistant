@@ -1,35 +1,35 @@
-# Constituição do projeto
+# Project constitution
 
-Regras que valem para todo o código, toda spec e todo agente que trabalhe neste repositório. Uma spec de feature pode detalhar, mas não contrariar, o que está aqui.
+Rules that apply to all code, every spec and every agent working in this repository. A feature spec can add detail to, but not contradict, what is here.
 
-## Princípios de engenharia
+## Engineering principles
 
-1. **Recusar é recurso.** Sem evidência suficiente, o assistente responde com a recusa canônica. Uma resposta inventada é defeito; uma recusa correta é sucesso. O limiar de recusa é calibrado e versionado (`src/config.ts`).
-2. **Toda saída do LLM passa por schema.** Nada que o modelo devolve é usado sem `safeParse` do Zod (`src/llm/llm-client.ts`). Saída fora do schema tem um retry de parse e, se persistir, um fallback determinístico por nó.
-3. **Código gerado é validado antes de executar.** A SQL do modelo passa por lexer, política estática, `EXPLAIN QUERY PLAN` e authorizer, e roda numa conexão somente leitura. Violação de política bloqueia e nunca volta ao modelo para "correção".
-4. **Todo laço tem teto.** Correções de SQL (3), execuções lógicas de prompt por requisição (8), tentativas por modelo, passos do grafo (`recursionLimit` 25), linhas, células, tempo de requisição. Cada teto tem teste.
-5. **O system prompt não é firewall.** A segurança fica em código determinístico: regras de entrada, sanitização dos documentos, delimitação de contexto, authorizer, `query_only` e guarda de saída. O classificador por modelo é opcional e falha fechado.
-6. **A qualidade é medida, não presumida.** O eval gate (`npm run eval`) roda no CI e reprova abaixo do limiar. Cada métrica diz se é *mecanismo* (medida de verdade) ou *contrato (fixture)*.
+1. **Refusing is a feature.** Without enough evidence, the assistant answers with the canonical refusal. A made-up answer is a defect; a correct refusal is a success. The refusal threshold is calibrated and versioned (`src/config.ts`).
+2. **Every LLM output goes through a schema.** Nothing the model returns is used without Zod's `safeParse` (`src/llm/llm-client.ts`). Output outside the schema gets one parse retry and, if it persists, a deterministic per-node fallback.
+3. **Generated code is validated before it runs.** The model's SQL goes through a lexer, a static policy, `EXPLAIN QUERY PLAN` and an authorizer, and runs on a read-only connection. A policy violation blocks and never goes back to the model for "correction".
+4. **Every loop has a cap.** SQL corrections (3), logical prompt executions per request (8), attempts per model, graph steps (`recursionLimit` 25), rows, cells, request time. Each cap has a test.
+5. **The system prompt is not a firewall.** Security lives in deterministic code: input rules, document sanitization, context delimiting, authorizer, `query_only` and output guard. The model classifier is optional and fails closed.
+6. **Quality is measured, not assumed.** The eval gate (`npm run eval`) runs in CI and fails below the threshold. Each metric says whether it is a *mechanism* (really measured) or a *contract (fixture)*.
 
-## Regra de integridade das perguntas-ouro
+## Golden-question integrity rule
 
-É proibido reescrever perguntas-ouro (`eval/golden.v1.json`) ou fixtures (`fixtures/llm/`) para fazer uma métrica passar. Quando uma métrica falha, corrige-se o mecanismo (embedder, chunker, regra, prompt) ou recalibra-se o limiar só no split `calibration`, e a decisão fica registrada na spec da feature ou em `docs/incidents/`.
+Rewriting golden questions (`eval/golden.v1.json`) or fixtures (`fixtures/llm/`) to make a metric pass is forbidden. When a metric fails, the mechanism is fixed (embedder, chunker, rule, prompt) or the threshold is recalibrated on the `calibration` split only, and the decision is recorded in the feature spec or in `docs/incidents/`.
 
-## Fake honesto
+## Honest fake
 
-O provedor `fake` substitui **só a chamada ao modelo**. Recuperação, limiar, sanitização, validação e execução de SQL, authorizer, guardrails, retry, fallback, ledger e `/stats` rodam de verdade. Pergunta sem fixture falha com `FixtureMissingError`; nunca há resposta genérica. Fixtures que encenam um modelo que cedeu levam a nota "modelo complacente simulado", e a demo e o README dizem isso. O modo fake aparece em toda saída (`meta.provider`, faixa MODO DEMO, rótulo FAKE).
+The `fake` provider replaces **only the model call**. Retrieval, threshold, sanitization, SQL validation and execution, authorizer, guardrails, retry, fallback, ledger and `/stats` run for real. A question without a fixture fails with `FixtureMissingError`; there is never a generic answer. Fixtures that stage a model that gave in carry the note "simulated compliant model", and the demo and the README say so. Fake mode shows up in every output (`meta.provider`, the DEMO MODE banner, the FAKE label).
 
-## Material do curso
+## Course material
 
-Nenhum material do curso entra no repositório: transcrição, slide, texto autoral ou exemplo de aula. Aulas são citadas só por ID e tema. Documentos da empresa fictícia, dataset, corpus de ataques, prompts e perguntas-ouro são escritos do zero.
+No course material goes into the repository: transcript, slide, author's text or lesson example. Lessons are cited only by ID and topic. The fictional company's documents, the dataset, the attack corpus, the prompts and the golden questions are written from scratch.
 
-## Humano no controle
+## Human in control
 
-Nenhum commit, push, publicação ou criação de repositório remoto acontece sem pedido explícito do humano responsável. Agentes preparam a mudança, rodam `npm run typecheck` e `npm test`, e entregam para validação.
+No commit, push, publication or creation of a remote repository happens without an explicit request from the responsible human. Agents prepare the change, run `npm run typecheck` and `npm test`, and hand it over for validation.
 
-## Fluxo de trabalho (SDD)
+## Workflow (SDD)
 
-1. A spec da feature (`specs/00N-*/spec.md`) vem antes do código e traz critérios EARS com ID.
-2. O teste do critério é escrito primeiro, com o ID no nome, e falha pelo motivo certo.
-3. Implementação mínima até o teste passar.
-4. Verificação: `npm run typecheck`, `npm test`, `npm run eval` e `npm run layers` com código 0. O teste `tests/unit/ears-coverage.unit.test.ts` garante que todo ID das specs tem teste.
+1. The feature spec (`specs/00N-*/spec.md`) comes before the code and carries EARS criteria with IDs.
+2. The criterion's test is written first, with the ID in its name, and fails for the right reason.
+3. Minimal implementation until the test passes.
+4. Verification: `npm run typecheck`, `npm test`, `npm run eval` and `npm run layers` with exit code 0. The test `tests/unit/ears-coverage.unit.test.ts` ensures every spec ID has a test.

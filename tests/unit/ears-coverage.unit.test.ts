@@ -37,11 +37,11 @@ test('todo ID EARS tem um teste cujo nome começa pelo ID', () => {
 // Complementos
 test('cada ID EARS aparece em exatamente uma spec, e as 5 specs seguem a distribuição por assunto', () => {
   const owner: Record<string, RegExp> = {
-    '001-cliente-llm-e-observabilidade': /^(LLM|OBS)-/,
-    '002-rag-com-recusa': /^(RAG-|GRD-04$)/,
-    '003-text-to-sql-seguro': /^(DATA-01$|SQL-)/,
-    '004-guardrails-e-grafo': /^(GRD-0[1235]$|RTE-)/,
-    '005-interfaces-e-eval': /^(ENV|API|WEB|EVL)-/,
+    '001-llm-client-and-observability': /^(LLM|OBS)-/,
+    '002-rag-with-refusal': /^(RAG-|GRD-04$)/,
+    '003-safe-text-to-sql': /^(DATA-01$|SQL-)/,
+    '004-guardrails-and-graph': /^(GRD-0[1235]$|RTE-)/,
+    '005-interfaces-and-eval': /^(ENV|API|WEB|EVL)-/,
   };
   const seen = new Map<string, string>();
   for (const [dir, rule] of Object.entries(owner)) {
@@ -53,7 +53,7 @@ test('cada ID EARS aparece em exatamente uma spec, e as 5 specs seguem a distrib
       assert.equal(seen.get(id), undefined, `${id} repetido em ${seen.get(id)} e ${dir}`);
       seen.set(id, dir);
     }
-    for (const heading of ['## Contexto', '## Escopo', '## Non-goals', '## Critérios de aceite (EARS)', '## Decisões', '## Como verificar']) {
+    for (const heading of ['## Context', '## Scope', '## Non-goals', '## Acceptance criteria (EARS)', '## Decisions', '## How to verify']) {
       assert.ok(text.includes(heading), `${dir} sem a seção "${heading}"`);
     }
   }
@@ -62,8 +62,8 @@ test('cada ID EARS aparece em exatamente uma spec, e as 5 specs seguem a distrib
 
 test('constitution.md tem os princípios, a regra de integridade e a regra de publicação', () => {
   const text = fs.readFileSync('specs/constitution.md', 'utf8');
-  for (const needle of ['Recusar é recurso', 'schema', 'validado antes de executar', 'teto', 'firewall', 'medida',
-    'perguntas-ouro', 'fake', 'material do curso', 'commit']) {
+  for (const needle of ['Refusing is a feature', 'schema', 'validated before it runs', 'cap', 'firewall', 'measured',
+    'golden questions', 'fake', 'course material', 'commit']) {
     assert.ok(text.includes(needle), `constitution.md sem "${needle}"`);
   }
 });

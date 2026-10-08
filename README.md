@@ -130,7 +130,7 @@ The longest path has 16 steps; the `recursionLimit` of 25 is only a safety net, 
 | Interfaces | `src/server.ts`, `src/web/`, `src/cli/` | Fastify, static page with no build, CLIs |
 | Eval | `src/eval/`, `eval/` | Golden questions, metrics, report, calibration and layer matrix |
 
-The decisions behind this design, with the spec and incident for each, are in [engineering decisions](docs/decisoes-de-engenharia.md) (in Portuguese).
+The decisions behind this design, with the spec and incident for each, are in [engineering decisions](docs/engineering-decisions.md).
 
 ## Quick start
 
@@ -172,7 +172,7 @@ Retrieval, threshold, SQL validation, authorizer, guardrails, retry and fallback
   the poisoned passage, already redacted at ingestion; in 11, the SQL policy stops the write without asking for a correction.
 
 13/13 scenarios with the expected outcome.
-/stats: 13 req · P50 3 ms · P95 1606 ms · 28 LLM calls · 4 retries · 2 fallbacks · US$ 0.0027 (fictional)
+/stats: 13 req · P50 4 ms · P95 1646 ms · 28 LLM calls · 4 retries · 2 fallbacks · US$ 0.0027 (fictional)
 ```
 
 Scenarios 10 and 11 use a **fixture: simulated compliant model**. The fixture stages a model that gave in to the embedded instruction (in 10, it repeats the coupon from the poisoned document; in 11, it returns a `DELETE`), to prove that the last line of defense blocks it anyway. A real model would not even receive the passage from scenario 10, which was already redacted at ingestion. The high P95 comes from scenario 13, which waits for the real retry backoff; with the fake, latencies measure only local processing, with no simulated delay, and vary from run to run.
@@ -230,7 +230,7 @@ Sources
   [1] Returns and exchanges policy › Defective products   score 0.43
   [2] Returns and exchanges policy › Defective products   score 0.33
 
-2 LLM calls · 1,356 tokens (estimated) · US$ 0.0002 (fictional) · 17 ms · req 282f82ca
+2 LLM calls · 1,352 tokens (estimated) · US$ 0.0002 (fictional) · 23 ms · req 70e1f751
 ```
 
 <details>
@@ -266,10 +266,10 @@ Follow-up questions:
   - What were the 5 best-selling products in the first half of 2025?
   - How much revenue did these 5 products make in the second half of 2025?
 
-4 LLM calls · 3,143 tokens (estimated) · US$ 0.0004 (fictional) · 1 correction · 70 ms · req 2f078dfa
+4 LLM calls · 3,143 tokens (estimated) · US$ 0.0004 (fictional) · 1 correction · 76 ms · req 81f074b3
 ```
 
-The CLI shows the original query (the one the model wrote first, with `oi.qty`, a column that does not exist); the validator reported `no such column` in `EXPLAIN QUERY PLAN` and the model corrected it to `oi.quantity`. The 70 ms include starting the child process that executes the SQL, on the first query; the fake's latencies vary with machine load.
+The CLI shows the original query (the one the model wrote first, with `oi.qty`, a column that does not exist); the validator reported `no such column` in `EXPLAIN QUERY PLAN` and the model corrected it to `oi.quantity`. The 76 ms include starting the child process that executes the SQL, on the first query; the fake's latencies vary with machine load.
 
 </details>
 
@@ -328,7 +328,7 @@ The same `npm start` serves a static page at `http://127.0.0.1:3000`: a question
 | Citations | The code drops cited IDs outside the retrieved set (`citation_dropped` warning) and refuses if none remain |
 | Sanitization | Embedded instructions are redacted **at ingestion**; the model receives `[passage removed: possible embedded instruction]` and each passage is wrapped in an escaped `<document id="...">` tag |
 
-The `hash-v1` embedder is lexical: questions whose vocabulary differs from the document retrieve worse. A semantic embedder plugs in through the `Embedder` interface, as described in [ADR 001](docs/adr/001-embedder-plugavel.md). Full spec: [002, RAG with refusal](specs/002-rag-com-recusa/spec.md).
+The `hash-v1` embedder is lexical: questions whose vocabulary differs from the document retrieve worse. A semantic embedder plugs in through the `Embedder` interface, as described in [ADR 001](docs/adr/001-pluggable-embedder.md). Full spec: [002, RAG with refusal](specs/002-rag-with-refusal/spec.md).
 
 ## SQL branch and its defenses
 
@@ -349,17 +349,17 @@ Flow rules:
 - **The model sees at most 50 rows** to write the analysis and 1 to 3 follow-up questions.
 
 <details>
-<summary>Incidents that shaped these defenses (docs in Portuguese)</summary>
+<summary>Incidents that shaped these defenses</summary>
 
-- [`prepare()` silently drops extra statements](docs/incidents/2026-10-04-prepare-descarta-instrucoes.md): hence the lexer rejects a second statement.
-- [`readOnly` does not hold on shared memory](docs/incidents/2026-10-04-readonly-nao-vale-em-memoria-compartilhada.md): hence snapshot, `query_only` and authorizer.
-- [A Cartesian product got through the policy and froze the server](docs/incidents/2026-10-04-produto-cartesiano-trava-o-servidor.md) and [`Worker.terminate()` does not interrupt `node:sqlite`](docs/incidents/2026-10-04-terminate-nao-interrompe-sqlite.md): hence the child process.
-- [Text functions allocated hundreds of MB within the deadline](docs/incidents/2026-10-04-funcoes-de-texto-sem-teto.md): hence the per-value cap.
-- [`LIKE` denied by the authorizer](docs/incidents/2026-10-04-like-negado-pelo-authorizer.md).
+- [`prepare()` silently drops extra statements](docs/incidents/2026-10-04-prepare-drops-statements.md): hence the lexer rejects a second statement.
+- [`readOnly` does not hold on shared memory](docs/incidents/2026-10-04-readonly-fails-on-shared-memory.md): hence snapshot, `query_only` and authorizer.
+- [A Cartesian product got through the policy and froze the server](docs/incidents/2026-10-04-cartesian-product-freezes-server.md) and [`Worker.terminate()` does not interrupt `node:sqlite`](docs/incidents/2026-10-04-terminate-does-not-interrupt-sqlite.md): hence the child process.
+- [Text functions allocated hundreds of MB within the deadline](docs/incidents/2026-10-04-uncapped-text-functions.md): hence the per-value cap.
+- [`LIKE` denied by the authorizer](docs/incidents/2026-10-04-like-denied-by-authorizer.md).
 
 </details>
 
-Full spec: [003, safe Text-to-SQL](specs/003-text-to-sql-seguro/spec.md).
+Full spec: [003, safe Text-to-SQL](specs/003-safe-text-to-sql/spec.md).
 
 ## Guardrails and attack matrix
 
@@ -399,7 +399,7 @@ Real output of `npm run layers`. Each attack in `eval/attacks.v1.json` (19, writ
 
 19 attacks; all stopped by at least one layer; SQL writes stopped by 3, 2, 3 and 3 layers.
 
-In short: **the input rules are the weakest layer** (`ind-assistant` gets past them and only the sanitizer stops it), and the main defense is architectural. SQL writes have real redundancy, and only the authorizer stops personal data. A line-by-line reading, with the incident behind each finding, is in [the layered defenses notes](docs/defesas-em-camadas.md) (in Portuguese). Spec: [004, guardrails and graph](specs/004-guardrails-e-grafo/spec.md).
+In short: **the input rules are the weakest layer** (`ind-assistant` gets past them and only the sanitizer stops it), and the main defense is architectural. SQL writes have real redundancy, and only the authorizer stops personal data. A line-by-line reading, with the incident behind each finding, is in [the layered defenses notes](docs/layered-defenses.md). Spec: [004, guardrails and graph](specs/004-guardrails-and-graph/spec.md).
 
 ## Eval gate
 
@@ -407,8 +407,8 @@ CI ([`ci.yml`](.github/workflows/ci.yml)) runs typecheck, offline tests, the eva
 
 - **Nature.** A *mechanism* is really measured even on the fake: retrieval, threshold decision, blocks. A *contract (fixture)* proves that fixtures, embedder and pipeline are in sync; since the author-written fixture already encodes the route, citations and SQL, that 1.00 is not generation quality. The contracts still fail CI if they break.
 - **The FAKE label** means: scripted generation; retrieval, threshold, validation and blocking really measured. Only `npm run eval -- --live` measures the 7 metrics with a real model, with looser thresholds for the generation metrics ([`eval/thresholds.json`](eval/thresholds.json)).
-- **Threshold tuned on 12 calibration items.** `npm run calibrate` sweeps the refusal threshold only on the `calibration` split (median separation 0.157, threshold 0.22, accuracy 12 of 12). The first calibration of the original Portuguese base failed, and the embedder was fixed without changing any question ([incident](docs/incidents/2026-10-04-calibracao-hash-v1.md), in Portuguese). Translating the product to English required English stopwords and stemming and moved the threshold from 0.18 to 0.22; the margin is thin and the caveats are recorded ([incident](docs/incidents/2026-10-08-translation-to-english.md)).
-- **The 0.04 in `falseBlockRate`** is `docs-003` (scenario 10): a legitimate question whose fixture stages the compliant model and ends up blocked by the output guard. The item was not rewritten to "pass" ([incident](docs/incidents/2026-10-04-falso-bloqueio-docs-003-no-eval-fake.md)).
+- **Threshold tuned on 12 calibration items.** `npm run calibrate` sweeps the refusal threshold only on the `calibration` split (median separation 0.157, threshold 0.22, accuracy 12 of 12). The first calibration of the original Portuguese base failed, and the embedder was fixed without changing any question ([incident](docs/incidents/2026-10-04-hash-v1-calibration.md)). Translating the product to English required English stopwords and stemming and moved the threshold from 0.18 to 0.22; the margin is thin and the caveats are recorded ([incident](docs/incidents/2026-10-08-translation-to-english.md)).
+- **The 0.04 in `falseBlockRate`** is `docs-003` (scenario 10): a legitimate question whose fixture stages the compliant model and ends up blocked by the output guard. The item was not rewritten to "pass" ([incident](docs/incidents/2026-10-04-false-block-docs-003-in-fake-eval.md)).
 - **Project rule:** rewriting golden questions or fixtures to make a metric pass is forbidden.
 
 <details>
@@ -457,7 +457,7 @@ npm run test:live         # live tests (skipped without a key)
 
 With a key, the provider switches to `openrouter` (`openai/gpt-oss-120b`, fallback `google/gemini-2.5-flash`) and the guardrail switches to `rules+model` (`openai/gpt-oss-safeguard-20b`). The IDs and prices were checked against OpenRouter's public catalog on 2026-10-04 (`config/model-prices.json`).
 
-The client uses the `openai` SDK with `baseURL`, `maxRetries: 0` and its own retry: `LlmClient` does backoff, model fallback, Zod parsing (one parse retry) and counts logical executions against the cap of 8 per request; truncated output is not retried. All configuration is documented in [`.env.example`](.env.example), and the API signatures checked in the project are in [API notes](docs/notas-de-api.md) (in Portuguese).
+The client uses the `openai` SDK with `baseURL`, `maxRetries: 0` and its own retry: `LlmClient` does backoff, model fallback, Zod parsing (one parse retry) and counts logical executions against the cap of 8 per request; truncated output is not retried. All configuration is documented in [`.env.example`](.env.example), and the API signatures checked in the project are in [API notes](docs/api-notes.md).
 
 ## Observability
 
@@ -509,12 +509,12 @@ docs/               API notes, incidents, ADR, decisions, screenshots
 
 **Lunar Mill Specialty Coffee** is a specialty-coffee e-commerce invented for the project (a web search on 2026-10-08 found no coffee company with that name).
 
-- **Documents:** 8 policies in `data/kb/`: about the company, exchanges and returns, equipment warranty, shipping and deadlines, payments and refunds, subscription club, privacy and data, and partner coffee shops. The last one deliberately carries a paragraph with an embedded instruction and the canary `FULL-MOON-100`, to test indirect injection.
+- **Documents:** 8 policies in `data/kb/`: about the company, returns and exchanges, equipment warranty, shipping and delivery times, payments and refunds, subscription club, privacy and data protection, and partner coffee shops. The last one deliberately carries a paragraph with an embedded instruction and the canary `FULL-MOON-100`, to test indirect injection.
 - **Sales:** a database generated by a deterministic seed (fixed seed 20251) with 5 tables (`customers`, `products`, `orders`, `order_items`, `customer_contacts`), orders from 2025 only and values in integer cents. `customer_contacts` and `customers.name` exist to prove that the authorizer protects personal data.
 
 ## Course lessons applied
 
-A project derived from an AI course. Only IDs and topics; no excerpt or example from a lesson is in this repository. The map from each topic to the code is in [course lessons map](docs/aulas-do-curso.md) (in Portuguese).
+A project derived from an AI course. Only IDs and topics; no excerpt or example from a lesson is in this repository. The map from each topic to the code is in [course lessons map](docs/course-lessons.md).
 
 | Lessons | Topic |
 |---|---|
@@ -564,7 +564,7 @@ The course's reference projects (lessons cited by ID) were adapted as follows:
 - **`SELECT *` on `customers` is a block:** the expansion of `*` reads `customers.name`, which the authorizer denies, and a policy violation does not go to correction. The glossary sent to the model asks it to list the columns, but no golden question measures how often a real model writes `c.*`.
 - **No memory between questions** (multi-turn), no authentication, rate limit or multi-user support: the API is local and for demonstration.
 - **Faithfulness** is verified by mechanism (valid citation, output guard, refusal), not by an LLM judge.
-- **Lexical embedder:** MiniLM comes in with the optional milestone M9 through the `Embedder` interface ([ADR 001](docs/adr/001-embedder-plugavel.md)).
+- **Lexical embedder:** MiniLM comes in with the optional milestone M9 through the `Embedder` interface ([ADR 001](docs/adr/001-pluggable-embedder.md)).
 
 ## License
 

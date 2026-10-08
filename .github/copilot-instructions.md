@@ -1,3 +1,3 @@
-# Instruções para o Copilot
+# Instructions for Copilot
 
-Leia e siga o arquivo `AGENTS.md` na raiz do repositório antes de sugerir ou alterar código.
+Read and follow the `AGENTS.md` file at the root of the repository before suggesting or changing code.

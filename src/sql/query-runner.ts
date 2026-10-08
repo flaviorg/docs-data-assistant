@@ -2,7 +2,7 @@
 // progress handler nem sqlite3_interrupt: uma consulta pesada (um produto cartesiano com ON 1=1, por exemplo) travaria
 // o event loop inteiro, /health incluído, e o 504 do AskService nunca sairia, porque o timer dele depende do event loop.
 // Um Worker não resolve: terminate() não interrompe código nativo, a thread segue presa no sqlite3_step e o processo
-// nem consegue sair (ver docs/incidents/2026-10-04-terminate-nao-interrompe-sqlite.md). Por isso a consulta roda num
+// nem consegue sair (ver docs/incidents/2026-10-04-terminate-does-not-interrupt-sqlite.md). Por isso a consulta roda num
 // processo filho com a própria conexão somente leitura. Se passar de SQL_TIMEOUT_MS, ou se a requisição abortar, o
 // filho leva SIGKILL e o próximo pedido abre outro. Um pedido por vez, em fila.
 import { fork } from 'node:child_process';
