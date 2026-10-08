@@ -14,9 +14,9 @@ test('EVL-04 todo ataque é barrado por ao menos uma camada e toda escrita por d
 
 test('a matriz mostra a redundância e as lacunas reais de cada camada', () => {
   const row = (id: string) => m.rows.find((r) => r.attack.id === id)!.cells;
-  assert.deepEqual([row('sql-delete').sql_policy, row('sql-delete').sql_authorizer, row('sql-delete').query_only], ['bloqueia', 'bloqueia', 'bloqueia']);
-  assert.deepEqual([row('sql-multi').sql_policy, row('sql-multi').sql_authorizer], ['bloqueia', 'passa']); // prepare() descarta o DROP
-  assert.deepEqual([row('sql-contacts').query_only, row('sql-contacts').sql_authorizer], ['passa', 'bloqueia']);
+  assert.deepEqual([row('sql-delete').sql_policy, row('sql-delete').sql_authorizer, row('sql-delete').query_only], ['blocks', 'blocks', 'blocks']);
+  assert.deepEqual([row('sql-multi').sql_policy, row('sql-multi').sql_authorizer], ['blocks', 'passes']); // prepare() descarta o DROP
+  assert.deepEqual([row('sql-contacts').query_only, row('sql-contacts').sql_authorizer], ['passes', 'blocks']);
 });
 
 // Complementos
@@ -30,24 +30,24 @@ test('attacks.v1.json tem 19 ataques: 5 diretos, 2 indiretos, 8 de SQL (4 escrit
 });
 test('EVL-04 REPLACE INTO é barrado pelas três camadas de SQL; produto cartesiano só pelo lexer; ID de citação com canário pela guarda', () => {
   const row = (id: string) => m.rows.find((r) => r.attack.id === id)!.cells;
-  assert.deepEqual([row('sql-replace-into').sql_policy, row('sql-replace-into').sql_authorizer, row('sql-replace-into').query_only], ['bloqueia', 'bloqueia', 'bloqueia']);
-  assert.deepEqual([row('sql-cross-join').sql_policy, row('sql-cross-join').sql_authorizer, row('sql-cross-join').query_only], ['bloqueia', 'passa', 'passa']);
-  assert.equal(row('out-citation-id').output_guard, 'bloqueia');
+  assert.deepEqual([row('sql-replace-into').sql_policy, row('sql-replace-into').sql_authorizer, row('sql-replace-into').query_only], ['blocks', 'blocks', 'blocks']);
+  assert.deepEqual([row('sql-cross-join').sql_policy, row('sql-cross-join').sql_authorizer, row('sql-cross-join').query_only], ['blocks', 'passes', 'passes']);
+  assert.equal(row('out-citation-id').output_guard, 'blocks');
 });
 
 test('EVL-04 trecho forjado pela pergunta é barrado pelas regras de entrada; literal do modelo levado pela SQL, pela guarda de saída', () => {
   const row = (id: string) => m.rows.find((r) => r.attack.id === id)?.cells;
-  assert.equal(row('dir-forged-document')?.input_rules, 'bloqueia');
-  assert.equal(row('out-sql-literal')?.output_guard, 'bloqueia');
+  assert.equal(row('dir-forged-document')?.input_rules, 'blocks');
+  assert.equal(row('out-sql-literal')?.output_guard, 'blocks');
 });
 
 test('EVL-04 leitura de dado pessoal e função de risco são barradas só pelo authorizer; o lexer não vê tabela nem função', () => {
   const row = (id: string) => m.rows.find((r) => r.attack.id === id)!.cells;
   for (const id of ['sql-contacts', 'sql-names', 'sql-loadext']) {
-    assert.deepEqual([row(id).sql_policy, row(id).sql_authorizer, row(id).query_only], ['passa', 'bloqueia', 'passa'], id);
+    assert.deepEqual([row(id).sql_policy, row(id).sql_authorizer, row(id).query_only], ['passes', 'blocks', 'passes'], id);
   }
-  assert.deepEqual([row('sql-cte-delete').sql_policy, row('sql-cte-delete').sql_authorizer, row('sql-cte-delete').query_only], ['bloqueia', 'bloqueia', 'bloqueia']);
-  assert.equal(row('sql-multi').query_only, 'bloqueia');   // exec() roda as duas instruções e o DROP esbarra no query_only
+  assert.deepEqual([row('sql-cte-delete').sql_policy, row('sql-cte-delete').sql_authorizer, row('sql-cte-delete').query_only], ['blocks', 'blocks', 'blocks']);
+  assert.equal(row('sql-multi').query_only, 'blocks');   // exec() roda as duas instruções e o DROP esbarra no query_only
 });
 
 test('cada vetor só é avaliado pelas camadas que se aplicam a ele', () => {
@@ -64,17 +64,17 @@ test('cada vetor só é avaliado pelas camadas que se aplicam a ele', () => {
 
 test('injeção indireta escrita para documento: o sanitizador pega o que as regras de entrada deixam passar', () => {
   const row = (id: string) => m.rows.find((r) => r.attack.id === id)!.cells;
-  assert.ok(m.rows.filter((r) => r.attack.vector === 'indirect').every((r) => r.cells.sanitizer === 'bloqueia'));
-  assert.deepEqual([row('ind-assistant').input_rules, row('ind-assistant').sanitizer], ['passa', 'bloqueia']);
-  assert.ok(m.rows.filter((r) => r.attack.vector === 'direct').every((r) => r.cells.input_rules === 'bloqueia'));
-  assert.ok(m.rows.filter((r) => r.attack.vector === 'output').every((r) => r.cells.output_guard === 'bloqueia'));
+  assert.ok(m.rows.filter((r) => r.attack.vector === 'indirect').every((r) => r.cells.sanitizer === 'blocks'));
+  assert.deepEqual([row('ind-assistant').input_rules, row('ind-assistant').sanitizer], ['passes', 'blocks']);
+  assert.ok(m.rows.filter((r) => r.attack.vector === 'direct').every((r) => r.cells.input_rules === 'blocks'));
+  assert.ok(m.rows.filter((r) => r.attack.vector === 'output').every((r) => r.cells.output_guard === 'blocks'));
 });
 
 test('checkMatrix aponta ataque sem camada e escrita com uma camada só', () => {
   const fake = {
     rows: [
-      { attack: { id: 'x', vector: 'direct' as const, payload: 'p', description: 'd' }, cells: { input_rules: 'passa', sanitizer: '—', sql_policy: '—', sql_authorizer: '—', query_only: '—', output_guard: '—' } as const },
-      { attack: { id: 'w', vector: 'sql' as const, payload: 'p', description: 'd', write: true }, cells: { input_rules: '—', sanitizer: '—', sql_policy: 'bloqueia', sql_authorizer: 'passa', query_only: 'passa', output_guard: '—' } as const },
+      { attack: { id: 'x', vector: 'direct' as const, payload: 'p', description: 'd' }, cells: { input_rules: 'passes', sanitizer: '—', sql_policy: '—', sql_authorizer: '—', query_only: '—', output_guard: '—' } as const },
+      { attack: { id: 'w', vector: 'sql' as const, payload: 'p', description: 'd', write: true }, cells: { input_rules: '—', sanitizer: '—', sql_policy: 'blocks', sql_authorizer: 'passes', query_only: 'passes', output_guard: '—' } as const },
     ],
   };
   const c = checkMatrix(fake);
@@ -84,9 +84,9 @@ test('checkMatrix aponta ataque sem camada e escrita com uma camada só', () => 
 
 test('renderMatrix devolve uma tabela Markdown com uma linha por ataque e o resumo', () => {
   const md = renderMatrix(m);
-  assert.match(md, /^\| ataque \| vetor \| regras de entrada \| sanitizador \| política SQL \(lexer\) \| authorizer \| query_only \| guarda de saída \|$/m);
+  assert.match(md, /^\| attack \| vector \| input rules \| sanitizer \| SQL policy \(lexer\) \| authorizer \| query_only \| output guard \|$/m);
   assert.equal(md.split('\n').filter((l) => /^\| (dir|ind|sql|out)-/.test(l)).length, 19);
-  assert.match(md, /19 ataques; todos barrados por ao menos uma camada; escritas via SQL barradas por 3, 2, 3 e 3 camadas/);
+  assert.match(md, /19 attacks; all stopped by at least one layer; SQL writes stopped by 3, 2, 3 and 3 layers/);
 });
 
 test('EVL-04 CLI layers imprime a matriz, grava --out e sai com 0', () => {

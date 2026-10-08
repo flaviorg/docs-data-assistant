@@ -34,7 +34,7 @@ test('package.json exige Node 24.15+ e o .npmrc liga engine-strict, para o npm c
   assert.match(fs.readFileSync('.npmrc', 'utf8'), /^engine-strict=true$/m);
 });
 test('sem DatabaseSync.setAuthorizer ou DatabaseSync.limits (Node antigo) a conexão analítica falha com mensagem que pede Node 24.15+', () => {
-  assert.throws(() => assertSqliteFeatures({}), /Node 24\.15 ou mais novo/);
-  assert.throws(() => assertSqliteFeatures({ setAuthorizer() {} }), /Node 24\.15 ou mais novo.*limits/);
+  assert.throws(() => assertSqliteFeatures({}), /Node 24\.15 or newer/);
+  assert.throws(() => assertSqliteFeatures({ setAuthorizer() {} }), /Node 24\.15 or newer.*limits/);
   assert.doesNotThrow(() => assertSqliteFeatures({ setAuthorizer() {}, limits: { length: 1 } }));
 });

@@ -21,8 +21,8 @@ test('volumes e distribuição dentro das faixas esperadas', () => {
   assert.deepEqual([r.counts.customers, r.counts.products, r.counts.orders, r.counts.contacts], [300, 40, 4000, 300]);
   assert.ok(r.counts.orderItems >= 8000 && r.counts.orderItems <= 10000);
   const share = (sql: string) => (db.prepare(sql).get() as { s: number }).s;
-  assert.ok(Math.abs(share(`SELECT AVG(segment = 'cafeteria') s FROM customers`) - 0.15) <= 0.03);
-  assert.ok(Math.abs(share(`SELECT AVG(status = 'pago') s FROM orders`) - 0.90) <= 0.02);
+  assert.ok(Math.abs(share(`SELECT AVG(segment = 'coffee_shop') s FROM customers`) - 0.15) <= 0.03);
+  assert.ok(Math.abs(share(`SELECT AVG(status = 'paid') s FROM orders`) - 0.90) <= 0.02);
   const q = (m1: string, m2: string) => share(`SELECT COUNT(*) s FROM orders WHERE ordered_at >= '${m1}' AND ordered_at < '${m2}'`);
   assert.ok(q('2025-10-01', '2026-01-01') > q('2025-01-01', '2025-04-01'));
 });
@@ -33,7 +33,7 @@ test('nenhum pedido fora de 2025 e e-mails só em .example', () => {
 });
 test('CHECK rejeita preço zero', () => {
   const db = new DatabaseSync(':memory:'); seedSales(db);
-  assert.throws(() => db.exec(`INSERT INTO products VALUES (999,'X-1','x','graos',0,1)`), /CHECK constraint failed/);
+  assert.throws(() => db.exec(`INSERT INTO products VALUES (999,'X-1','x','beans',0,1)`), /CHECK constraint failed/);
 });
 test('createSalesSnapshot é memoizado', () => {
   assert.equal(createSalesSnapshot(), createSalesSnapshot());
@@ -50,14 +50,14 @@ test('DATA-01 fingerprint é sha256 hex e reflete o banco', () => {
   const db = new DatabaseSync(':memory:'); const r = seedSales(db);
   assert.match(r.fingerprint, /^[0-9a-f]{64}$/);
   assert.equal(fingerprintSales(db), r.fingerprint);
-  db.exec(`UPDATE orders SET status = 'cancelado' WHERE id = (SELECT MIN(id) FROM orders WHERE status = 'pago')`);
+  db.exec(`UPDATE orders SET status = 'cancelled' WHERE id = (SELECT MIN(id) FROM orders WHERE status = 'paid')`);
   assert.notEqual(fingerprintSales(db), r.fingerprint);
 });
 test('status perto de 90/6/4, sem dados antes de 2025 e itens de 1 a 4 produtos distintos', () => {
   const db = new DatabaseSync(':memory:'); seedSales(db);
   const share = (st: string) => (db.prepare(`SELECT AVG(status = ?) s FROM orders`).get(st) as { s: number }).s;
-  assert.ok(Math.abs(share('cancelado') - 0.06) <= 0.02);
-  assert.ok(Math.abs(share('reembolsado') - 0.04) <= 0.02);
+  assert.ok(Math.abs(share('cancelled') - 0.06) <= 0.02);
+  assert.ok(Math.abs(share('refunded') - 0.04) <= 0.02);
   const per = db.prepare(`SELECT MIN(n) mn, MAX(n) mx FROM (SELECT COUNT(*) n FROM order_items GROUP BY order_id)`).get() as { mn: number; mx: number };
   assert.ok(per.mn >= 1 && per.mx <= 4);
   const orphan = db.prepare(`SELECT COUNT(*) n FROM orders o WHERE NOT EXISTS (SELECT 1 FROM order_items i WHERE i.order_id = o.id)`).get() as { n: number };

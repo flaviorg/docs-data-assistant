@@ -38,7 +38,7 @@ export function sweepThresholds(
 
 /** Entre os limiares de acurácia máxima, o do meio do platô contíguo mais longo (o primeiro, em empate). */
 export function bestThreshold(sweep: readonly { threshold: number; accuracy: number }[]): number {
-  if (sweep.length === 0) throw new Error('varredura vazia');
+  if (sweep.length === 0) throw new Error('empty sweep');
   const max = Math.max(...sweep.map((s) => s.accuracy));
   let best: { start: number; len: number } = { start: 0, len: 0 };
   let start = -1;

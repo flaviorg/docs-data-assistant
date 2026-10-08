@@ -43,7 +43,7 @@ test('SQL-08 negação do authorizer atravessa o processo filho como SqlRuntimeE
   try {
     await assert.rejects(runner.run('SELECT email FROM customer_contacts', { maxRows: 200 }),
       (e: unknown) => e instanceof SqlRuntimeError && e.denials[0]?.kind === 'table');
-    await assert.rejects(runner.run("DELETE FROM orders WHERE status = 'cancelado'", { maxRows: 200 }),
+    await assert.rejects(runner.run("DELETE FROM orders WHERE status = 'cancelled'", { maxRows: 200 }),
       (e: unknown) => e instanceof SqlRuntimeError && e.denials.some((d) => d.kind === 'action'));
     await assert.rejects(runner.run('SELECT * FROM suppliers', { maxRows: 200 }),
       (e: unknown) => e instanceof SqlRuntimeError && /no such table/.test(e.message) && e.denials.length === 0);
@@ -93,9 +93,9 @@ test('consultas concorrentes saem na ordem, cada uma com o próprio resultado; c
   const pending = runner.run(HEAVY, { maxRows: 200 });
   const waiting = runner.run('SELECT 1 AS x', { maxRows: 200 });
   runner.close();
-  await assert.rejects(pending, /fechado/);
-  await assert.rejects(waiting, /fechado/);
-  await assert.rejects(runner.run('SELECT 1 AS x', { maxRows: 200 }), /fechado/);
+  await assert.rejects(pending, /closed/);
+  await assert.rejects(waiting, /closed/);
+  await assert.rejects(runner.run('SELECT 1 AS x', { maxRows: 200 }), /closed/);
 });
 
 test('fonte file: o processo filho abre o arquivo em modo somente leitura', async () => {

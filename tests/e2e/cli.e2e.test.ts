@@ -31,10 +31,10 @@ test('ask sem --json imprime rota, status, fontes e a linha de meta', () => {
   const dir = tmp();
   const r = spawnSync(process.execPath, ['src/cli/ask.ts', DEMO_SCENARIOS[0]!.question], { env: env(dir), encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /^\[FAKE · hash-v1\] rota=docs \(.+\) · status=answered$/m);
-  assert.match(r.stdout, /^Fontes$/m);
+  assert.match(r.stdout, /^\[FAKE · hash-v1\] route=docs \(.+\) · status=answered$/m);
+  assert.match(r.stdout, /^Sources$/m);
   assert.match(r.stdout, /^ {2}\[1\] .+ › .+ {2,}score 0\.\d{2}$/m);
-  assert.match(r.stdout, /^2 chamadas LLM · [\d.]+ tokens \(estimados\) · US\$ \d+,\d+ \(fictício\) · \d+ ms · req [0-9a-f]{8}$/m);
+  assert.match(r.stdout, /^2 LLM calls · [\d,]+ tokens \(estimated\) · US\$ \d+\.\d+ \(fictional\) · \d+ ms · req [0-9a-f]{8}$/m);
   assert.ok(fs.existsSync(path.join(dir, 'sales.db')) && fs.existsSync(path.join(dir, 'app.db')), 'modo file grava os bancos indicados');
 });
 
@@ -42,10 +42,10 @@ test('ask de dados mostra a SQL com a correção, a tabela e as perguntas para c
   const dir = tmp();
   const r = spawnSync(process.execPath, ['src/cli/ask.ts', DEMO_SCENARIOS[3]!.question], { env: env(dir), encoding: 'utf8' });
   assert.equal(r.status, 0, r.stderr);
-  assert.match(r.stdout, /rota=data/); assert.match(r.stdout, /^SQL \(1 correção\)$/m);
+  assert.match(r.stdout, /route=data/); assert.match(r.stdout, /^SQL \(1 correction\)$/m);
   assert.match(r.stdout, /SUM\(oi\.quantity\)/); assert.match(r.stdout, /^ {2}name +total$/m);
-  assert.match(r.stdout, /^Perguntas para continuar:$/m);
-  assert.match(r.stdout, /· 1 correção ·/);
+  assert.match(r.stdout, /^Follow-up questions:$/m);
+  assert.match(r.stdout, /· 1 correction ·/);
 });
 
 test('RTE-02 ask --route data força a rota e o bloqueio aparece com o motivo', () => {
@@ -62,7 +62,7 @@ test('LLM-03 ask com todos os modelos fora sai com código 3; argumentos inváli
   assert.equal(down.status, 3, down.stderr); assert.match(down.stderr, /llm_unavailable/);
   for (const args of [[], ['--route', 'sql', 'qual o prazo?'], ['--nao-existe', 'qual o prazo?']]) {
     const r = spawnSync(process.execPath, ['src/cli/ask.ts', ...args], { env: env(dir), encoding: 'utf8' });
-    assert.equal(r.status, 1, JSON.stringify(args)); assert.match(r.stderr, /uso:/);
+    assert.equal(r.status, 1, JSON.stringify(args)); assert.match(r.stderr, /usage:/);
   }
 });
 
@@ -75,7 +75,7 @@ test('ENV-04 demo sai com 0, ignora a chave do shell e não grava em data/', () 
   const before = fs.existsSync('data') ? fs.readdirSync('data').map((f) => [f, fs.statSync(path.join('data', f)).mtimeMs]) : [];
   const r = spawnSync(process.execPath, ['src/cli/demo.ts'], { env: { PATH: process.env.PATH!, NODE_OPTIONS: process.env.NODE_OPTIONS!, OPENROUTER_API_KEY: 'sk-or-shell-key' }, encoding: 'utf8' });
   assert.equal(r.status, 0, r.stdout + r.stderr);
-  assert.match(r.stdout, /Provedor: fake/); assert.match(r.stdout, /13\/13/); assert.match(r.stdout, /modelo complacente simulado/);
+  assert.match(r.stdout, /Provider: fake/); assert.match(r.stdout, /13\/13/); assert.match(r.stdout, /simulated compliant model/);
   const after = fs.existsSync('data') ? fs.readdirSync('data').map((f) => [f, fs.statSync(path.join('data', f)).mtimeMs]) : [];
   assert.deepEqual(after, before);
 });
@@ -87,12 +87,12 @@ test('ENV-04 runDemo em processo imprime cabeçalho, 13 linhas, rodapé e a linh
   const code = await runDemo({ write: (s) => lines.push(s) });
   const out = lines.join('\n');
   assert.equal(code, 0, out);
-  assert.match(out, /^Moenda Lunar · docs-data-assistant · demo roteirizada$/m);
-  assert.match(out, /Embedder: hash-v1\. Dados em memória\./);
+  assert.match(out, /^Lunar Mill · docs-data-assistant · scripted demo$/m);
+  assert.match(out, /Embedder: hash-v1\. In-memory data\./);
   for (let i = 1; i <= 13; i++) assert.match(out, new RegExp(`^ ?${i} `, 'm'), `linha do cenário ${i}`);
   assert.match(out, /^ ?8 .+ - +blocked +input_rules: instruction_override/m);
-  assert.match(out, /^10 .+\* +docs +blocked +output_guard: canário/m);
+  assert.match(out, /^10 .+\* +docs +blocked +output_guard: canary/m);
   assert.match(out, /^11 .+\* +data +blocked +sql_policy: not_select/m);
   assert.match(out, /^13 .+ docs +answered +.*4 retries · 2 fallbacks → fake\/fallback/m);
-  assert.match(out, /^\/stats: 13 req · P50 \d+ ms · P95 \d+ ms · \d+ chamadas LLM · 4 retries · 2 fallbacks · US\$ \d+,\d+ \(fictício\)$/m);
+  assert.match(out, /^\/stats: 13 req · P50 \d+ ms · P95 \d+ ms · \d+ LLM calls · 4 retries · 2 fallbacks · US\$ \d+\.\d+ \(fictional\)$/m);
 });

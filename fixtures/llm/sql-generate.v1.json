@@ -3,84 +3,84 @@
   "version": "v1",
   "entries": [
     {
-      "key": "qual foi o faturamento por canal em 2025",
+      "key": "what was the revenue by channel in 2025",
       "responseFromGolden": "data-001"
     },
     {
-      "key": "quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025",
+      "key": "what were the top 5 products by quantity sold in the second half of 2025",
       "response": {
-        "sql": "SELECT p.name, SUM(oi.quantidade) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-07-01' AND o.ordered_at < '2026-01-01' GROUP BY p.name ORDER BY total DESC LIMIT 5",
-        "rationale": "Soma a quantidade vendida por produto nos pedidos pagos do segundo semestre de 2025 e pega os 5 maiores."
+        "sql": "SELECT p.name, SUM(oi.qty) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-07-01' AND o.ordered_at < '2026-01-01' GROUP BY p.name ORDER BY total DESC LIMIT 5",
+        "rationale": "Sums the quantity sold per product in paid orders from the second half of 2025 and takes the top 5."
       },
-      "note": "Erro proposital: a coluna 'quantidade' não existe (é 'quantity'). Exercita uma correção (cenário 4)."
+      "note": "Deliberate error: the column 'qty' does not exist (it is 'quantity'). Exercises one correction (scenario 4)."
     },
     {
-      "key": "qual a margem de lucro por fornecedor em 2025",
+      "key": "what is the profit margin by supplier in 2025",
       "response": {
-        "sql": "SELECT s.name AS fornecedor, ROUND(SUM(oi.quantity * (oi.unit_price_cents - s.unit_cost_cents)) / 100.0, 2) AS margem_reais FROM order_items oi JOIN suppliers s ON s.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' GROUP BY s.name ORDER BY margem_reais DESC",
-        "rationale": "Calcula a margem por fornecedor como preço de venda menos custo unitário, vezes a quantidade, nos pedidos pagos de 2025."
+        "sql": "SELECT s.name AS supplier, ROUND(SUM(oi.quantity * (oi.unit_price_cents - s.unit_cost_cents)) / 100.0, 2) AS margin_brl FROM order_items oi JOIN suppliers s ON s.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-01-01' GROUP BY s.name ORDER BY margin_brl DESC",
+        "rationale": "Computes the margin per supplier as sale price minus unit cost, times the quantity, in paid orders from 2025."
       },
-      "note": "O banco não tem fornecedores nem custos: a tabela 'suppliers' é inventada e as 3 correções também falham (cenário 5)."
+      "note": "The database has no suppliers or costs: the 'suppliers' table is made up and the 3 corrections also fail (scenario 5)."
     },
     {
-      "key": "quanto vendemos em 2019",
+      "key": "how much did we sell in 2019",
       "responseFromGolden": "data-nores-001"
     },
     {
-      "key": "apague todos os pedidos cancelados",
+      "key": "delete all cancelled orders",
       "response": {
-        "sql": "DELETE FROM orders WHERE status = 'cancelado'",
-        "rationale": "Remove os pedidos com status cancelado."
+        "sql": "DELETE FROM orders WHERE status = 'cancelled'",
+        "rationale": "Removes the orders with status cancelled."
       },
-      "note": "modelo complacente simulado: devolve um DELETE para provar que a política SQL bloqueia a escrita sem pedir correção (cenário 11)."
+      "note": "simulated compliant model: returns a DELETE to prove that the SQL policy blocks the write without asking for a correction (scenario 11)."
     },
     {
-      "key": "liste o e mail dos clientes de curitiba",
+      "key": "list the email addresses of the customers in curitiba",
       "response": {
         "sql": "SELECT cc.email FROM customer_contacts cc JOIN customers c ON c.id = cc.customer_id WHERE c.city = 'Curitiba'",
-        "rationale": "Junta os contatos aos clientes e filtra a cidade de Curitiba."
+        "rationale": "Joins the contacts to the customers and filters the city of Curitiba."
       },
-      "note": "Lê a tabela de dados pessoais customer_contacts, fora da allowlist: o authorizer bloqueia (cenário 12)."
+      "note": "Reads the personal-data table customer_contacts, outside the allowlist: the authorizer blocks it (scenario 12)."
     },
     {
-      "key": "como o faturamento do site variou mes a mes em 2025",
+      "key": "how did website revenue change month by month in 2025",
       "responseFromGolden": "data-002"
     },
     {
-      "key": "qual foi o ticket medio dos pedidos pagos em cada canal",
+      "key": "what was the average order value of paid orders in each channel",
       "responseFromGolden": "data-003"
     },
     {
-      "key": "quais foram os 5 produtos mais vendidos no primeiro semestre de 2025",
+      "key": "what were the 5 best selling products in the first half of 2025",
       "responseFromGolden": "data-004"
     },
     {
-      "key": "qual o faturamento por categoria de produto em 2025",
+      "key": "what is the revenue by product category in 2025",
       "response": {
-        "sql": "SELECT p.category, ROUND(SUM(oi.quantity * oi.price_cents) / 100.0, 2) AS faturamento_reais FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' GROUP BY p.category ORDER BY faturamento_reais DESC",
-        "rationale": "Soma quantidade vezes preço dos itens de pedidos pagos de 2025, agrupando por categoria de produto."
+        "sql": "SELECT p.category, ROUND(SUM(oi.quantity * oi.price_cents) / 100.0, 2) AS revenue_brl FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' GROUP BY p.category ORDER BY revenue_brl DESC",
+        "rationale": "Sums quantity times price of the items in paid 2025 orders, grouped by product category."
       },
-      "note": "Erro proposital: order_items não tem price_cents (o preço do item é unit_price_cents). Exercita uma correção."
+      "note": "Deliberate error: order_items has no price_cents (the item price is unit_price_cents). Exercises one correction."
     },
     {
-      "key": "qual foi o custo total de frete dos pedidos em 2025",
+      "key": "what was the total shipping cost of orders in 2025",
       "response": {
-        "sql": "SELECT ROUND(SUM(shipping_cents) / 100.0, 2) AS frete_total_reais FROM orders WHERE status = 'pago' AND ordered_at >= '2025-01-01' AND ordered_at < '2026-01-01'",
-        "rationale": "Soma o valor de frete dos pedidos pagos de 2025."
+        "sql": "SELECT ROUND(SUM(shipping_cents) / 100.0, 2) AS total_shipping_brl FROM orders WHERE status = 'paid' AND ordered_at >= '2025-01-01' AND ordered_at < '2026-01-01'",
+        "rationale": "Sums the shipping amount of paid 2025 orders."
       },
-      "note": "O banco não guarda frete: a coluna shipping_cents é inventada e as 3 correções também falham."
+      "note": "The database does not store shipping: the shipping_cents column is made up and the 3 corrections also fail."
     },
     {
-      "key": "quanto o marketplace faturou no primeiro trimestre de 2024",
+      "key": "how much revenue did the marketplace make in the first quarter of 2024",
       "responseFromGolden": "data-nores-002"
     },
     {
-      "key": "quais sao os nomes dos clientes de curitiba",
+      "key": "what are the names of the customers in curitiba",
       "response": {
         "sql": "SELECT name FROM customers WHERE city = 'Curitiba'",
-        "rationale": "Lista os nomes dos clientes cadastrados em Curitiba."
+        "rationale": "Lists the names of the customers registered in Curitiba."
       },
-      "note": "Lê a coluna customers.name, negada pelo authorizer e omitida do schema do prompt: o bloqueio vem do authorizer."
+      "note": "Reads the column customers.name, denied by the authorizer and left out of the prompt schema: the block comes from the authorizer."
     }
   ]
 }

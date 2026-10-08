@@ -1,7 +1,7 @@
 // Validação das citações do ragAnswer (RAG-03, RAG-04): só valem IDs que estavam entre os recuperados.
 import type { RagAnswerOutput } from '../domain/schemas.ts';
 
-export const REFUSAL_TEXT = 'Não encontrei essa informação nos documentos da Moenda Lunar.';
+export const REFUSAL_TEXT = "I could not find this information in Lunar Mill's documents.";
 
 export function validateCitations(draft: RagAnswerOutput, retrievedIds: readonly string[]): { citedIds: string[]; dropped: string[]; refused: boolean } {
   if (draft.refused) return { citedIds: [], dropped: [], refused: true };

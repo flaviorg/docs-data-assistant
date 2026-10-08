@@ -1,28 +1,28 @@
-# Frete e prazos de entrega
+# Shipping and delivery times
 
-## Regiões atendidas
+## Regions served
 
-Entregamos em todo o Brasil a partir do nosso centro de distribuição em Curitiba (PR). Os pedidos são despachados em até 2 dias úteis depois da confirmação do pagamento. Como o café sai em até 48 horas depois da torra, um pedido de café feito no fim de semana costuma ser despachado na terça-feira.
+We deliver all over Brazil from our distribution center in Curitiba (PR). Orders ship within 2 business days after payment is confirmed. Since coffee ships within 48 hours after roasting, a coffee order placed over the weekend usually ships on Tuesday.
 
-## Prazos estimados
+## Estimated delivery times
 
-Os prazos abaixo contam em dias úteis a partir do despacho:
+The times below are counted in business days from shipping:
 
-- Sul e Sudeste: de 2 a 5 dias úteis;
-- Centro-Oeste: de 4 a 7 dias úteis;
-- Nordeste: de 5 a 9 dias úteis;
-- Norte: de 7 a 12 dias úteis.
+- South and Southeast: 2 to 5 business days;
+- Center-West: 4 to 7 business days;
+- Northeast: 5 to 9 business days;
+- North: 7 to 12 business days.
 
-Capitais costumam receber no início da faixa; cidades do interior e áreas rurais, no fim. Em novembro e dezembro, por causa do volume de fim de ano, os prazos podem aumentar em até 3 dias úteis.
+State capitals usually receive orders at the start of the range; inland cities and rural areas, at the end. In November and December, because of the end-of-year volume, delivery times can increase by up to 3 business days.
 
-## Valor do frete
+## Shipping cost
 
-O frete é calculado no carrinho a partir do CEP e do peso do pedido. Compras acima de R$ 199 têm frete grátis para todo o Brasil na modalidade econômica. A modalidade expressa é sempre cobrada à parte. Assinantes do clube têm frete grátis nas entregas da assinatura, e cafeterias parceiras seguem as condições do contrato de atacado. Equipamentos grandes, como a máquina de espresso, podem ter frete diferenciado por causa do tamanho da caixa.
+Shipping is calculated in the cart from the postal code and the order weight. Purchases over R$ 199 get free shipping anywhere in Brazil with the economy option. The express option is always charged separately. Club subscribers get free shipping on subscription deliveries, and partner coffee shops follow the terms of the wholesale contract. Large equipment, such as the espresso machine, may have a different shipping cost because of the box size.
 
-## Rastreio do pedido
+## Order tracking
 
-Assim que o pedido é despachado, você recebe por e-mail o código de rastreio e um link para acompanhar a entrega em https://moendalunar.example/rastreio. O status também aparece em "Meus pedidos" no aplicativo. Se o rastreio ficar parado por mais de 5 dias úteis, fale com a equipe pelo e-mail entregas@moendalunar.example.
+As soon as the order ships, you receive the tracking code by email and a link to follow the delivery at https://lunarmill.example/tracking. The status also shows up under "My orders" in the app. If tracking stalls for more than 5 business days, contact the team at deliveries@lunarmill.example.
 
-## Entrega não realizada
+## Failed delivery
 
-A transportadora faz até três tentativas de entrega. Depois disso, o pacote volta para o centro de distribuição e entramos em contato para combinar um novo envio. O novo frete é cobrado só quando o endereço informado estava incompleto ou incorreto.
+The carrier makes up to three delivery attempts. After that, the package goes back to the distribution center and we get in touch to arrange a new shipment. The new shipping fee is charged only when the address provided was incomplete or incorrect.

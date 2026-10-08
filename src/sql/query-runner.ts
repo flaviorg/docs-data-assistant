@@ -39,7 +39,7 @@ interface Job {
 }
 
 const CHILD_URL = new URL('./query-process.ts', import.meta.url);
-const CLOSED_MESSAGE = 'o executor de SQL foi fechado';
+const CLOSED_MESSAGE = 'the SQL executor was closed';
 
 export function createQueryRunner(source: SalesSource, opts: { timeoutMs: number }): QueryRunner {
   const queue: Job[] = [];
@@ -108,14 +108,14 @@ export function createQueryRunner(source: SalesSource, opts: { timeoutMs: number
       const job = takeCurrent()!;
       if (msg.type === 'result') job.resolve(msg.result);
       else if (msg.type === 'runtime_error') job.reject(new SqlRuntimeError(msg.message, msg.denials));
-      else job.reject(new Error(`falha no processo de SQL: ${msg.message}`));
+      else job.reject(new Error(`SQL process failure: ${msg.message}`));
       pump();
     });
-    c.on('error', (err) => childFailed(c, new Error(`o processo de SQL falhou: ${err.message}`)));
+    c.on('error', (err) => childFailed(c, new Error(`the SQL process failed: ${err.message}`)));
     c.on('exit', (code, signal) => {
       childFailed(c, new Error(initError
-        ? `o processo de SQL não abriu o banco: ${initError}`
-        : `o processo de SQL saiu (código ${code ?? 'nulo'}, sinal ${signal ?? 'nenhum'})`));
+        ? `the SQL process could not open the database: ${initError}`
+        : `the SQL process exited (code ${code ?? 'null'}, signal ${signal ?? 'none'})`));
     });
     c.send({ type: 'init', source } satisfies ParentMessage);
     return c;

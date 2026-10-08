@@ -102,31 +102,31 @@ function hasNonLiteralLimit(tokens: readonly Token[]): boolean {
 
 function policyOf(tokens: readonly Token[]): { rule: PolicyRule; message: string } | null {
   if (tokens.some((t) => isPunct(t, ';'))) {
-    return { rule: 'multiple_statements', message: 'a SQL tem mais de uma instrução; envie uma única consulta' };
+    return { rule: 'multiple_statements', message: 'the SQL has more than one statement; send a single query' };
   }
   const first = tokens[0]!;
   if (first.kind !== 'word' || (first.upper !== 'SELECT' && first.upper !== 'WITH')) {
-    return { rule: 'not_select', message: `a consulta precisa começar com SELECT ou WITH (começa com "${first.value}")` };
+    return { rule: 'not_select', message: `the query must start with SELECT or WITH (it starts with "${first.value}")` };
   }
   const forbidden = tokens.find((t) => t.kind === 'word' && FORBIDDEN_KEYWORDS.has(t.upper));
-  if (forbidden) return { rule: 'forbidden_keyword', message: `palavra-chave proibida: ${forbidden.upper}` };
-  if (tokens.some((t) => isWord(t, 'RECURSIVE'))) return { rule: 'recursive_cte', message: 'CTE recursiva não é permitida' };
-  if (hasCommaJoin(tokens)) return { rule: 'comma_join', message: 'junção por vírgula no FROM não é permitida; use JOIN ... ON' };
+  if (forbidden) return { rule: 'forbidden_keyword', message: `forbidden keyword: ${forbidden.upper}` };
+  if (tokens.some((t) => isWord(t, 'RECURSIVE'))) return { rule: 'recursive_cte', message: 'a recursive CTE is not allowed' };
+  if (hasCommaJoin(tokens)) return { rule: 'comma_join', message: 'a comma join in FROM is not allowed; use JOIN ... ON' };
   if (hasJoinWithoutCondition(tokens)) {
-    return { rule: 'cross_join', message: 'junção sem condição (CROSS JOIN, NATURAL JOIN ou JOIN sem ON/USING) não é permitida; use JOIN ... ON com a chave da junção' };
+    return { rule: 'cross_join', message: 'a join without a condition (CROSS JOIN, NATURAL JOIN or JOIN without ON/USING) is not allowed; use JOIN ... ON with the join key' };
   }
   const refs = countTableRefs(tokens);
   if (refs > MAX_TABLE_REFS) {
-    return { rule: 'too_many_tables', message: `a consulta tem ${refs} referências a tabela; o máximo é ${MAX_TABLE_REFS}` };
+    return { rule: 'too_many_tables', message: `the query has ${refs} table references; the maximum is ${MAX_TABLE_REFS}` };
   }
-  if (hasNonLiteralLimit(tokens)) return { rule: 'non_literal_limit', message: 'LIMIT e OFFSET precisam ser inteiros literais' };
+  if (hasNonLiteralLimit(tokens)) return { rule: 'non_literal_limit', message: 'LIMIT and OFFSET must be integer literals' };
   return null;
 }
 
 function describeDenial(d: AuthorizerDenial): string {
-  if (d.kind === 'table') return d.column ? `coluna ${d.table}.${d.column}` : `tabela ${d.table}`;
-  if (d.kind === 'function') return `função de risco ${d.name}`;
-  return `ação ${d.code}`;
+  if (d.kind === 'table') return d.column ? `column ${d.table}.${d.column}` : `table ${d.table}`;
+  if (d.kind === 'function') return `risky function ${d.name}`;
+  return `action ${d.code}`;
 }
 
 /**
@@ -138,10 +138,10 @@ export function classifyDenials(denials: readonly AuthorizerDenial[]): { kind: '
   const blocking = denials.filter((d) => d.kind !== 'function' || d.dangerous);
   if (blocking.length > 0) {
     const what = [...new Set(blocking.map(describeDenial))].join(', ');
-    return { kind: 'policy', message: `acesso negado pelo authorizer: ${what}` };
+    return { kind: 'policy', message: `access denied by the authorizer: ${what}` };
   }
   const names = [...new Set(denials.map((d) => (d.kind === 'function' ? d.name : '')))];
-  return { kind: 'correctable', message: `função não permitida: ${names.join(', ')}. Use apenas: ${ALLOWLIST_TEXT}` };
+  return { kind: 'correctable', message: `function not allowed: ${names.join(', ')}. Use only: ${ALLOWLIST_TEXT}` };
 }
 
 export function createSqlValidator(deps: { conn: SalesConnection; maxRows: number }): SqlValidator {
@@ -182,10 +182,10 @@ export function createSqlValidator(deps: { conn: SalesConnection; maxRows: numbe
   function validate(sql: string): SqlValidation {
     let policy: PolicyCheck;
     try {
-      if (tokenize(sql).length === 0) return { ok: false, kind: 'correctable', message: 'a SQL está vazia; devolva uma consulta SELECT' };
+      if (tokenize(sql).length === 0) return { ok: false, kind: 'correctable', message: 'the SQL is empty; return a SELECT query' };
       policy = checkPolicy(sql);
     } catch (err) {
-      if (err instanceof SqlLexError) return { ok: false, kind: 'correctable', message: `erro de sintaxe: ${err.message}` };
+      if (err instanceof SqlLexError) return { ok: false, kind: 'correctable', message: `syntax error: ${err.message}` };
       throw err;
     }
     if (!policy.ok) return { ok: false, kind: 'policy', rule: policy.rule, message: policy.message };

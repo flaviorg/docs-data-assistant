@@ -1,28 +1,28 @@
-# Garantia de equipamentos
+# Equipment warranty
 
-## Prazo da garantia
+## Warranty period
 
-Todos os equipamentos vendidos pela loja, como moedores manuais e elétricos, prensas francesas, cafeteiras italianas, balanças, chaleiras e a máquina de espresso, têm garantia de 12 meses contados da data de entrega. Esse prazo já inclui os 90 dias de garantia legal previstos no Código de Defesa do Consumidor, somados a 9 meses de garantia contratual dada pela empresa.
+All equipment sold by the store, such as manual and electric grinders, French presses, moka pots, scales, kettles and the espresso machine, has a 12-month warranty counted from the delivery date. This period already includes the 90-day legal warranty required by the Brazilian Consumer Protection Code, plus 9 months of contractual warranty given by the company.
 
-A garantia cobre defeitos de fabricação: motor que não liga, mós que se soltam, peças que trincam sem impacto, falha na resistência da chaleira ou no sistema de pressão da máquina.
+The warranty covers manufacturing defects: a motor that does not start, burrs that come loose, parts that crack without impact, a failure in the kettle's heating element or in the machine's pressure system.
 
-## Como acionar a garantia
+## How to claim the warranty
 
-1. Acesse "Meus pedidos", escolha o equipamento e clique em "Acionar garantia".
-2. Descreva o problema e envie fotos ou um vídeo mostrando o defeito, com o número de série quando houver.
-3. Nossa equipe técnica responde em até 3 dias úteis com um diagnóstico inicial.
-4. Se o defeito for confirmado, enviamos uma etiqueta de postagem sem custo. O reparo ou a troca acontece em até 30 dias depois que o equipamento chega à assistência.
+1. Go to "My orders", choose the equipment and click "Claim warranty".
+2. Describe the problem and send photos or a video showing the defect, with the serial number when there is one.
+3. Our technical team replies within 3 business days with an initial diagnosis.
+4. If the defect is confirmed, we send a prepaid shipping label. The repair or replacement happens within 30 days after the equipment arrives at the service center.
 
-Se o mesmo defeito voltar depois do reparo, ou se o conserto passar de 30 dias, você pode escolher entre um produto novo e o reembolso integral. Também é possível acionar a garantia pelo e-mail garantia@moendalunar.example.
+If the same defect comes back after the repair, or if the repair takes longer than 30 days, you can choose between a new product and a full refund. You can also claim the warranty by email at warranty@lunarmill.example.
 
-## Assistência técnica
+## Technical service
 
-Os reparos são feitos pela nossa assistência técnica própria, em Curitiba, ou por uma rede credenciada nas capitais. Depois que a garantia termina, a assistência continua disponível: o orçamento é gratuito e as peças de reposição ficam à venda por pelo menos 5 anos depois que o modelo sai de linha.
+Repairs are done by our own service center in Curitiba or by an authorized network in the state capitals. After the warranty ends, the service center remains available: the quote is free and spare parts stay on sale for at least 5 years after the model is discontinued.
 
-## O que a garantia não cobre
+## What the warranty does not cover
 
-- desgaste natural de peças como mós, borrachas de vedação e filtros;
-- danos causados por queda, transporte inadequado feito pelo cliente ou ligação em voltagem errada;
-- acúmulo de calcário por falta de limpeza ou por uso de água fora da recomendação do manual;
-- equipamentos abertos ou consertados por terceiros não credenciados;
-- uso comercial de equipamentos domésticos, por exemplo numa cafeteria, que segue as condições do contrato de parceiro.
+- normal wear of parts such as burrs, rubber seals and filters;
+- damage caused by a fall, improper transport by the customer or connection to the wrong voltage;
+- limescale buildup from lack of cleaning or from using water outside the manual's recommendation;
+- equipment opened or repaired by unauthorized third parties;
+- commercial use of home equipment, for example in a coffee shop, which follows the terms of the partner contract.

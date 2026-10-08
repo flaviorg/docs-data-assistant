@@ -2,7 +2,7 @@
 // marca de redação e devolve os trechos removidos (usados depois pela guarda de saída).
 import { matchRules } from '../guardrails/rules.ts';
 
-export const REDACTION_MARK = '[trecho removido: possível instrução embutida]';
+export const REDACTION_MARK = '[passage removed: possible embedded instruction]';
 
 interface Segment { text: string; sentence: boolean }
 

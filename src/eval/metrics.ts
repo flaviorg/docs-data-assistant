@@ -16,7 +16,7 @@ export const METRIC_NAMES = [
 export type MetricName = (typeof METRIC_NAMES)[number];
 export type Op = '>=' | '<=' | '=';
 export type Profile = 'fake' | 'live';
-export type Nature = 'mecanismo' | 'contrato (fixture)' | 'medida';
+export type Nature = 'mechanism' | 'contract (fixture)' | 'measured';
 
 const ThresholdPairSchema = z.tuple([z.enum(['>=', '<=', '=']), z.number()]);
 const ProfileSchema = z.strictObject(Object.fromEntries(METRIC_NAMES.map((n) => [n, ThresholdPairSchema])) as Record<MetricName, typeof ThresholdPairSchema>);
@@ -25,7 +25,7 @@ export type Thresholds = z.infer<typeof ThresholdsSchema>;
 
 export function loadThresholds(file = 'eval/thresholds.json'): Thresholds {
   const parsed = ThresholdsSchema.safeParse(JSON.parse(fs.readFileSync(file, 'utf8')));
-  if (!parsed.success) throw new Error(`Limiares inválidos em ${file}: ${z.prettifyError(parsed.error)}`);
+  if (!parsed.success) throw new Error(`Invalid thresholds in ${file}: ${z.prettifyError(parsed.error)}`);
   return parsed.data;
 }
 
@@ -158,7 +158,7 @@ export function computeMetrics(results: readonly EvalItemResult[], profile: Prof
     const { ok, total, failed } = raw[name];
     const value = ratio(ok, total);
     const [op, threshold] = table[name];
-    const nature: Nature = profile === 'live' ? 'medida' : CONTRACT_METRICS.has(name) ? 'contrato (fixture)' : 'mecanismo';
+    const nature: Nature = profile === 'live' ? 'measured' : CONTRACT_METRICS.has(name) ? 'contract (fixture)' : 'mechanism';
     return { name, nature, value, op, threshold, pass: passes(value, op, threshold), count: `${ok}/${total}`, failedIds: failed };
   });
 }

@@ -1,21 +1,21 @@
-# Sobre a Moenda Lunar Cafés Especiais
+# About Lunar Mill Specialty Coffee
 
-## Nossa história
+## Our story
 
-A empresa nasceu em 2020, em Curitiba, quando dois baristas começaram a torrar pequenos lotes numa garagem e a entregar café de bicicleta pelo bairro. A procura cresceu rápido e, em 2022, a torrefação se mudou para um galpão próprio na região metropolitana, com capacidade para torrar cerca de duas toneladas por mês. Compramos de sítios familiares de Minas Gerais, do Espírito Santo, da Bahia e do Paraná, pagando acima do preço de mercado por lotes com pontuação a partir de 84 pontos na escala de cafés especiais.
+The company was born in 2020, in Curitiba, when two baristas started roasting small batches in a garage and delivering coffee by bicycle around the neighborhood. Demand grew quickly and, in 2022, the roastery moved to its own warehouse in the metropolitan area, able to roast about two tonnes a month. We buy from family farms in Minas Gerais, Espírito Santo, Bahia and Paraná, paying above the market price for lots that score 84 points or more on the specialty coffee scale.
 
-O nome vem do hábito dos fundadores de moer o café de madrugada, sob a luz da lua, antes de abrir a primeira loja. Hoje a equipe torra três vezes por semana e despacha os pedidos em até 48 horas depois da torra, para que o café chegue fresco.
+The name comes from the founders' habit of grinding coffee late at night, by moonlight, before they opened the first shop. Today the team roasts three times a week and ships orders within 48 hours after roasting, so the coffee arrives fresh.
 
-## O que vendemos
+## What we sell
 
-O catálogo tem cinco linhas: grãos torrados, café moído, cápsulas compatíveis, equipamentos de preparo (moedores, prensas, cafeteiras e uma máquina de espresso) e acessórios, como filtros, balanças e chaleiras. Cada embalagem de café traz a data de torra, a origem, a altitude da fazenda e as notas sensoriais.
+The catalog has five lines: roasted whole beans, ground coffee, compatible capsules, brewing equipment (grinders, presses, coffee makers and an espresso machine) and accessories, such as filters, scales and kettles. Every bag of coffee shows the roast date, the origin, the farm's altitude and the tasting notes.
 
-## Canais de venda
+## Sales channels
 
-Você pode comprar pelo site https://moendalunar.example, pelo aplicativo para celular ou pela nossa loja oficial em marketplaces. Preços e promoções podem variar entre os canais, porque cada marketplace tem regras próprias de frete e de parcelamento. O clube de assinatura e o programa para cafeterias parceiras existem só no site.
+You can buy on the website https://lunarmill.example, in the mobile app or in our official store on marketplaces. Prices and promotions may vary between channels, because each marketplace has its own shipping and installment rules. The subscription club and the partner coffee shop program are available only on the website.
 
-## Horário de atendimento
+## Support hours
 
-O atendimento humano está disponível de segunda a sexta, das 8h às 20h, e aos sábados, das 9h às 14h, sempre no horário de Brasília. Em feriados nacionais não há atendimento humano. Fora desse horário, o assistente automático responde dúvidas sobre políticas e números de vendas, e qualquer caso que ele não resolva vai para a equipe no próximo dia útil.
+Human support is available Monday to Friday, from 8 a.m. to 8 p.m., and on Saturdays, from 9 a.m. to 2 p.m., always in Brasília time. There is no human support on national holidays. Outside these hours, the automated assistant answers questions about policies and sales figures, and any case it cannot resolve goes to the team on the next business day.
 
-Os canais de contato são o e-mail atendimento@moendalunar.example e o chat do site e do aplicativo. Não vendemos por telefone. Pedidos feitos em marketplaces também podem ser tratados pelo canal de mensagens da própria plataforma.
+The contact channels are the email support@lunarmill.example and the chat on the website and in the app. We do not sell by phone. Orders placed on marketplaces can also be handled through the platform's own messaging channel.

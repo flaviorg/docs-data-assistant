@@ -1,16 +1,16 @@
 // Formatação de texto para as CLIs (ask e demo): números no padrão brasileiro, quebra de linha e tabela simples.
 import type { AskResponse } from '../domain/schemas.ts';
 
-const intFmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-const numFmt = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 2 });
-const usdFmt = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+const intFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
+const numFmt = new Intl.NumberFormat('en-US', { maximumFractionDigits: 2 });
+const usdFmt = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 
 export const formatInt = (n: number): string => intFmt.format(n);
 export const formatNumber = (n: number): string => numFmt.format(n);
 
 export function formatCost(costUsd: number | null, fictional: boolean): string {
-  if (costUsd === null) return 'custo indisponível';
-  return `US$ ${usdFmt.format(costUsd)}${fictional ? ' (fictício)' : ''}`;
+  if (costUsd === null) return 'cost unavailable';
+  return `US$ ${usdFmt.format(costUsd)}${fictional ? ' (fictional)' : ''}`;
 }
 
 export const plural = (n: number, one: string, many: string): string => `${n} ${n === 1 ? one : many}`;

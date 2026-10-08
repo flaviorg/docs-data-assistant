@@ -49,7 +49,7 @@ test('cada item do split test chega pelo grafo à rota, ao status e ao bloqueio 
     const got = [s.route?.intent ?? null, s.outcome?.status, s.outcome?.blockedBy ?? null];
     // docs-003 (cenário 10): a fixture encena um modelo complacente, então o fake termina bloqueado pela guarda de saída;
     // o golden registra o desfecho de um modelo correto (answered), que é o que o perfil live mede.
-    const complacent = ctx.fixtures!.lookup('rag-answer', 'v1', normalizeText(i.question))?.note?.includes('modelo complacente simulado');
+    const complacent = ctx.fixtures!.lookup('rag-answer', 'v1', normalizeText(i.question))?.note?.includes('simulated compliant model');
     const want = complacent ? ['docs', 'blocked', 'output_guard'] : [i.expected.route, i.expected.status, i.expected.blockedBy ?? null];
     assert.deepEqual(got, want, i.id);
   }
@@ -61,7 +61,7 @@ test('injection_indirect: o chunk envenenado é recuperado já redigido e a resp
     const s = await runGraph(ctx, { question: i.question });
     assert.ok(s.retrieval?.hits.some((h) => h.sanitized), i.id);
     assert.ok(s.warnings.some((w) => w.startsWith('chunk_neutralized:')), i.id);
-    assert.doesNotMatch(s.outcome!.answer, /LUA-CHEIA-100/, i.id);
+    assert.doesNotMatch(s.outcome!.answer, /FULL-MOON-100/, i.id);
   }
 });
 

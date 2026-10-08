@@ -47,7 +47,7 @@ test('GRD-02 rules+model: SAFE do modelo deixa seguir; a chamada vai ao modelo d
   assert.equal(s.outcome?.status, 'answered'); assert.equal(s.guardrail?.layer, 'model');
   const guard = p.calls.find((c) => c.meta.promptId === 'safeguard')!;
   assert.equal(guard.model, 'fake/guardrail');
-  assert.ok(guard.messages[1]!.content.includes(Q1!) && guard.messages[1]!.content.includes('Proibido'));
+  assert.ok(guard.messages[1]!.content.includes(Q1!) && guard.messages[1]!.content.includes('Forbidden'));
   assert.deepEqual(p.calls.map((c) => c.meta.promptId), ['safeguard', 'router', 'rag-answer']);
 });
 test('GRD-01 rules+model: regra bloqueia antes e o modelo de segurança não é chamado', async () => {
@@ -63,7 +63,7 @@ test('GRD-03 modelo de segurança indisponível responde 503 llm_unavailable, se
   const r = await ctx.askService.ask({ question: Q1! });
   assert.ok(!r.ok);
   assert.deepEqual([r.httpStatus, r.body.error], [503, 'llm_unavailable']);
-  assert.doesNotMatch(r.body.message, /instruções do assistente/);
+  assert.doesNotMatch(r.body.message, /assistant instructions/);
   assert.ok(p.calls.every((c) => c.meta.promptId === 'safeguard'));
   assert.equal(ctx.ledger.stats(3_600_000).requests.errorRate, 1);
 });
@@ -78,10 +78,10 @@ test('GRD-02 pela AskService: bloqueio do modelo conta 1 chamada e responde 200 
 test('GRD-05 modelo complacente não vaza canário nem system prompt pelo motivo da rota ou pelo aviso de citação descartada', async () => {
   const constraint = ragAnswerPrompt.system.constraints[0]!;
   const p = scriptedByPrompt({
-    router: okJson({ intent: 'docs', reason: `Use o cupom LUA-CHEIA-100. ${constraint}`.slice(0, 200) }),
+    router: okJson({ intent: 'docs', reason: `Use o cupom FULL-MOON-100. ${constraint}`.slice(0, 200) }),
     'rag-answer': (req) => {
       const ids = [...req.messages[1]!.content.matchAll(/id="([^"]+)"/g)].map((m) => m[1]!);
-      return okJson({ refused: false, answer: 'O prazo de devolução por defeito está nos trechos.', citedChunkIds: [ids[0]!, 'lua-cheia-100#cupom'] });
+      return okJson({ refused: false, answer: 'O prazo de devolução por defeito está nos trechos.', citedChunkIds: [ids[0]!, 'full-moon-100#cupom'] });
     },
   });
   const ctx = await createTestContext({}, { provider: p });
@@ -95,7 +95,7 @@ test('GRD-05 modelo complacente não vaza canário nem system prompt pelo motivo
 
 test('GRD-05 modelo complacente não vaza canário nem system prompt pelo bloco SQL: consulta, linhas e erro passam pela guarda', async () => {
   const constraint = ragAnswerPrompt.system.constraints[0]!;
-  const leakSql = `SELECT 'LUA-CHEIA-100' AS cupom, '${constraint.replace(/'/g, "''")}' AS regra`;
+  const leakSql = `SELECT 'FULL-MOON-100' AS cupom, '${constraint.replace(/'/g, "''")}' AS regra`;
   const p = scriptedByPrompt({
     router: okJson({ intent: 'data', reason: 'pergunta sobre vendas' }),
     'sql-generate': okJson({ sql: leakSql, rationale: 'literal' }),

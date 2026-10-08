@@ -13,7 +13,7 @@ import { elapsedMs } from '../timing.ts';
 export function createRagAnswerNode(deps: { llm: LlmClient; prompt: typeof ragAnswerPrompt; getChunk: (id: string) => StoredChunk | undefined }) {
   return async (state: AskState, config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
-    if (!state.retrieval) throw new Error('ragAnswer chamado sem retrieval no estado');
+    if (!state.retrieval) throw new Error('ragAnswer called without retrieval in the state');
     const t0 = performance.now();
     const warnings: string[] = [];
     const chunks = state.retrieval.hits.flatMap((h) => {

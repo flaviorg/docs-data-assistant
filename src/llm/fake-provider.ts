@@ -37,10 +37,10 @@ export function createFakeProvider(opts: { fixtures: FixtureIndex; chaos?: Chaos
       const { promptId, promptVersion, fixtureKey } = req.meta;
       calls.push({ promptId, key: fixtureKey, model: req.model, messages: req.messages.map((m) => ({ ...m })) });
       if (calls.length > MAX_RECORDED_CALLS) calls.splice(0, calls.length - MAX_RECORDED_CALLS);
-      if (signal.aborted) throw new LlmError('timeout', 'chamada abortada antes de responder');
+      if (signal.aborted) throw new LlmError('timeout', 'call aborted before answering');
 
-      if (chaos === 'all-down') throw new LlmError('server_error', `caos all-down: ${req.model} indisponível`);
-      if (chaos === 'primary-down' && req.model === PRIMARY) throw new LlmError('server_error', 'caos primary-down: fake/primary indisponível');
+      if (chaos === 'all-down') throw new LlmError('server_error', `chaos all-down: ${req.model} unavailable`);
+      if (chaos === 'primary-down' && req.model === PRIMARY) throw new LlmError('server_error', 'chaos primary-down: fake/primary unavailable');
       const chaosKey = req.meta.requestId ?? '';
       if (chaos === 'primary-timeout-once' && req.model === PRIMARY && !timedOut.has(chaosKey)) {
         if (timedOut.size >= MAX_CHAOS_KEYS) timedOut.clear();

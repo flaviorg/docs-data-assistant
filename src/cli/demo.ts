@@ -15,7 +15,7 @@ import { formatCost, plural } from './format.ts';
 
 const DAY_MS = 24 * 60 * 60_000;
 const OUTPUT_GUARD_REASON: Readonly<Record<string, string>> = {
-  canary: 'canário', redacted_span: 'trecho redigido', system_prompt_leak: 'vazamento do prompt',
+  canary: 'canary', redacted_span: 'redacted passage', system_prompt_leak: 'prompt leak',
 };
 
 interface Row { scenario: DemoScenario; label: string; route: string; status: string; detail: string; ok: boolean; expected: string }
@@ -32,25 +32,25 @@ function detailFor(r: AskResponse, state: AskState | undefined, calls: readonly 
       const reason = warningValue(r, 'output_guard') ?? '';
       parts.push(`output_guard: ${OUTPUT_GUARD_REASON[reason] ?? reason}`);
     } else if (r.blockedBy === 'sql_policy') parts.push(`sql_policy: ${warningValue(r, 'sql_policy') ?? ''}`);
-    else if (r.blockedBy === 'sql_authorizer') parts.push(`sql_authorizer: ${(r.sql?.lastError ?? '').replace(/^acesso negado pelo authorizer: /, '')}`);
+    else if (r.blockedBy === 'sql_authorizer') parts.push(`sql_authorizer: ${(r.sql?.lastError ?? '').replace(/^access denied by the authorizer: /, '')}`);
   } else if (r.status === 'refused') {
     const ret = state?.retrieval;
-    if (r.route === 'out_of_scope') parts.push('mensagem fixa');
-    else if (ret && r.warnings.includes('below_threshold')) parts.push(`top ${ret.topScore.toFixed(2)} < limiar ${ret.threshold.toFixed(2)}`);
-    else parts.push('recusa sem citação válida');
+    if (r.route === 'out_of_scope') parts.push('fixed message');
+    else if (ret && r.warnings.includes('below_threshold')) parts.push(`top ${ret.topScore.toFixed(2)} < threshold ${ret.threshold.toFixed(2)}`);
+    else parts.push('refusal without a valid citation');
   } else if (r.status === 'error') {
-    if (r.sql) parts.push(`${r.sql.corrections}/${maxCorrections} correções esgotadas (${(r.sql.lastError ?? '').split(':')[0]})`);
-    else parts.push(r.warnings.join(', ') || 'erro');
+    if (r.sql) parts.push(`${r.sql.corrections}/${maxCorrections} corrections exhausted (${(r.sql.lastError ?? '').split(':')[0]})`);
+    else parts.push(r.warnings.join(', ') || 'error');
   } else if (r.status === 'no_results') {
     const rows = r.sql?.rows ?? [];
-    parts.push(rows.length > 0 ? 'agregação sobre vazio (linha só com NULL)' : 'zero linhas');
+    parts.push(rows.length > 0 ? 'aggregate over an empty set (row with only NULL)' : 'zero rows');
   } else if (r.route === 'docs') {
-    parts.push(`${plural(r.citations.length, 'fonte', 'fontes')} · top ${(state?.retrieval?.topScore ?? 0).toFixed(2)}`);
+    parts.push(`${plural(r.citations.length, 'source', 'sources')} · top ${(state?.retrieval?.topScore ?? 0).toFixed(2)}`);
     const neutralized = r.warnings.filter((w) => w.startsWith('chunk_neutralized:')).length;
-    if (neutralized > 0) parts.push(plural(neutralized, 'trecho neutralizado', 'trechos neutralizados'));
+    if (neutralized > 0) parts.push(plural(neutralized, 'passage neutralized', 'passages neutralized'));
   } else if (r.route === 'data' && r.sql) {
-    parts.push(`${plural(r.sql.rowCount, 'linha', 'linhas')} · ${r.followUpQuestions.length} follow-ups`);
-    if (r.sql.corrections > 0) parts.push(plural(r.sql.corrections, 'correção', 'correções'));
+    parts.push(`${plural(r.sql.rowCount, 'row', 'rows')} · ${r.followUpQuestions.length} follow-ups`);
+    if (r.sql.corrections > 0) parts.push(plural(r.sql.corrections, 'correction', 'corrections'));
   }
   const retries = calls.reduce((n, c) => n + c.retries, 0);
   const fallbacks = calls.filter((c) => c.fallbackUsed).length;
@@ -94,31 +94,31 @@ export async function runDemo(opts: { write?: (s: string) => void } = {}): Promi
     const rows: Row[] = [];
     for (const s of DEMO_SCENARIOS) rows.push(await runScenario(ctx, s));
 
-    write('Moenda Lunar · docs-data-assistant · demo roteirizada');
-    write(`Provedor: ${ctx.provider.name} (respostas do modelo vêm de fixtures). Embedder: ${ctx.embedder.id}. Dados em memória.`);
-    write('Recuperação, limiar, validação de SQL, authorizer, guardrails, retry e fallback rodam de verdade.');
+    write('Lunar Mill · docs-data-assistant · scripted demo');
+    write(`Provider: ${ctx.provider.name} (model answers come from fixtures). Embedder: ${ctx.embedder.id}. In-memory data.`);
+    write('Retrieval, threshold, SQL validation, authorizer, guardrails, retry and fallback run for real.');
     write('');
-    const wLabel = Math.max('cenário'.length, ...rows.map((r) => r.label.length));
-    const wRoute = Math.max('rota'.length, ...rows.map((r) => r.route.length));
+    const wLabel = Math.max('scenario'.length, ...rows.map((r) => r.label.length));
+    const wRoute = Math.max('route'.length, ...rows.map((r) => r.route.length));
     const wStatus = Math.max('status'.length, ...rows.map((r) => r.status.length));
     const line = (id: string, label: string, route: string, status: string, detail: string) =>
       `${id.padStart(2)}  ${label.padEnd(wLabel)}  ${route.padEnd(wRoute)}  ${status.padEnd(wStatus)}  ${detail}`.trimEnd();
-    write(line('#', 'cenário', 'rota', 'status', 'detalhe'));
+    write(line('#', 'scenario', 'route', 'status', 'detail'));
     for (const r of rows) {
-      write(line(String(r.scenario.id), r.label, r.route, r.status, r.ok ? r.detail : `${r.detail}  ✗ esperado ${r.expected}`));
+      write(line(String(r.scenario.id), r.label, r.route, r.status, r.ok ? r.detail : `${r.detail}  ✗ expected ${r.expected}`));
     }
     write('');
     if (rows.some((r) => r.scenario.complacentFixture)) {
-      write('* fixture: modelo complacente simulado. Testa a última linha de defesa: no 10, um modelo real nem recebe');
-      write('  o trecho envenenado, que já foi redigido na ingestão; no 11, a política SQL barra a escrita sem pedir correção.');
+      write('* fixture: simulated compliant model. Tests the last line of defense: in 10, a real model does not even receive');
+      write('  the poisoned passage, already redacted at ingestion; in 11, the SQL policy stops the write without asking for a correction.');
       write('');
     }
     const passed = rows.filter((r) => r.ok).length;
-    write(`${passed}/${rows.length} cenários com o desfecho esperado.`);
+    write(`${passed}/${rows.length} scenarios with the expected outcome.`);
     const st = ctx.ledger.stats(DAY_MS);
     const ms = (v: number | null) => (v === null ? '-' : String(Math.round(v)));
     write(`/stats: ${st.requests.total} req · P50 ${ms(st.requests.latencyMs.p50)} ms · P95 ${ms(st.requests.latencyMs.p95)} ms · `
-      + `${st.llm.calls} chamadas LLM · ${st.llm.retries} retries · ${st.llm.fallbacks} fallbacks · ${formatCost(st.llm.costUsd, st.llm.costIsFictional)}`);
+      + `${st.llm.calls} LLM calls · ${st.llm.retries} retries · ${st.llm.fallbacks} fallbacks · ${formatCost(st.llm.costUsd, st.llm.costIsFictional)}`);
     return passed === rows.length ? 0 : 1;
   } finally {
     ctx.close();
@@ -129,7 +129,7 @@ if (import.meta.main) {
   try {
     process.exitCode = await runDemo();
   } catch (err) {
-    console.error(`demo falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`demo failed: ${err instanceof Error ? err.message : String(err)}`);
     process.exitCode = 1;
   }
 }

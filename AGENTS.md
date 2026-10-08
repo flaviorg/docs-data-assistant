@@ -4,7 +4,7 @@ Instruções para agentes de código (Claude Code, Copilot, Codex e afins) neste
 
 ## O que é
 
-Assistente em TypeScript que responde perguntas sobre uma empresa fictícia (Moenda Lunar) por RAG com recusa ou por Text-to-SQL seguro, atrás de um grafo LangGraph com guardrails em camadas.
+Assistente em TypeScript que responde perguntas sobre uma empresa fictícia (Lunar Mill Specialty Coffee; base, perguntas e mensagens em inglês) por RAG com recusa ou por Text-to-SQL seguro, atrás de um grafo LangGraph com guardrails em camadas.
 O provedor padrão é um `fake` roteirizado por fixtures; o OpenRouter entra com chave no `.env`.
 Roda em Node 24.15+ sem build, sem Docker e sem rede depois do `npm install`.
 

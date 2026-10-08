@@ -44,3 +44,4 @@ Arquivo e nome do teste (ou comando) que falha se o problema voltar.
 | 2026-10-04 | [Bloco SQL da resposta passava ao largo da guarda de saída](2026-10-04-bloco-sql-fora-da-guarda-de-saida.md) | Guardrails |
 | 2026-10-04 | [A pergunta podia forjar um trecho no prompt do RAG](2026-10-04-pergunta-forja-trecho-do-rag.md) | Guardrails |
 | 2026-10-04 | [Funções de texto permitidas alocavam centenas de MB dentro do prazo](2026-10-04-funcoes-de-texto-sem-teto.md) | SQL |
+| 2026-10-08 | [Refusal threshold recalibrated after translating the product to English](2026-10-08-translation-to-english.md) | RAG |

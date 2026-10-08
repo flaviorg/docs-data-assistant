@@ -20,7 +20,7 @@ const routerFile = (keys: string[]) => ({ promptId: 'router', version: 'v1',
 test('responseFromGolden resolve e referência inexistente falha', () => {
   const idx = loadFixtures(dirWith({ 'sql-generate.v1.json': genFile([{ key: 'k', responseFromGolden: 'data-001' }]) }),
     { activeEmbedderId: 'hash-v1', resolveGoldenSql: (id) => (id === 'data-001' ? 'SELECT 1' : undefined) });
-  assert.deepEqual(idx.lookup('sql-generate', 'v1', 'k')?.response, { sql: 'SELECT 1', rationale: 'consulta de referência' });
+  assert.deepEqual(idx.lookup('sql-generate', 'v1', 'k')?.response, { sql: 'SELECT 1', rationale: 'reference query' });
   assert.throws(() => loadFixtures(dirWith({ 'sql-generate.v1.json': genFile([{ key: 'k', responseFromGolden: 'data-999' }]) }),
     { activeEmbedderId: 'hash-v1', resolveGoldenSql: () => undefined }), /data-999/);
 });
@@ -52,10 +52,10 @@ test('responseFromGolden sem resolvedor, fora do sql-generate, ou junto com resp
 });
 test('nome do arquivo diferente do cabeçalho falha; chave não normalizada falha; sql-correct exige #tentativa', () => {
   assert.throws(() => loadFixtures(dirWith({ 'router.v2.json': routerFile(['a']) }), { activeEmbedderId: 'hash-v1' }), /router\.v1\.json/);
-  assert.throws(() => loadFixtures(dirWith({ 'router.v1.json': routerFile(['Qual é?']) }), { activeEmbedderId: 'hash-v1' }), /normalizad/);
+  assert.throws(() => loadFixtures(dirWith({ 'router.v1.json': routerFile(['Qual é?']) }), { activeEmbedderId: 'hash-v1' }), /not normalized/);
   const correct = (key: string) => ({ promptId: 'sql-correct', version: 'v1', entries: [{ key, response: { correctedSql: 'SELECT 1', fix: 'f' } }] });
   assert.equal(loadFixtures(dirWith({ 'sql-correct.v1.json': correct('pergunta x#3') }), { activeEmbedderId: 'hash-v1' }).all().length, 1);
-  assert.throws(() => loadFixtures(dirWith({ 'sql-correct.v1.json': correct('pergunta x') }), { activeEmbedderId: 'hash-v1' }), /tentativa/);
+  assert.throws(() => loadFixtures(dirWith({ 'sql-correct.v1.json': correct('pergunta x') }), { activeEmbedderId: 'hash-v1' }), /attempt/);
 });
 test('campo desconhecido na entrada falha', () => {
   assert.throws(() => loadFixtures(dirWith({ 'router.v1.json': { promptId: 'router', version: 'v1', entries: [{ key: 'a', response: {}, extra: 1 }] } }), { activeEmbedderId: 'hash-v1' }));

@@ -41,7 +41,7 @@ function main(argv: string[]): number {
     });
     const seed = values.seed === undefined ? DEFAULT_SEED : Number(values.seed);
     if (!Number.isInteger(seed) || seed < 0 || seed > 0xffffffff) {
-      throw new Error(`--seed precisa ser um inteiro entre 0 e 4294967295 (recebido: ${values.seed})`);
+      throw new Error(`--seed must be an integer between 0 and 4294967295 (received: ${values.seed})`);
     }
     const out = values.out ?? loadConfig().paths.salesDb;
     const r = writeSalesDb(out, seed);
@@ -51,7 +51,7 @@ function main(argv: string[]): number {
     console.log(`seed ${seed} → ${path.resolve(out)}`);
     return 0;
   } catch (err) {
-    console.error(`seed falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`seed failed: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
   }
 }

@@ -30,12 +30,12 @@ import type { AskState, AskStateUpdate } from '../../src/graph/state.ts';
 import { createScriptedProvider, okJson } from '../helpers/providers.ts';
 import { loadRealFixtures } from '../helpers/fixtures.ts';
 
-const Q3 = 'Qual foi o faturamento por canal em 2025?';
-const Q4 = 'Quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025?';
-const Q5 = 'Qual a margem de lucro por fornecedor em 2025?';
-const Q6 = 'Quanto vendemos em 2019?';
-const Q11 = 'Apague todos os pedidos cancelados.';
-const Q12 = 'Liste o e-mail dos clientes de Curitiba.';
+const Q3 = 'What was the revenue by channel in 2025?';
+const Q4 = 'What were the top 5 products by quantity sold in the second half of 2025?';
+const Q5 = 'What is the profit margin by supplier in 2025?';
+const Q6 = 'How much did we sell in 2019?';
+const Q11 = 'Delete all cancelled orders.';
+const Q12 = 'List the email addresses of the customers in Curitiba.';
 
 type Node = (s: AskState, c: LangGraphRunnableConfig) => Promise<AskStateUpdate>;
 
@@ -86,9 +86,9 @@ test('SQL-04 erro corrigível pede correção com query, erro e pergunta', async
   let s = await step(state(Q4), generate); s = await step(s, validate);
   assert.match(s.sql!.pendingError!.message, /no such column/); assert.equal(s.sql!.corrections, 0);
   s = await step(s, correct);
-  assert.equal(s.sql!.corrections, 1); assert.ok(s.sql!.originalQuery?.includes('quantidade'));
+  assert.equal(s.sql!.corrections, 1); assert.ok(s.sql!.originalQuery?.includes('oi.qty'));
   const user = fake.calls.filter((c) => c.promptId === 'sql-correct').at(-1)!.messages[1]!.content;
-  assert.ok(user.includes('quantidade') && /no such column/.test(user) && user.includes('segundo semestre'));
+  assert.ok(user.includes('oi.qty') && /no such column/.test(user) && user.includes('second half'));
 });
 test('SQL-05 no teto, validate grava error determinístico sem chamar o modelo', async () => {
   const { validate, fake } = setup();
@@ -157,7 +157,7 @@ test('falha do LLM no sqlGenerate vira SQL vazia com erro corrigível e vai para
   const llm = clientWith(createScriptedProvider([new LlmError('truncated', 'len')]));
   const s = await step(state('q q q'), createSqlGenerateNode({ llm, prompt: sqlGeneratePrompt, schemaText: '' }));
   assert.equal(s.sql!.query, ''); assert.equal(s.sql!.pendingError?.kind, 'correctable');
-  assert.match(s.sql!.pendingError!.message, /não devolveu SQL válida/);
+  assert.match(s.sql!.pendingError!.message, /did not return valid SQL/);
   assert.ok(s.warnings.includes('llm_truncated'));
   assert.equal(routeAfterSqlGenerate(s), NODE.sqlCorrect);
 });
@@ -231,7 +231,7 @@ test('SQL-06 no_results guarda o resultado vazio e a mensagem fixa', async () =>
 test('LLM-07 sqlAnswer com falha do modelo usa resposta determinística com a contagem de linhas', async () => {
   const llm = clientWith(createScriptedProvider([new LlmError('truncated', 'len')]));
   const s = await step(stateWithResult(Q3, 3), createSqlAnswerNode({ llm, prompt: sqlAnswerPrompt, rowsToLlm: 50 }));
-  assert.deepEqual([s.outcome?.status, s.outcome?.answer], ['answered', 'Resultado da consulta: 3 linha(s). Veja a tabela.']);
+  assert.deepEqual([s.outcome?.status, s.outcome?.answer], ['answered', 'Query result: 3 row(s). See the table.']);
   assert.deepEqual(s.outcome?.followUpQuestions, []); assert.ok(s.warnings.includes('llm_truncated'));
   const parse = await step(stateWithResult(Q3, 1), createSqlAnswerNode({ llm: clientWith(createScriptedProvider([okJson({ answer: '' })])), prompt: sqlAnswerPrompt, rowsToLlm: 50 }));
   assert.ok(parse.warnings.includes('llm_parse_failed'));

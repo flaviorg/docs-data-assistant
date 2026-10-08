@@ -10,7 +10,7 @@ import type { AskResponse, ErrorBody } from '../domain/schemas.ts';
 import { createLogger } from '../obs/logger.ts';
 import { formatCost, formatInt, plural, profileTag, table, wrap } from './format.ts';
 
-const USAGE = 'uso: npm run ask -- [--json] [--route docs|data] "<pergunta>"';
+const USAGE = 'usage: npm run ask -- [--json] [--route docs|data] "<question>"';
 const TABLE_ROWS = 20;
 
 export function exitCodeFor(httpStatus: number): number {
@@ -27,18 +27,18 @@ export function exitCodeFor(httpStatus: number): number {
 export function formatResponse(r: AskResponse): string {
   const out: string[] = [];
   const reason = r.routeReason ? ` (${r.routeReason.replace(/\.$/, '')})` : '';
-  const blocked = r.blockedBy ? ` · bloqueio=${r.blockedBy}` : '';
-  out.push(`${profileTag(r.meta)} rota=${r.route ?? '-'}${reason} · status=${r.status}${blocked}`, '');
+  const blocked = r.blockedBy ? ` · blocked=${r.blockedBy}` : '';
+  out.push(`${profileTag(r.meta)} route=${r.route ?? '-'}${reason} · status=${r.status}${blocked}`, '');
 
   if (r.sql) {
-    const corr = r.sql.corrections === 0 ? 'sem correção' : plural(r.sql.corrections, 'correção', 'correções');
-    out.push(`SQL (${corr}${r.sql.limitApplied ? '; LIMIT aplicado' : ''})`);
+    const corr = r.sql.corrections === 0 ? 'no correction' : plural(r.sql.corrections, 'correction', 'corrections');
+    out.push(`SQL (${corr}${r.sql.limitApplied ? '; LIMIT applied' : ''})`);
     out.push(...wrap(r.sql.query, 88, '  '));
-    if (r.sql.originalQuery) out.push('  consulta original:', ...wrap(r.sql.originalQuery, 88, '    '));
-    if (r.sql.lastError) out.push(...wrap(`último erro: ${r.sql.lastError}`, 88, '  '));
+    if (r.sql.originalQuery) out.push('  original query:', ...wrap(r.sql.originalQuery, 88, '    '));
+    if (r.sql.lastError) out.push(...wrap(`last error: ${r.sql.lastError}`, 88, '  '));
     if (r.sql.columns.length > 0 && r.sql.rows.length > 0) {
       out.push('', ...table(r.sql.columns, r.sql.rows.slice(0, TABLE_ROWS)));
-      if (r.sql.rowCount > TABLE_ROWS) out.push(`  … ${formatInt(r.sql.rowCount)} linhas no total`);
+      if (r.sql.rowCount > TABLE_ROWS) out.push(`  … ${formatInt(r.sql.rowCount)} rows in total`);
     }
     out.push('');
   }
@@ -46,34 +46,34 @@ export function formatResponse(r: AskResponse): string {
   out.push(...wrap(r.answer));
 
   if (r.citations.length > 0) {
-    out.push('', 'Fontes');
+    out.push('', 'Sources');
     const labels = r.citations.map((c, i) => `  [${i + 1}] ${c.docTitle} › ${c.heading}`);
     const width = Math.max(...labels.map((l) => l.length)) + 3;
     r.citations.forEach((c, i) => {
-      out.push(`${labels[i]!.padEnd(width)}score ${c.score.toFixed(2)}${c.sanitized ? ' · trecho neutralizado' : ''}`);
+      out.push(`${labels[i]!.padEnd(width)}score ${c.score.toFixed(2)}${c.sanitized ? ' · passage neutralized' : ''}`);
     });
   }
   if (r.followUpQuestions.length > 0) {
-    out.push('Perguntas para continuar:', ...r.followUpQuestions.map((q) => `  - ${q}`));
+    out.push('Follow-up questions:', ...r.followUpQuestions.map((q) => `  - ${q}`));
   }
-  if (r.warnings.length > 0) out.push('', `Avisos: ${r.warnings.join(', ')}`);
+  if (r.warnings.length > 0) out.push('', `Warnings: ${r.warnings.join(', ')}`);
 
   const m = r.meta;
   const facts = [
-    plural(m.llmCalls, 'chamada LLM', 'chamadas LLM'),
-    `${formatInt(m.tokens.prompt + m.tokens.completion)} tokens${m.tokens.estimated ? ' (estimados)' : ''}`,
+    plural(m.llmCalls, 'LLM call', 'LLM calls'),
+    `${formatInt(m.tokens.prompt + m.tokens.completion)} tokens${m.tokens.estimated ? ' (estimated)' : ''}`,
     formatCost(m.costUsd, m.costIsFictional),
   ];
-  if (r.sql && r.sql.corrections > 0) facts.push(plural(r.sql.corrections, 'correção', 'correções'));
-  if (m.fallbackUsed) facts.push(`fallback usado (modelos: ${m.models.join(', ')})`);
+  if (r.sql && r.sql.corrections > 0) facts.push(plural(r.sql.corrections, 'correction', 'corrections'));
+  if (m.fallbackUsed) facts.push(`fallback used (models: ${m.models.join(', ')})`);
   facts.push(`${Math.round(m.latencyMs)} ms`, `req ${r.requestId.slice(0, 8)}`);
   out.push('', facts.join(' · '));
   return out.join('\n');
 }
 
 function formatError(httpStatus: number, body: ErrorBody): string {
-  const lines = [`erro ${httpStatus} (${body.error}): ${body.message}`];
-  if (body.suggestions?.length) lines.push('Perguntas roteirizadas disponíveis:', ...body.suggestions.map((s) => `  - ${s}`));
+  const lines = [`error ${httpStatus} (${body.error}): ${body.message}`];
+  if (body.suggestions?.length) lines.push('Available scripted questions:', ...body.suggestions.map((s) => `  - ${s}`));
   lines.push(`req ${body.requestId}`);
   return lines.join('\n');
 }
@@ -94,9 +94,9 @@ export async function main(argv: string[]): Promise<number> {
   }
   if (values.help) { console.log(USAGE); return 0; }
   const question = positionals.join(' ').trim();
-  if (!question) { console.error(`falta a pergunta\n${USAGE}`); return 1; }
+  if (!question) { console.error(`missing question\n${USAGE}`); return 1; }
   if (values.route !== undefined && values.route !== 'docs' && values.route !== 'data') {
-    console.error(`--route aceita docs ou data (recebido: ${values.route})\n${USAGE}`);
+    console.error(`--route accepts docs or data (received: ${values.route})\n${USAGE}`);
     return 1;
   }
 
@@ -114,7 +114,7 @@ export async function main(argv: string[]): Promise<number> {
     console.log(values.json ? JSON.stringify(outcome.response, null, 2) : formatResponse(outcome.response));
     return 0;
   } catch (err) {
-    console.error(`ask falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`ask failed: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
   } finally {
     ctx?.close();

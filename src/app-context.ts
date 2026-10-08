@@ -84,10 +84,10 @@ const EMBEDDER_ID = 'hash-v1';
 
 function createProvider(config: AppConfig, fixtures: FixtureIndex | null): LlmProvider {
   if (config.llm.provider === 'fake') {
-    if (!fixtures) throw new Error('provedor fake sem fixtures carregadas');
+    if (!fixtures) throw new Error('fake provider without loaded fixtures');
     return createFakeProvider({ fixtures, chaos: config.llm.fakeChaos });
   }
-  if (!config.llm.apiKey) throw new ConfigError('OPENROUTER_API_KEY ausente: é obrigatória com LLM_PROVIDER=openrouter', 'OPENROUTER_API_KEY');
+  if (!config.llm.apiKey) throw new ConfigError('OPENROUTER_API_KEY missing: it is required with LLM_PROVIDER=openrouter', 'OPENROUTER_API_KEY');
   return createOpenRouterProvider({ apiKey: config.llm.apiKey, baseUrl: config.llm.baseUrl, structuredMode: config.llm.structuredMode });
 }
 
@@ -115,7 +115,7 @@ export async function createAppContext(config: AppConfig, opts: AppContextOption
     : null;
   const provider = opts.provider ?? createProvider(config, fixtures);
   if (config.guardrailMode === 'rules+model' && provider.name === 'fake') {
-    throw new ConfigError('GUARDRAIL_MODE=rules+model exige um modelo de segurança real; com o provedor fake use GUARDRAIL_MODE=rules', 'GUARDRAIL_MODE');
+    throw new ConfigError('GUARDRAIL_MODE=rules+model requires a real safety model; with the fake provider use GUARDRAIL_MODE=rules', 'GUARDRAIL_MODE');
   }
 
   const logger = opts.logger ?? createLogger({ level: config.logLevel });

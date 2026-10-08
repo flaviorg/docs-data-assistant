@@ -108,7 +108,7 @@ async function evaluateItem(ctx: AppContext, item: GoldenItem, referenceRows: un
 /** Itens cuja fixture (de qualquer prompt) encena um modelo que cedeu: explica, por exemplo, o docs-003 bloqueado no fake. */
 function complacentItems(ctx: AppContext, items: readonly GoldenItem[]): string[] {
   if (!ctx.fixtures) return [];
-  const keys = new Set(ctx.fixtures.all().filter((e) => e.note?.includes('modelo complacente simulado')).map((e) => e.key.replace(/#\d$/, '')));
+  const keys = new Set(ctx.fixtures.all().filter((e) => e.note?.includes('simulated compliant model')).map((e) => e.key.replace(/#\d$/, '')));
   return items.filter((i) => keys.has(normalizeText(i.question))).map((i) => i.id);
 }
 
@@ -127,7 +127,7 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
     const reference = (item: GoldenItem): unknown[][] | null => {
       if (item.expected.sql === undefined) return null;
       const v = validator.validate(item.expected.sql);
-      if (!v.ok) throw new Error(`${item.id}: a SQL de referência não passa no validador (${v.message})`);
+      if (!v.ok) throw new Error(`${item.id}: the reference SQL does not pass the validator (${v.message})`);
       return executeReadOnly(ctx.sales, v.sql, config.sql.maxRows).rows;
     };
     const results: EvalItemResult[] = [];
@@ -149,7 +149,7 @@ export async function runEval(opts: RunEvalOptions): Promise<RunEvalResult> {
   }
 }
 
-const USAGE = 'uso: npm run eval -- [--live] [--guardrail rules|rules+model] [--split test|all] [--out <arquivo.md>]';
+const USAGE = 'usage: npm run eval -- [--live] [--guardrail rules|rules+model] [--split test|all] [--out <file.md>]';
 
 export async function main(argv: string[]): Promise<number> {
   let values: { live?: boolean; guardrail?: string; split?: string; out?: string; help?: boolean };
@@ -169,11 +169,11 @@ export async function main(argv: string[]): Promise<number> {
   }
   if (values.help) { console.log(USAGE); return 0; }
   if (values.guardrail !== undefined && values.guardrail !== 'rules' && values.guardrail !== 'rules+model') {
-    console.error(`--guardrail aceita rules ou rules+model (recebido: ${values.guardrail})\n${USAGE}`);
+    console.error(`--guardrail accepts rules or rules+model (received: ${values.guardrail})\n${USAGE}`);
     return 2;
   }
   if (values.split !== 'test' && values.split !== 'all') {
-    console.error(`--split aceita test ou all (recebido: ${values.split})\n${USAGE}`);
+    console.error(`--split accepts test or all (received: ${values.split})\n${USAGE}`);
     return 2;
   }
   const profile = values.live ? 'live' : 'fake';
@@ -188,7 +188,7 @@ export async function main(argv: string[]): Promise<number> {
     console.log(r.text);
     return r.exitCode;
   } catch (err) {
-    console.error(`eval falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`eval failed: ${err instanceof Error ? err.message : String(err)}`);
     return 2;
   }
 }

@@ -67,7 +67,7 @@ function parseWith<T>(schema: z.ZodType<T>, content: string): Parsed<T> {
   try {
     value = JSON.parse(unfence(content));
   } catch (err) {
-    return { ok: false, issues: `JSON inválido (${err instanceof Error ? err.message : String(err)})` };
+    return { ok: false, issues: `invalid JSON (${err instanceof Error ? err.message : String(err)})` };
   }
   const r = schema.safeParse(value);
   if (r.success) return { ok: true, data: r.data };
@@ -125,7 +125,7 @@ export function createLlmClient(deps: LlmClientDeps): LlmClient {
         }
       }
     }
-    throw new LlmUnavailableError(`todos os modelos falharam (${models.join(', ')}); último erro: ${lastKind}`, lastKind);
+    throw new LlmUnavailableError(`all models failed (${models.join(', ')}); last error: ${lastKind}`, lastKind);
   }
 
   async function run<V, T>(p: PromptDef<V, unknown>, vars: V, ctx: CallContext, parse: (content: string) => Parsed<T>): Promise<Result<T>> {
@@ -159,7 +159,7 @@ export function createLlmClient(deps: LlmClientDeps): LlmClient {
     let system = renderSystem(p.system);
     if (jsonSchema && deps.structuredMode === 'json_object') {
       const { $schema: _drop, ...plain } = jsonSchema;
-      system += `\n\nResponda só com um objeto JSON que valide este JSON Schema:\n${JSON.stringify(plain)}`;
+      system += `\n\nReply only with a JSON object that validates against this JSON Schema:\n${JSON.stringify(plain)}`;
     }
     const meta = { promptId: p.id, promptVersion: p.version, fixtureKey: p.fixtureKey(vars), requestId: ctx.requestId };
 
@@ -169,7 +169,7 @@ export function createLlmClient(deps: LlmClientDeps): LlmClient {
         if (parseAttempt === 1) t.parseRetried = true;
         const user = parseAttempt === 0
           ? p.buildUser(vars)
-          : `${p.buildUser(vars)}\n\nSua resposta anterior não validou: ${issues}\nResponda de novo, só no formato pedido.`;
+          : `${p.buildUser(vars)}\n\nYour previous answer did not validate: ${issues}\nAnswer again, only in the requested format.`;
         const base: Omit<ProviderRequest, 'model'> = {
           messages: [{ role: 'system', content: system }, { role: 'user', content: user }],
           temperature: p.temperature,
@@ -197,7 +197,7 @@ export function createLlmClient(deps: LlmClientDeps): LlmClient {
         if (parsed.ok) return { success: true, data: parsed.data, call: record(true, null) };
         issues = parsed.issues;
       }
-      const error = new ParseError(`a saída do prompt ${p.id} não validou depois do retry de parse`, issues);
+      const error = new ParseError(`the output of prompt ${p.id} did not validate after the parse retry`, issues);
       return { success: false, error, call: record(false, 'parse') };
     } catch (err) {
       const kind = err instanceof LlmUnavailableError ? 'llm_unavailable'
@@ -212,7 +212,7 @@ export function createLlmClient(deps: LlmClientDeps): LlmClient {
   return {
     generateStructured(p, vars, ctx) {
       const schema = p.schema;
-      if (!schema) throw new Error(`o prompt ${p.id} não tem schema; use generateText`);
+      if (!schema) throw new Error(`prompt ${p.id} has no schema; use generateText`);
       return run(p, vars, ctx, (content) => parseWith(schema, content));
     },
     generateText(p, vars, ctx) {

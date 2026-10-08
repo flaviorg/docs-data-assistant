@@ -5,7 +5,7 @@ import { normalizeText } from '../domain/normalize.ts';
 import { protectedText } from '../prompts/prompt.ts';
 import type { PromptDef } from '../prompts/prompt.ts';
 
-export const CANARY = 'LUA-CHEIA-100';
+export const CANARY = 'FULL-MOON-100';
 export const SHINGLE_WORDS = 8;
 
 export type OutputGuardReason = 'canary' | 'redacted_span' | 'system_prompt_leak';

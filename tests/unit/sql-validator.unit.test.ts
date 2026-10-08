@@ -17,23 +17,23 @@ const cases: [string, Expect, RegExp?][] = [
   [`SELECT id FROM orders;`, 'ok'],
   [`SELECT 'DROP TABLE x' AS t`, 'ok'],
   [`SELECT created_at FROM customers`, 'ok'],
-  [`SELECT channel, SUM(total_cents) / 100.0 AS faturamento FROM orders WHERE status = 'pago' GROUP BY channel`, 'ok'],
-  [`WITH pagos AS (SELECT * FROM orders WHERE status = 'pago') SELECT channel, COUNT(*) FROM pagos GROUP BY channel`, 'ok'],
-  [`SELECT "channel" FROM orders -- o canal\nWHERE status = 'pago'`, 'ok'],
+  [`SELECT channel, SUM(total_cents) / 100.0 AS faturamento FROM orders WHERE status = 'paid' GROUP BY channel`, 'ok'],
+  [`WITH pagos AS (SELECT * FROM orders WHERE status = 'paid') SELECT channel, COUNT(*) FROM pagos GROUP BY channel`, 'ok'],
+  [`SELECT "channel" FROM orders -- o canal\nWHERE status = 'paid'`, 'ok'],
   [`SELECT p.category, COUNT(*) FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY p.category`, 'ok'],
-  [`SELECT COUNT(*) FROM customers WHERE segment = 'cafeteria'`, 'ok'],
+  [`SELECT COUNT(*) FROM customers WHERE segment = 'coffee_shop'`, 'ok'],
   [`SELECT id FROM orders LIMIT 10 OFFSET 5`, 'ok'],
   // política
   [`select 1; drop table orders`, ['policy', 'multiple_statements']],
   [`SELECT 1;;`, ['policy', 'multiple_statements']],
-  [`DELETE FROM orders WHERE status = 'cancelado'`, ['policy', 'not_select']],
+  [`DELETE FROM orders WHERE status = 'cancelled'`, ['policy', 'not_select']],
   [`WITH x AS (SELECT 1) DELETE FROM orders`, ['policy', 'forbidden_keyword']],
   [`WITH x AS (SELECT 1) INSERT INTO orders SELECT * FROM x`, ['policy', 'forbidden_keyword']],
   [`SELECT 1 FROM orders WHERE 0; PRAGMA query_only = OFF`, ['policy', 'multiple_statements']],
   [`PRAGMA query_only = OFF`, ['policy', 'not_select']],
   [`ATTACH 'x.db' AS x`, ['policy', 'not_select']],
   [`CREATE TABLE t (a)`, ['policy', 'not_select']],
-  [`UPDATE orders SET status = 'pago'`, ['policy', 'not_select']],
+  [`UPDATE orders SET status = 'paid'`, ['policy', 'not_select']],
   [`SELEC id FROM orders`, ['policy', 'not_select']],
   [`WITH RECURSIVE r(n) AS (SELECT 1 UNION ALL SELECT n+1 FROM r) SELECT n FROM r`, ['policy', 'recursive_cte']],
   [`SELECT * FROM orders, customers`, ['policy', 'comma_join']],
@@ -49,7 +49,7 @@ const cases: [string, Expect, RegExp?][] = [
   [`SELECT COUNT(*) FROM orders a JOIN orders b ON a.id = b.id JOIN orders c`, ['policy', 'cross_join']],
   [`SELECT o.id FROM orders o JOIN (SELECT c.id FROM customers c JOIN products p) x ON x.id = o.id`, ['policy', 'cross_join']],
   [`SELECT COUNT(*) FROM order_items oi LEFT JOIN products p ON p.id = oi.product_id WHERE p.category = 'cafe'`, 'ok'],
-  [`SELECT COUNT(*) FROM orders o JOIN (SELECT id FROM customers WHERE segment = 'cafeteria') c ON c.id = o.customer_id`, 'ok'],
+  [`SELECT COUNT(*) FROM orders o JOIN (SELECT id FROM customers WHERE segment = 'coffee_shop') c ON c.id = o.customer_id`, 'ok'],
   [`SELECT COUNT(*) FROM orders a JOIN orders b USING (id)`, 'ok'],
   // REPLACE INTO é um INSERT; replace() continua permitida (caso acima)
   [`WITH x AS (SELECT 1) REPLACE INTO orders (id) VALUES (1)`, ['policy', 'forbidden_keyword'], /INTO/],
@@ -65,9 +65,9 @@ const cases: [string, Expect, RegExp?][] = [
   // corrigíveis
   [`SELECT p.name, SUM(oi.quantidade) FROM order_items oi JOIN products p ON p.id = oi.product_id GROUP BY p.name`, 'correctable', /no such column/],
   [`SELECT * FROM suppliers`, 'correctable', /no such table/],
-  [`SELECT random() FROM orders`, 'correctable', /random.*Use apenas:.*like/s],
+  [`SELECT random() FROM orders`, 'correctable', /random.*Use only:.*like/s],
   [`SELECT id FROM orders WHERE`, 'correctable', /syntax|incomplete/],
-  [`SELECT 'abc FROM orders`, 'correctable', /sintaxe/],
+  [`SELECT 'abc FROM orders`, 'correctable', /syntax error/],
   [`SELECT id FROM orders o JOIN customers c ON id = c.id`, 'correctable', /ambiguous/],
 ];
 
@@ -101,8 +101,8 @@ test('SQL-02 tabela de política e classificação cobre todas as regras', () =>
 });
 test('SQL-10 função fora da allowlist e fora da lista de risco é corrigível com a allowlist na mensagem', () => {
   const r = validator().validate('SELECT random() FROM orders');
-  assert.equal(r.ok === false && r.kind, 'correctable'); assert.match(!r.ok ? r.message : '', /random.*Use apenas:.*like/s);
-  const listed = (!r.ok ? r.message : '').split('Use apenas:')[1]!.trim().split(', ');
+  assert.equal(r.ok === false && r.kind, 'correctable'); assert.match(!r.ok ? r.message : '', /random.*Use only:.*like/s);
+  const listed = (!r.ok ? r.message : '').split('Use only:')[1]!.trim().split(', ');
   assert.deepEqual(listed, [...ALLOWED_FUNCTIONS].sort());
 });
 
@@ -168,5 +168,5 @@ test('classifyDenials: tabela, ação ou função de risco é política; só fun
   assert.equal(classifyDenials([{ kind: 'function', name: 'printf', dangerous: true }])?.kind, 'policy');
   const c = classifyDenials([{ kind: 'function', name: 'random', dangerous: false }, { kind: 'function', name: 'random', dangerous: false }]);
   assert.equal(c?.kind, 'correctable');
-  assert.match(c?.message ?? '', /^função não permitida: random\. Use apenas: /);
+  assert.match(c?.message ?? '', /^function not allowed: random\. Use only: /);
 });

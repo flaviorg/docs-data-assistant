@@ -22,10 +22,10 @@ const WEB_ASSETS = [
 ] as const;
 
 const FASTIFY_ERRORS: Readonly<Record<string, { status: number; error: string; message: string }>> = {
-  FST_ERR_CTP_INVALID_JSON_BODY: { status: 400, error: 'bad_request', message: 'O corpo não é um JSON válido.' },
-  FST_ERR_CTP_EMPTY_JSON_BODY: { status: 400, error: 'bad_request', message: 'O corpo está vazio; envie um JSON com o campo question.' },
-  FST_ERR_CTP_INVALID_MEDIA_TYPE: { status: 415, error: 'unsupported_media_type', message: 'Tipo de conteúdo não suportado; use application/json.' },
-  FST_ERR_CTP_BODY_TOO_LARGE: { status: 413, error: 'payload_too_large', message: `O corpo passou do limite de ${BODY_LIMIT_BYTES} bytes.` },
+  FST_ERR_CTP_INVALID_JSON_BODY: { status: 400, error: 'bad_request', message: 'The body is not valid JSON.' },
+  FST_ERR_CTP_EMPTY_JSON_BODY: { status: 400, error: 'bad_request', message: 'The body is empty; send a JSON object with the question field.' },
+  FST_ERR_CTP_INVALID_MEDIA_TYPE: { status: 415, error: 'unsupported_media_type', message: 'Unsupported content type; use application/json.' },
+  FST_ERR_CTP_BODY_TOO_LARGE: { status: 413, error: 'payload_too_large', message: `The body exceeded the ${BODY_LIMIT_BYTES}-byte limit.` },
 };
 
 function sendError(req: FastifyRequest, reply: FastifyReply, status: number, error: string, message: string): FastifyReply {
@@ -56,12 +56,12 @@ export function createServer(ctx: AppContext): FastifyInstance {
     const known = err.code ? FASTIFY_ERRORS[err.code] : undefined;
     if (known) return sendError(req, reply, known.status, known.error, known.message);
     const status = err.statusCode ?? 500;
-    if (status >= 400 && status < 500) return sendError(req, reply, status, 'bad_request', 'Requisição inválida.');
+    if (status >= 400 && status < 500) return sendError(req, reply, status, 'bad_request', 'Invalid request.');
     ctx.logger.error('http_error', { requestId: req.id, error: err });
-    return sendError(req, reply, 500, 'internal', 'Erro interno inesperado. O requestId identifica a ocorrência no log.');
+    return sendError(req, reply, 500, 'internal', 'Unexpected internal error. The requestId identifies the occurrence in the log.');
   });
 
-  app.setNotFoundHandler((req, reply) => sendError(req, reply, 404, 'not_found', `Rota inexistente: ${req.method} ${req.url.split('?')[0]}`));
+  app.setNotFoundHandler((req, reply) => sendError(req, reply, 404, 'not_found', `Route not found: ${req.method} ${req.url.split('?')[0]}`));
 
   app.post('/ask', async (req, reply) => {
     const header = req.headers['x-request-id'];
@@ -76,7 +76,7 @@ export function createServer(ctx: AppContext): FastifyInstance {
     const raw = (req.query as Record<string, unknown>).since;
     const since = raw === undefined ? '24h' : String(raw);
     const ms = parseSince(since);
-    if (ms === null) return sendError(req, reply, 400, 'bad_request', 'since deve ser 15m, 1h, 24h ou 7d.');
+    if (ms === null) return sendError(req, reply, 400, 'bad_request', 'since must be 15m, 1h, 24h or 7d.');
     return ctx.ledger.stats(ms);
   });
 

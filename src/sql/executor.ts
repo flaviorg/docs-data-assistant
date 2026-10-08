@@ -21,7 +21,7 @@ function toCell(value: unknown): Cell {
   if (typeof value === 'bigint') {
     return value <= BigInt(Number.MAX_SAFE_INTEGER) && value >= BigInt(Number.MIN_SAFE_INTEGER) ? Number(value) : value.toString();
   }
-  const text = value instanceof Uint8Array ? `<blob de ${value.byteLength} bytes>` : String(value);
+  const text = value instanceof Uint8Array ? `<blob of ${value.byteLength} bytes>` : String(value);
   return text.length > CELL_MAX_CHARS ? `${text.slice(0, CELL_MAX_CHARS)}…` : text;
 }
 

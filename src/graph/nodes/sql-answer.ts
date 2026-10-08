@@ -12,14 +12,14 @@ export function createSqlAnswerNode(deps: { llm: LlmClient; prompt: typeof sqlAn
   return async (state: AskState, config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
     const result = state.sql?.result;
-    if (!state.sql || !result) throw new Error('sqlAnswer chamado sem resultado no estado');
+    if (!state.sql || !result) throw new Error('sqlAnswer called without a result in the state');
     const t0 = performance.now();
     const rows = result.rows.slice(0, deps.rowsToLlm);
     const r = await deps.llm.generateStructured(deps.prompt, { question: state.question, sql: state.sql.query, columns: result.columns, rows }, callContextFrom(config));
     if (!r.success) {
       const warning = r.error.kind === 'truncated' ? 'llm_truncated' : 'llm_parse_failed';
       return {
-        outcome: { status: 'answered', blockedBy: null, answer: `Resultado da consulta: ${result.rows.length} linha(s). Veja a tabela.`, followUpQuestions: [] },
+        outcome: { status: 'answered', blockedBy: null, answer: `Query result: ${result.rows.length} row(s). See the table.`, followUpQuestions: [] },
         warnings: [warning],
         trace: [{ node: NODE.sqlAnswer, ms: elapsedMs(t0), note: warning }],
       };

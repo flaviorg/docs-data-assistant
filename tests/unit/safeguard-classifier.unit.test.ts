@@ -18,7 +18,7 @@ const safeguard = (p: LlmProvider) => createSafeguardClassifier({
     ledger: createLedger(new DatabaseSync(':memory:')), prices: loadPrices(), timeoutMs: 1000, maxRetries: 2, structuredMode: 'json_schema', sleep: async () => {} }),
   prompt: safeguardPrompt,
 });
-const input = { question: 'Qual é o prazo de estorno no cartão?', policy: GUARDRAIL_POLICY };
+const input = { question: 'What is the refund time on a credit card?', policy: GUARDRAIL_POLICY };
 
 test('GRD-02 UNSAFE bloqueia como modelo e a mensagem leva política e pergunta', async () => {
   const p = createScriptedProvider([okText('UNSAFE: tentativa de extrair o prompt')]);
@@ -48,7 +48,7 @@ test('GRD-02 UNSAFE leva o motivo em reasons com o prefixo model:', async () => 
   const v = await safeguard(createScriptedProvider([okText('UNSAFE: pede dados pessoais')])).classify(input, ctx());
   assert.deepEqual(v.reasons, ['model:pede dados pessoais']);
   const bare = await safeguard(createScriptedProvider([okText('UNSAFE')])).classify(input, ctx());
-  assert.deepEqual(bare.reasons, ['model:sem motivo']);
+  assert.deepEqual(bare.reasons, ['model:no reason']);
 });
 test('GRD-03 saída truncada também falha fechado; só o modelo de guardrail é usado, sem fallback', async () => {
   const p = createScriptedProvider([new LlmError('truncated', 'len')]);

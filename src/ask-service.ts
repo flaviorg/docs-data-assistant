@@ -40,7 +40,7 @@ export interface AskServiceDeps {
   now?: () => number;
 }
 
-export const BUDGET_EXCEEDED_MESSAGE = 'A pergunta precisou de mais chamadas ao modelo do que o limite por requisição e foi interrompida.';
+export const BUDGET_EXCEEDED_MESSAGE = 'The question needed more model calls than the per-request limit and was stopped.';
 const SNIPPET_MAX = 240;
 const API_ROWS_MAX = 50;
 const RECURSION_LIMIT = 25;
@@ -120,7 +120,7 @@ export function createAskService(deps: AskServiceDeps): AskService {
 
     const parsed = AskRequestSchema.safeParse(body);
     if (!parsed.success) {
-      return fail(400, 'invalid_request', `Corpo inválido: ${z.prettifyError(parsed.error).replace(/\s+/g, ' ').trim()}`, { issues: parsed.error.issues });
+      return fail(400, 'invalid_request', `Invalid body: ${z.prettifyError(parsed.error).replace(/\s+/g, ' ').trim()}`, { issues: parsed.error.issues });
     }
     question = parsed.data.question;
     const forceRoute = parsed.data.forceRoute;
@@ -143,14 +143,14 @@ export function createAskService(deps: AskServiceDeps): AskService {
       state = (await Promise.race([run, aborted])) as AskState;
     } catch (err) {
       if (controller.signal.aborted || err instanceof AskAbortedError) {
-        return fail(504, 'timeout', `A pergunta passou do tempo limite de ${deps.config.askTimeoutMs} ms.`);
+        return fail(504, 'timeout', `The question exceeded the ${deps.config.askTimeoutMs} ms time limit.`);
       }
       if (err instanceof FixtureMissingError) {
-        return fail(422, 'fixture_missing', `Modo demonstração (fake): não há resposta roteirizada para essa pergunta. ${err.message}`,
+        return fail(422, 'fixture_missing', `Demo mode (fake): there is no scripted answer for this question. ${err.message}`,
           { suggestions: deps.suggestions() });
       }
       if (err instanceof LlmUnavailableError) {
-        return fail(503, 'llm_unavailable', 'Os modelos de linguagem estão indisponíveis no momento. Tente de novo em instantes.');
+        return fail(503, 'llm_unavailable', 'The language models are unavailable right now. Try again in a moment.');
       }
       if (err instanceof BudgetExceededError) {
         const response = AskResponseSchema.parse({
@@ -164,14 +164,14 @@ export function createAskService(deps: AskServiceDeps): AskService {
       }
       deps.logger.error('ask_failed', { requestId, error: err });
       if (err instanceof ReindexRequiredError) return fail(500, 'reindex_required', err.message);
-      return fail(500, 'internal', 'Erro interno inesperado. O requestId identifica a ocorrência no log.');
+      return fail(500, 'internal', 'Unexpected internal error. The requestId identifies the occurrence in the log.');
     } finally {
       clearTimeout(timer);
     }
 
     try {
       const outcome = state.outcome;
-      if (!outcome) throw new Error('o grafo terminou sem outcome');
+      if (!outcome) throw new Error('the graph ended without an outcome');
       const response = AskResponseSchema.parse({
         requestId,
         route: state.route?.intent ?? null,
@@ -191,7 +191,7 @@ export function createAskService(deps: AskServiceDeps): AskService {
       return opts.includeState ? { ok: true, response, state } : { ok: true, response };
     } catch (err) {
       deps.logger.error('ask_failed', { requestId, error: err });
-      return fail(500, 'internal', 'Erro interno inesperado. O requestId identifica a ocorrência no log.');
+      return fail(500, 'internal', 'Unexpected internal error. The requestId identifies the occurrence in the log.');
     }
   }
 

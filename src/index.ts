@@ -19,7 +19,7 @@ async function main(): Promise<number> {
       models: [ctx.models.primary, ctx.models.fallback], kb: ctx.store.counts(),
     });
     if (ctx.provider.name === 'fake') {
-      ctx.logger.info('demo_mode', { message: 'MODO DEMO: respostas do modelo roteirizadas (fake). Configure OPENROUTER_API_KEY para usar um modelo real.' });
+      ctx.logger.info('demo_mode', { message: 'DEMO MODE: scripted model answers (fake). Set OPENROUTER_API_KEY to use a real model.' });
     }
     const opened = ctx;
     let closing = false;

@@ -15,7 +15,7 @@ const CHUNK_ID_MAX = 120;
 export function createCheckCitationsNode(deps: { outputGuard: OutputGuard }) {
   return async (state: AskState, _config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
-    if (!state.draft) throw new Error('checkCitations chamado sem draft no estado');
+    if (!state.draft) throw new Error('checkCitations called without a draft in the state');
     const t0 = performance.now();
     const retrievedIds = (state.retrieval?.hits ?? []).map((h) => h.chunkId);
     const v = validateCitations(state.draft, retrievedIds);

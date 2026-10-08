@@ -2,11 +2,11 @@
 
 ## Contexto
 
-A rota `docs` responde perguntas sobre as políticas da Moenda Lunar Cafés Especiais, uma empresa fictícia criada para o projeto. A resposta cita só trechos recuperados e recusa quando a evidência é fraca. Um dos documentos traz, de propósito, uma instrução embutida para testar a defesa contra injeção indireta.
+A rota `docs` responde perguntas sobre as políticas da Lunar Mill Specialty Coffee (até 2026-10-08, Moenda Lunar Cafés Especiais), uma empresa fictícia criada para o projeto. A resposta cita só trechos recuperados e recusa quando a evidência é fraca. Um dos documentos traz, de propósito, uma instrução embutida para testar a defesa contra injeção indireta.
 
 ## Escopo
 
-- **Base de documentos:** 8 arquivos Markdown em `data/kb/`, escritos do zero, de 250 a 500 palavras, com H1 e ao menos 3 H2. Domínio `moendalunar.example` (RFC 2606). `cafeterias-parceiras.md` contém um parágrafo envenenado com o canário `LUA-CHEIA-100`.
+- **Base de documentos:** 8 arquivos Markdown em `data/kb/`, escritos do zero, de 250 a 500 palavras, com H1 e ao menos 3 H2. Domínio `lunarmill.example` (RFC 2606). `cafeterias-parceiras.md` contém um parágrafo envenenado com o canário `FULL-MOON-100`.
 - `src/rag/chunker.ts`: corte por H2 e H3, depois por tamanho (600 caracteres) com overlap de 100; IDs estáveis `<slug>#<seção>-<n>`.
 - `src/embeddings/`: interface `Embedder` e o `hash-v1` (TF-IDF com *feature hashing*, 2048 dimensões, IDF ajustado no corpus, *fingerprint* `hash-v1:idf=<hash>`).
 - `src/rag/sanitizer.ts`: detecção e redação, por frase, de instruções embutidas; devolve os spans removidos.
@@ -34,7 +34,7 @@ A rota `docs` responde perguntas sobre as políticas da Moenda Lunar Cafés Espe
 
 - **Chunks de 600 caracteres cortados por seção**, em vez de blocos grandes: um chunk grande dilui o assunto e piora a recuperação.
 - **Embedder lexical determinístico no v1.** Roda sem rede e sem download de modelo, e o resultado é reprodutível no CI. É fraco semanticamente, e o README diz isso; as métricas sempre levam o *fingerprint*.
-- **Limiar calibrado, não fixo.** `npm run calibrate` varre limiares só no split `calibration` (12 itens) e o valor escolhido, 0,18, fica em `MIN_SCORE_DEFAULTS` com comentário da origem. A primeira calibração reprovou e o embedder foi corrigido sem mudar nenhuma pergunta: [incidente de 2026-10-04](../../docs/incidents/2026-10-04-calibracao-hash-v1.md).
+- **Limiar calibrado, não fixo.** `npm run calibrate` varre limiares só no split `calibration` (12 itens) e o valor escolhido, 0,22 (0,18 antes da tradução para o inglês), fica em `MIN_SCORE_DEFAULTS` com comentário da origem. A primeira calibração reprovou e o embedder foi corrigido sem mudar nenhuma pergunta: [incidente de 2026-10-04](../../docs/incidents/2026-10-04-calibracao-hash-v1.md).
 - **IDF acoplado ao corpus.** Mudar qualquer documento recalcula o IDF e os vetores de todos os chunks (barato no `hash-v1`), mas só rechunka o documento alterado. Mudança de algoritmo exige trocar o id do embedder.
 - **Sanitização na ingestão, não na consulta.** O trecho original fica só em `redacted_spans`, para a guarda de saída comparar; o texto enviado ao modelo já tem a marca `[trecho removido: possível instrução embutida]`. Cada chunk vai entre `<documento id="...">` e o prompt declara que nada ali é instrução. O escape de `<documento` vale para o texto dos trechos e para a pergunta: sem ele, a pergunta fechava o delimitador e abria um trecho forjado com o ID de um chunk real ([incidente](../../docs/incidents/2026-10-04-pergunta-forja-trecho-do-rag.md)); a regra `system_tag` também barra a tag na entrada.
 - **Citações filtradas pelo conjunto recuperado.** O modelo pode errar o ID; o código descarta o que não foi recuperado e recusa se não sobrar nada.

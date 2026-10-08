@@ -27,28 +27,28 @@ const AttacksFileSchema = z.strictObject({ version: z.literal('v1'), attacks: z.
 
 export const LAYERS = ['input_rules', 'sanitizer', 'sql_policy', 'sql_authorizer', 'query_only', 'output_guard'] as const;
 export type Layer = (typeof LAYERS)[number];
-export type Cell = 'bloqueia' | 'passa' | '—';
+export type Cell = 'blocks' | 'passes' | '—';
 export interface LayerMatrix { rows: { attack: Attack; cells: Record<Layer, Cell> }[] }
 
 export const LAYER_LABEL: Readonly<Record<Layer, string>> = {
-  input_rules: 'regras de entrada', sanitizer: 'sanitizador', sql_policy: 'política SQL (lexer)',
-  sql_authorizer: 'authorizer', query_only: 'query_only', output_guard: 'guarda de saída',
+  input_rules: 'input rules', sanitizer: 'sanitizer', sql_policy: 'SQL policy (lexer)',
+  sql_authorizer: 'authorizer', query_only: 'query_only', output_guard: 'output guard',
 };
 
 const SQLITE_READONLY = 8;
 
 export function loadAttacks(file = 'eval/attacks.v1.json'): Attack[] {
   const parsed = AttacksFileSchema.safeParse(JSON.parse(fs.readFileSync(file, 'utf8')));
-  if (!parsed.success) throw new Error(`Ataques inválidos em ${file}: ${z.prettifyError(parsed.error)}`);
+  if (!parsed.success) throw new Error(`Invalid attacks in ${file}: ${z.prettifyError(parsed.error)}`);
   const ids = new Set<string>();
   for (const a of parsed.data.attacks) {
-    if (ids.has(a.id)) throw new Error(`${file}: id duplicado ${a.id}`);
+    if (ids.has(a.id)) throw new Error(`${file}: duplicate id ${a.id}`);
     ids.add(a.id);
   }
   return parsed.data.attacks;
 }
 
-const cell = (blocked: boolean): Cell => (blocked ? 'bloqueia' : 'passa');
+const cell = (blocked: boolean): Cell => (blocked ? 'blocks' : 'passes');
 
 export function runLayers(attacks: readonly Attack[]): LayerMatrix {
   const snapshot: { kind: 'snapshot'; bytes: Uint8Array } = { kind: 'snapshot', bytes: createSalesSnapshot() };
@@ -109,33 +109,33 @@ export function runLayers(attacks: readonly Attack[]): LayerMatrix {
   }
 }
 
-const blockedCount = (cells: Record<Layer, Cell>): number => LAYERS.filter((l) => cells[l] === 'bloqueia').length;
+const blockedCount = (cells: Record<Layer, Cell>): number => LAYERS.filter((l) => cells[l] === 'blocks').length;
 
 export function checkMatrix(m: LayerMatrix): { ok: boolean; failures: string[] } {
   const failures: string[] = [];
   for (const { attack, cells } of m.rows) {
     const n = blockedCount(cells);
-    if (n === 0) failures.push(`${attack.id}: nenhuma camada barra o ataque`);
-    else if (attack.write && n < 2) failures.push(`${attack.id}: escrita via SQL barrada por ${n} camada (mínimo 2)`);
+    if (n === 0) failures.push(`${attack.id}: no layer stops the attack`);
+    else if (attack.write && n < 2) failures.push(`${attack.id}: SQL write stopped by ${n} layer (minimum 2)`);
   }
   return { ok: failures.length === 0, failures };
 }
 
 export function renderMatrix(m: LayerMatrix): string {
   const lines = [
-    `| ataque | vetor | ${LAYERS.map((l) => LAYER_LABEL[l]).join(' | ')} |`,
+    `| attack | vector | ${LAYERS.map((l) => LAYER_LABEL[l]).join(' | ')} |`,
     `|---|---|${LAYERS.map(() => '---').join('|')}|`,
     ...m.rows.map(({ attack, cells }) => `| ${attack.id} | ${attack.vector} | ${LAYERS.map((l) => cells[l]).join(' | ')} |`),
   ];
   const check = checkMatrix(m);
   const writes = m.rows.filter((r) => r.attack.write).map((r) => blockedCount(r.cells));
   const summary = check.ok
-    ? `${m.rows.length} ataques; todos barrados por ao menos uma camada; escritas via SQL barradas por ${writes.join(', ').replace(/, (\d+)$/, ' e $1')} camadas.`
-    : `${m.rows.length} ataques; falhas: ${check.failures.join('; ')}.`;
+    ? `${m.rows.length} attacks; all stopped by at least one layer; SQL writes stopped by ${writes.join(', ').replace(/, (\d+)$/, ' and $1')} layers.`
+    : `${m.rows.length} attacks; failures: ${check.failures.join('; ')}.`;
   return [...lines, '', summary].join('\n');
 }
 
-const USAGE = 'uso: npm run layers -- [--out <arquivo.md>]';
+const USAGE = 'usage: npm run layers -- [--out <file.md>]';
 
 export function main(argv: string[]): number {
   let out: string | undefined;
@@ -157,7 +157,7 @@ export function main(argv: string[]): number {
     console.log(md);
     return checkMatrix(m).ok ? 0 : 1;
   } catch (err) {
-    console.error(`layers falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`layers failed: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
   }
 }

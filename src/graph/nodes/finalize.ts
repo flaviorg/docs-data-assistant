@@ -28,7 +28,7 @@ const redactSql = (sql: SqlState): SqlState => ({ ...sql, query: SQL_QUERY_BLOCK
 export function createFinalizeNode(deps: { outputGuard: OutputGuard }) {
   return async (state: AskState, _config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     const outcome = state.outcome;
-    if (!outcome) throw new Error('finalize sem outcome');
+    if (!outcome) throw new Error('finalize without an outcome');
     const t0 = performance.now();
     const route = state.route;
     const intent = route?.intent;

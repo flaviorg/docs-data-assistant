@@ -9,7 +9,7 @@ import type { SalesConnection } from './readonly-connection.ts';
 import type { ChildReply, ParentMessage } from './query-runner.ts';
 
 const send = process.send?.bind(process);
-if (!send) throw new Error('query-process.ts só roda como processo filho (use createQueryRunner)');
+if (!send) throw new Error('query-process.ts only runs as a child process (use createQueryRunner)');
 const reply = (msg: ChildReply): void => { send(msg); };
 
 // Vigia: se o pai morrer enquanto esta thread está presa numa consulta (código nativo, sem event loop), ninguém mais

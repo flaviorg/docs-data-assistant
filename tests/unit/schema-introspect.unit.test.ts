@@ -9,7 +9,7 @@ import { BUSINESS_GLOSSARY } from '../../src/sql/sales-schema.ts';
 const text = describeSchema(openSalesConnection({ kind: 'snapshot', bytes: createSalesSnapshot() }, { authorizer: false, queryOnly: true }).db);
 test('SQL-01 contém o DDL real das 4 tabelas permitidas e o glossário', () => {
   for (const t of ['customers', 'products', 'orders', 'order_items']) assert.match(text, new RegExp(`CREATE TABLE ${t} \\(`));
-  assert.match(text, /status = 'pago'/);
+  assert.match(text, /status = 'paid'/);
 });
 test('SQL-09 omite customer_contacts e customers.name, mantém products.name', () => {
   assert.doesNotMatch(text, /customer_contacts/);
@@ -49,7 +49,7 @@ CREATE TABLE order_items (order_id INTEGER);`);
 });
 
 test('glossário pede para listar as colunas de customers, porque * inclui a coluna negada e vira bloqueio de política', async () => {
-  assert.match(BUSINESS_GLOSSARY, /customers.*liste as colunas.*\*/s);
+  assert.match(BUSINESS_GLOSSARY, /customers.*list the columns.*\*/s);
   // A decisão continua sendo política: a expansão de * lê customers.name e o authorizer nega sem pedir correção.
   const { createSqlValidator } = await import('../../src/sql/validator.ts');
   const v = createSqlValidator({ conn: openSalesConnection({ kind: 'snapshot', bytes: createSalesSnapshot() }), maxRows: 200 });

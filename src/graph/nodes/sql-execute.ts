@@ -17,7 +17,7 @@ export function createSqlExecuteNode(deps: { runner: QueryRunner; maxRows: numbe
   return async (state: AskState, config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
     const sql = state.sql;
-    if (!sql) throw new Error('sqlExecute chamado sem sql no estado');
+    if (!sql) throw new Error('sqlExecute called without sql in the state');
     if (sql.pendingError) return {};
     const { signal } = callContextFrom(config);
     const t0 = performance.now();
@@ -33,7 +33,7 @@ export function createSqlExecuteNode(deps: { runner: QueryRunner; maxRows: numbe
           sql: { ...sql, pendingError: { kind: 'runtime', message: err.message } },
           outcome: { status: 'error', blockedBy: null, answer: SQL_TIMEOUT_MESSAGE, followUpQuestions: [] },
           warnings: ['sql_timeout'],
-          trace: trace('tempo limite da SQL'),
+          trace: trace('SQL time limit'),
         };
       }
       if (!(err instanceof SqlRuntimeError)) throw err;
@@ -43,10 +43,10 @@ export function createSqlExecuteNode(deps: { runner: QueryRunner; maxRows: numbe
           sql: { ...sql, pendingError: { kind: 'policy', message: denial.message, rule: 'authorizer' } },
           outcome: { status: 'blocked', blockedBy: 'sql_authorizer', answer: POLICY_BLOCK_MESSAGE, followUpQuestions: [] },
           warnings: ['sql_policy:authorizer'],
-          trace: trace('negado pelo authorizer'),
+          trace: trace('denied by the authorizer'),
         };
       }
-      return { ...pendingOrExhausted(sql, { kind: 'runtime', message: denial?.message ?? err.message }, deps.maxCorrections), trace: trace('erro de execução') };
+      return { ...pendingOrExhausted(sql, { kind: 'runtime', message: denial?.message ?? err.message }, deps.maxCorrections), trace: trace('execution error') };
     }
 
     // truncated é defesa em profundidade: o sqlValidate já deixou LIMIT <= SQL_MAX_ROWS, então o corte do executor não
@@ -56,7 +56,7 @@ export function createSqlExecuteNode(deps: { runner: QueryRunner; maxRows: numbe
       return {
         sql: { ...sql, result },
         outcome: { status: 'no_results', blockedBy: null, answer: NO_RESULTS_MESSAGE, followUpQuestions: [] },
-        trace: trace('sem resultados'),
+        trace: trace('no results'),
       };
     }
     return { sql: { ...sql, result }, warnings: r.truncated ? ['sql_truncated'] : [], trace: trace(`${r.rows.length} linha(s)`) };

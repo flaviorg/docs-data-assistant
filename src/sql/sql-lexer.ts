@@ -38,7 +38,7 @@ function readQuoted(sql: string, start: number, close: string, doubled: boolean,
     }
     i++;
   }
-  throw new SqlLexError(`${what} não terminado (posição ${start})`, start);
+  throw new SqlLexError(`unterminated ${what} (position ${start})`, start);
 }
 
 function readNumber(sql: string, start: number): number {
@@ -77,7 +77,7 @@ export function tokenize(sql: string): Token[] {
     }
     if (c === '/' && sql[i + 1] === '*') {
       const close = sql.indexOf('*/', i + 2);
-      if (close === -1) throw new SqlLexError(`comentário /* não terminado (posição ${i})`, i);
+      if (close === -1) throw new SqlLexError(`unterminated /* comment (position ${i})`, i);
       i = close + 2;
       continue;
     }

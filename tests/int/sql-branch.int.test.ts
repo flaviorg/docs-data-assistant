@@ -15,7 +15,7 @@ test('SQL-07 cenário 3 responde com 3 linhas e follow-ups', async () => {
   const s = await runGraph(ctx, { question: Q3! });
   assert.equal(s.outcome?.status, 'answered');
   assert.equal(s.sql!.result!.rows.length, 3);
-  assert.deepEqual(s.sql!.result!.columns, ['channel', 'faturamento_reais']);
+  assert.deepEqual(s.sql!.result!.columns, ['channel', 'revenue_brl']);
   const n = s.outcome!.followUpQuestions.length; assert.ok(n >= 1 && n <= 3);
   assert.equal(count(ctx, 'sql-correct'), 0);
 });
@@ -25,7 +25,7 @@ test('SQL-04 cenário 4 com exatamente 1 sql-correct e originalQuery guardada', 
   assert.equal(s.outcome?.status, 'answered');
   assert.equal(count(ctx, 'sql-correct'), 1);
   assert.equal(s.sql!.corrections, 1);
-  assert.match(s.sql!.originalQuery!, /quantidade/);
+  assert.match(s.sql!.originalQuery!, /oi\.qty\b/);
   assert.match(s.sql!.query, /quantity/);
   assert.equal(s.sql!.result!.rows.length, 5);
 });

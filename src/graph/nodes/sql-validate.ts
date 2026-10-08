@@ -12,12 +12,12 @@ export function createSqlValidateNode(deps: { validator: SqlValidator; maxCorrec
   return async (state: AskState, _config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
     const sql = state.sql;
-    if (!sql) throw new Error('sqlValidate chamado sem sql no estado');
+    if (!sql) throw new Error('sqlValidate called without sql in the state');
     const t0 = performance.now();
     const trace = (note: string) => [{ node: NODE.sqlValidate, ms: elapsedMs(t0), note }];
 
     // Correção que falhou no modelo: não há SQL nova para validar, só a regra do teto.
-    if (sql.pendingError) return { ...pendingOrExhausted(sql, sql.pendingError, deps.maxCorrections), trace: trace('erro pendente') };
+    if (sql.pendingError) return { ...pendingOrExhausted(sql, sql.pendingError, deps.maxCorrections), trace: trace('pending error') };
 
     const v = deps.validator.validate(sql.query);
     if (v.ok) {
@@ -28,9 +28,9 @@ export function createSqlValidateNode(deps: { validator: SqlValidator; maxCorrec
         sql: { ...sql, pendingError: { kind: 'policy', message: v.message, rule: v.rule } },
         outcome: { status: 'blocked', blockedBy: v.rule === 'authorizer' ? 'sql_authorizer' : 'sql_policy', answer: POLICY_BLOCK_MESSAGE, followUpQuestions: [] },
         warnings: [`sql_policy:${v.rule}`],
-        trace: trace(`política: ${v.rule}`),
+        trace: trace(`policy: ${v.rule}`),
       };
     }
-    return { ...pendingOrExhausted(sql, { kind: 'correctable', message: v.message }, deps.maxCorrections), trace: trace('corrigível') };
+    return { ...pendingOrExhausted(sql, { kind: 'correctable', message: v.message }, deps.maxCorrections), trace: trace('correctable') };
   };
 }

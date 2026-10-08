@@ -19,13 +19,13 @@ export function createGuardrailInputNode(deps: {
   mode: AppConfig['guardrailMode'];
   policy: string;
 }) {
-  if (deps.mode === 'rules+model' && !deps.model) throw new Error('GUARDRAIL_MODE=rules+model exige o classificador de modelo');
+  if (deps.mode === 'rules+model' && !deps.model) throw new Error('GUARDRAIL_MODE=rules+model requires the model classifier');
   return async (state: AskState, config: LangGraphRunnableConfig): Promise<AskStateUpdate> => {
     if (state.outcome) return {};
     const t0 = performance.now();
     const trace = (note: string) => [{ node: NODE.guardrailInput, ms: elapsedMs(t0), note }];
     if (deps.mode === 'off') {
-      return { guardrail: { verdict: 'safe', layer: null, reasons: [] }, warnings: ['guardrail_off'], trace: trace('modo off') };
+      return { guardrail: { verdict: 'safe', layer: null, reasons: [] }, warnings: ['guardrail_off'], trace: trace('off mode') };
     }
     const ctx = callContextFrom(config);
     const input = { question: state.question, policy: deps.policy };
@@ -44,6 +44,6 @@ export function createGuardrailInputNode(deps: {
         trace: trace(`bloqueado: ${verdict.reasons.join(',')}`),
       };
     }
-    return { guardrail: verdict, trace: trace(`safe (${verdict.layer ?? 'nenhuma camada'})`) };
+    return { guardrail: verdict, trace: trace(`safe (${verdict.layer ?? 'no layer'})`) };
   };
 }

@@ -18,7 +18,7 @@ Ao mesmo tempo, um embedder lexical é fraco semanticamente: perguntas com vocab
 - O código de RAG depende só da interface `Embedder` (`src/embeddings/embedder.ts`): `id`, `dim`, `fingerprint` e `embed(texts)`, com vetores de norma 1.
 - O v1 tem uma única implementação, o `hash-v1` (`src/embeddings/hash-embedder.ts`): TF-IDF com *feature hashing* com sinal, 2048 dimensões, IDF ajustado no corpus na ingestão. É determinístico, roda em milissegundos e não tem dependência.
 - Todo índice grava o *fingerprint* do embedder em `kb_meta`. O `VectorStore` recusa buscar com um embedder de *fingerprint* diferente (`ReindexRequiredError`), e o `ensureData()` reindexa no modo `file`.
-- O limiar de recusa é **por embedder** (`MIN_SCORE_DEFAULTS` em `src/config.ts`), calibrado com `npm run calibrate` no split `calibration`. O `hash-v1` usa 0,18.
+- O limiar de recusa é **por embedder** (`MIN_SCORE_DEFAULTS` em `src/config.ts`), calibrado com `npm run calibrate` no split `calibration`. O `hash-v1` usa 0,22 (0,18 antes da tradução da base para o inglês).
 - As fixtures de `rag-answer` declaram o embedder no cabeçalho (`"embedder": "hash-v1"`), e o carregador recusa o arquivo se o embedder ativo for outro.
 - Toda métrica do eval sai rotulada com o *fingerprint*. O README diz que o `hash-v1` é lexical.
 

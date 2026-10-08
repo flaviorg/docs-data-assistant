@@ -1,46 +1,46 @@
 <!doctype html>
-<html lang="pt-BR">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="light dark">
-  <title>Moenda Lunar · assistente de documentos e dados</title>
+  <title>Lunar Mill · documents and data assistant</title>
   <link rel="stylesheet" href="/app.css">
   <script src="/app.js" defer></script>
 </head>
 <body>
-  <div id="demo-banner" class="demo-banner" role="status" hidden>MODO DEMO: respostas do modelo roteirizadas (fake)</div>
+  <div id="demo-banner" class="demo-banner" role="status" hidden>DEMO MODE: scripted model answers (fake)</div>
 
   <div class="page">
     <header class="site-header">
-      <p class="eyebrow">Moenda Lunar Cafés Especiais · empresa fictícia</p>
-      <h1>Assistente de documentos e dados</h1>
-      <p class="lede">Pergunte sobre as políticas da loja (trocas, frete, garantia, pagamentos, assinatura e parcerias) ou sobre as vendas de 2025. Perguntas de política respondem com fonte ou recusam; perguntas de vendas viram uma consulta SQL somente leitura.</p>
+      <p class="eyebrow">Lunar Mill Specialty Coffee · fictional company</p>
+      <h1>Documents and data assistant</h1>
+      <p class="lede">Ask about the store's policies (returns, shipping, warranty, payments, subscription and partnerships) or about 2025 sales. Policy questions are answered with a source or refused; sales questions become a read-only SQL query.</p>
       <p id="health" class="health" aria-live="polite"></p>
     </header>
 
     <main>
       <form id="ask-form" class="ask-form" autocomplete="off" novalidate>
-        <label for="question">Sua pergunta</label>
+        <label for="question">Your question</label>
         <div class="ask-row">
-          <textarea id="question" name="question" rows="2" maxlength="500" required placeholder="Ex.: Qual é o prazo para devolver um moedor com defeito?"></textarea>
-          <button type="submit" id="ask-button">Perguntar</button>
+          <textarea id="question" name="question" rows="2" maxlength="500" required placeholder="E.g.: What is the deadline to return a defective grinder?"></textarea>
+          <button type="submit" id="ask-button">Ask</button>
         </div>
-        <p id="form-hint" class="form-hint">De 3 a 500 caracteres.</p>
+        <p id="form-hint" class="form-hint">3 to 500 characters.</p>
       </form>
 
       <section class="scenarios" aria-labelledby="chips-title">
-        <h2 id="chips-title">Cenários de demonstração</h2>
+        <h2 id="chips-title">Demo scenarios</h2>
         <ul id="chips" class="chips"></ul>
       </section>
 
-      <section id="result" class="result" aria-live="polite" aria-busy="false" aria-label="Resposta">
-        <p class="placeholder">Escolha um cenário ou escreva uma pergunta.</p>
+      <section id="result" class="result" aria-live="polite" aria-busy="false" aria-label="Answer">
+        <p class="placeholder">Pick a scenario or write a question.</p>
       </section>
     </main>
 
     <footer class="site-footer">
-      <p>Empresa, documentos e vendas são fictícios. Cada resposta mostra as chamadas ao modelo, os tokens, o custo estimado, a latência e a sequência de nós do grafo.</p>
+      <p>The company, documents and sales are fictional. Each answer shows the model calls, tokens, estimated cost, latency and the sequence of graph nodes.</p>
     </footer>
   </div>
 </body>

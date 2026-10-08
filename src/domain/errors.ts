@@ -49,7 +49,7 @@ export class FixtureMissingError extends Error {
   readonly version: string;
   readonly key: string;
   constructor(promptId: string, version: string, key: string) {
-    super(`Sem fixture para o prompt "${promptId}" (${version}) com a chave "${key}": adicione uma entrada em fixtures/llm/${promptId}.${version}.json`);
+    super(`No fixture for prompt "${promptId}" (${version}) with key "${key}": add an entry to fixtures/llm/${promptId}.${version}.json`);
     this.name = 'FixtureMissingError';
     this.promptId = promptId;
     this.version = version;
@@ -60,7 +60,7 @@ export class FixtureMissingError extends Error {
 export class BudgetExceededError extends Error {
   readonly max: number;
   constructor(max: number) {
-    super(`Teto de ${max} execuções lógicas de prompt por requisição atingido`);
+    super(`Cap of ${max} logical prompt executions per request reached`);
     this.name = 'BudgetExceededError';
     this.max = max;
   }
@@ -84,7 +84,7 @@ export class SqlRuntimeError extends Error {
 
 export class AskAbortedError extends Error {
   constructor() {
-    super('A pergunta foi abortada antes de terminar');
+    super('The question was aborted before it finished');
     this.name = 'AskAbortedError';
   }
 }
@@ -92,7 +92,7 @@ export class AskAbortedError extends Error {
 export class SqlTimeoutError extends Error {
   readonly timeoutMs: number;
   constructor(timeoutMs: number) {
-    super(`a consulta passou do tempo limite de execução de ${timeoutMs} ms e foi interrompida`);
+    super(`the query exceeded the ${timeoutMs} ms execution time limit and was stopped`);
     this.name = 'SqlTimeoutError';
     this.timeoutMs = timeoutMs;
   }

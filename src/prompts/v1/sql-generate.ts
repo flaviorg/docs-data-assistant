@@ -8,12 +8,12 @@ import type { PromptDef } from '../prompt.ts';
 export interface SqlGenerateVars { question: string; schemaText: string }
 
 const FEW_SHOT = [
-  ['Quantos pedidos foram cancelados em março de 2025?',
-    "SELECT COUNT(*) AS pedidos_cancelados FROM orders WHERE status = 'cancelado' AND ordered_at >= '2025-03-01' AND ordered_at < '2025-04-01'"],
-  ['Qual o ticket médio dos pedidos pagos por segmento de cliente?',
-    "SELECT c.segment, ROUND(AVG(o.total_cents) / 100.0, 2) AS ticket_medio_reais FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.status = 'pago' GROUP BY c.segment"],
-  ['Quais categorias de produto venderam mais unidades pelo app?',
-    "SELECT p.category, SUM(oi.quantity) AS unidades FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.channel = 'app' AND o.status = 'pago' GROUP BY p.category ORDER BY unidades DESC"],
+  ['How many orders were cancelled in March 2025?',
+    "SELECT COUNT(*) AS cancelled_orders FROM orders WHERE status = 'cancelled' AND ordered_at >= '2025-03-01' AND ordered_at < '2025-04-01'"],
+  ['What is the average order value of paid orders by customer segment?',
+    "SELECT c.segment, ROUND(AVG(o.total_cents) / 100.0, 2) AS avg_order_value_brl FROM orders o JOIN customers c ON c.id = o.customer_id WHERE o.status = 'paid' GROUP BY c.segment"],
+  ['Which product categories sold the most units through the app?',
+    "SELECT p.category, SUM(oi.quantity) AS units FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.channel = 'app' AND o.status = 'paid' GROUP BY p.category ORDER BY units DESC"],
 ] as const;
 
 export const sqlGeneratePrompt: PromptDef<SqlGenerateVars, SqlGenerationOutput> = {
@@ -23,26 +23,26 @@ export const sqlGeneratePrompt: PromptDef<SqlGenerateVars, SqlGenerationOutput> 
     meta: {
       id: 'sql-generate',
       version: 'v1',
-      description: 'Traduz uma pergunta de negócio sobre as vendas da Moenda Lunar numa consulta SQLite somente leitura.',
+      description: 'Translates a business question about Lunar Mill sales into a read-only SQLite query.',
     },
-    role: 'Você é analista de dados da Moenda Lunar Cafés Especiais, uma loja on-line fictícia, e escreve consultas SQLite de leitura sobre o banco de vendas.',
-    context: 'A mensagem do usuário traz o DDL das tabelas que podem ser consultadas, um glossário de negócio e a pergunta. Exemplos de pergunta e consulta:\n\n'
-      + FEW_SHOT.map(([q, sql]) => `Pergunta: ${q}\nSQL: ${sql}`).join('\n\n'),
-    task: 'Escreva uma única consulta SQLite que responda à pergunta usando o DDL recebido e explique em uma frase a lógica da consulta.',
+    role: 'You are a data analyst at Lunar Mill Specialty Coffee, a fictional online store, and write read-only SQLite queries on the sales database.',
+    context: 'The user message contains the DDL of the tables that can be queried, a business glossary and the question. Examples of a question and a query:\n\n'
+      + FEW_SHOT.map(([q, sql]) => `Question: ${q}\nSQL: ${sql}`).join('\n\n'),
+    task: 'Write a single SQLite query that answers the question using the DDL received and explain the logic of the query in one sentence.',
     constraints: [
-      'Devolva uma única instrução começando por SELECT ou WITH, sem ponto e vírgula no meio e sem nenhum comando que altere dados ou o banco.',
-      'Use só as tabelas e colunas que aparecem no DDL da mensagem; nunca invente tabela ou coluna.',
-      'Nunca selecione nomes de clientes nem dados de contato; para identificar clientes, use cidade, estado ou segmento.',
-      'Não use as funções printf nem format, porque a formatação dos valores fica para a resposta final.',
-      'Use JOIN com ON explícito, nunca junção por vírgula, e não use CTE recursiva.',
-      'Siga o glossário: faturamento conta só pedidos pagos e valores em centavos são divididos por 100.0.',
+      'Return a single statement starting with SELECT or WITH, with no semicolon in the middle and no command that changes data or the database.',
+      'Use only the tables and columns that appear in the DDL in the message; never make up a table or column.',
+      'Never select customer names or contact details; to identify customers, use city, state or segment.',
+      'Do not use the printf or format functions, because formatting the values is left to the final answer.',
+      'Use JOIN with an explicit ON, never a comma join, and do not use a recursive CTE.',
+      'Follow the glossary: revenue counts only paid orders and values in cents are divided by 100.0.',
     ],
-    output: 'Objeto JSON com sql (a consulta, de 6 a 2000 caracteres) e rationale (até 300 caracteres).',
+    output: 'JSON object with sql (the query, 6 to 2000 characters) and rationale (up to 300 characters).',
   },
   // A guarda de saída confere a SQL gerada; as consultas dos exemplos são o que o prompt manda imitar, não segredo.
   // Sem isso, toda consulta com o JOIN de order_items, products e orders dos exemplos seria bloqueada como vazamento.
   allowedEchoes: FEW_SHOT.map(([, sql]) => sql),
-  buildUser: (v) => `Schema do banco de vendas (SQLite):\n${v.schemaText}\nPergunta: ${v.question}`,
+  buildUser: (v) => `Sales database schema (SQLite):\n${v.schemaText}\nQuestion: ${v.question}`,
   schema: SqlGenerationOutputSchema,
   fixtureKey: (v) => normalizeText(v.question),
   temperature: 0,

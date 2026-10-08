@@ -19,7 +19,7 @@ const PriceTableSchema = z.strictObject({
 export function loadPrices(file = 'config/model-prices.json'): PriceTable {
   const parsed = PriceTableSchema.safeParse(JSON.parse(fs.readFileSync(file, 'utf8')));
   if (!parsed.success) {
-    throw new Error(`Tabela de preços inválida em ${file}: ${z.prettifyError(parsed.error)}`);
+    throw new Error(`Invalid price table in ${file}: ${z.prettifyError(parsed.error)}`);
   }
   return parsed.data;
 }

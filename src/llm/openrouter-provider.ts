@@ -41,7 +41,7 @@ function toLlmError(err: unknown, signal: AbortSignal): LlmError {
   if (err instanceof APIUserAbortError || err instanceof APIConnectionTimeoutError || signal.aborted) {
     return new LlmError('timeout', 'a chamada ao provedor expirou ou foi abortada');
   }
-  if (err instanceof APIConnectionError) return new LlmError('server_error', 'falha de conexão com o provedor');
+  if (err instanceof APIConnectionError) return new LlmError('server_error', 'connection to the provider failed');
   if (err instanceof APIError && typeof err.status === 'number') {
     return new LlmError(kindForStatus(err.status), `provedor respondeu HTTP ${err.status}`);
   }
@@ -59,7 +59,7 @@ export function createOpenRouterProvider(opts: {
   return {
     name: 'openrouter',
     async chat(req, signal): Promise<ProviderResponse> {
-      if (signal.aborted) throw new LlmError('timeout', 'chamada abortada antes de começar');
+      if (signal.aborted) throw new LlmError('timeout', 'call aborted before starting');
       const responseFormat = responseFormatFor(req, opts.structuredMode);
       let completion: OpenAI.Chat.Completions.ChatCompletion;
       try {
@@ -75,9 +75,9 @@ export function createOpenRouterProvider(opts: {
       }
 
       const choice = completion.choices[0];
-      if (choice?.finish_reason === 'length') throw new LlmError('truncated', `saída truncada em ${req.maxTokens} tokens`);
+      if (choice?.finish_reason === 'length') throw new LlmError('truncated', `output truncated at ${req.maxTokens} tokens`);
       const content = choice?.message.content ?? '';
-      if (content.trim() === '') throw new LlmError('bad_request', 'o provedor devolveu conteúdo vazio');
+      if (content.trim() === '') throw new LlmError('bad_request', 'the provider returned empty content');
       const finishReason = choice?.finish_reason === 'stop' ? 'stop' : 'other';
       const usage = completion.usage
         ? { promptTokens: completion.usage.prompt_tokens, completionTokens: completion.usage.completion_tokens, estimated: false }

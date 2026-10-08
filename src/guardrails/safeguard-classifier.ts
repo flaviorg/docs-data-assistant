@@ -27,7 +27,7 @@ export function createSafeguardClassifier(deps: { llm: LlmClient; prompt: typeof
       if (!r.success) return blocked('classifier_error');
       const parsed = parseSafeguardText(r.data);
       if (parsed.verdict === 'unparseable') return blocked('classifier_unparseable');
-      if (parsed.verdict === 'unsafe') return blocked(`model:${(parsed.reason || 'sem motivo').slice(0, MAX_REASON_CHARS)}`);
+      if (parsed.verdict === 'unsafe') return blocked(`model:${(parsed.reason || 'no reason').slice(0, MAX_REASON_CHARS)}`);
       return { verdict: 'safe', layer: 'model', reasons: [] };
     },
   };

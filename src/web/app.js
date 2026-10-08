@@ -1,18 +1,18 @@
 // Página do assistente (WEB-01). Monta o DOM só com createElement e textContent: a página mostra trechos de
 // documentos (inclusive o envenenado) e respostas do modelo, então nada vindo da API vira HTML.
-// #cenario=<n> na URL roda o chip n ao carregar.
+// #scenario=<n> na URL roda o chip n ao carregar.
 'use strict';
 
 (() => {
-  const STATUS_LABEL = { answered: 'respondida', refused: 'recusada', no_results: 'sem resultados', blocked: 'bloqueada', error: 'erro' };
-  const ROUTE_LABEL = { docs: 'documentos', data: 'dados', out_of_scope: 'fora do escopo' };
+  const STATUS_LABEL = { answered: 'answered', refused: 'refused', no_results: 'no results', blocked: 'blocked', error: 'error' };
+  const ROUTE_LABEL = { docs: 'documents', data: 'data', out_of_scope: 'out of scope' };
   const BLOCKED_LABEL = {
-    input_rules: 'regras de entrada', input_model: 'modelo de segurança', sql_policy: 'política SQL',
-    sql_authorizer: 'authorizer do SQLite', output_guard: 'guarda de saída',
+    input_rules: 'input rules', input_model: 'safety model', sql_policy: 'SQL policy',
+    sql_authorizer: 'SQLite authorizer', output_guard: 'output guard',
   };
   const TABLE_ROWS = 20;
-  const nf = new Intl.NumberFormat('pt-BR');
-  const usd = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 4, maximumFractionDigits: 6 });
+  const nf = new Intl.NumberFormat('en-US');
+  const usd = new Intl.NumberFormat('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 6 });
 
   const form = document.getElementById('ask-form');
   const input = document.getElementById('question');
@@ -51,7 +51,7 @@
   function setBusy(value) {
     busy = value;
     button.disabled = value;
-    button.textContent = value ? 'Perguntando…' : 'Perguntar';
+    button.textContent = value ? 'Asking…' : 'Ask';
     result.setAttribute('aria-busy', value ? 'true' : 'false');
     for (const b of chips.querySelectorAll('button')) b.disabled = value;
   }
@@ -66,7 +66,7 @@
 
   async function getJson(url) {
     const res = await fetch(url, { headers: { accept: 'application/json' } });
-    if (!res.ok) throw new Error(`${url} respondeu ${res.status}`);
+    if (!res.ok) throw new Error(`${url} answered ${res.status}`);
     return res.json();
   }
 
@@ -74,18 +74,18 @@
     const q = String(question || '').trim();
     if (busy) return;
     if (q.length < 3 || q.length > 500) {
-      hint.textContent = 'A pergunta precisa ter de 3 a 500 caracteres.';
+      hint.textContent = 'The question must have 3 to 500 characters.';
       hint.className = 'form-hint form-hint-error';
       input.focus();
       return;
     }
-    hint.textContent = 'De 3 a 500 caracteres.';
+    hint.textContent = '3 to 500 characters.';
     hint.className = 'form-hint';
     input.value = q;
     setBusy(true);
     revealResult();
     clear(result);
-    result.append(el('p', { className: 'placeholder', text: 'Consultando…' }));
+    result.append(el('p', { className: 'placeholder', text: 'Looking it up…' }));
     try {
       const res = await fetch('/ask', {
         method: 'POST',
@@ -98,7 +98,7 @@
       else renderError(res.status, body);
     } catch (err) {
       clear(result);
-      renderError(0, { error: 'network', message: `Não foi possível falar com o servidor: ${err instanceof Error ? err.message : String(err)}` });
+      renderError(0, { error: 'network', message: `Could not reach the server: ${err instanceof Error ? err.message : String(err)}` });
     } finally {
       setBusy(false);
     }
@@ -106,13 +106,13 @@
 
   function renderAnswer(r) {
     const head = el('div', { className: 'result-head' }, [
-      badge(r.route ? `rota: ${ROUTE_LABEL[r.route] || r.route}` : 'sem rota', 'route'),
+      badge(r.route ? `route: ${ROUTE_LABEL[r.route] || r.route}` : 'no route', 'route'),
       badge(STATUS_LABEL[r.status] || r.status, `status-${r.status}`),
-      r.blockedBy ? badge(`bloqueio: ${BLOCKED_LABEL[r.blockedBy] || r.blockedBy}`, 'blocked') : null,
-      r.overridden ? badge('rota forçada', 'route') : null,
+      r.blockedBy ? badge(`blocked by: ${BLOCKED_LABEL[r.blockedBy] || r.blockedBy}`, 'blocked') : null,
+      r.overridden ? badge('forced route', 'route') : null,
     ]);
     result.append(head);
-    if (r.routeReason) result.append(el('p', { className: 'route-reason', text: `Motivo da rota: ${r.routeReason}` }));
+    if (r.routeReason) result.append(el('p', { className: 'route-reason', text: `Route reason: ${r.routeReason}` }));
     result.append(el('p', { className: 'answer', text: r.answer }));
 
     if (r.guardrail && r.guardrail.verdict === 'unsafe' && r.guardrail.reasons.length > 0) {
@@ -122,7 +122,7 @@
     if (r.sql) result.append(renderSql(r.sql));
     if (r.followUpQuestions && r.followUpQuestions.length > 0) result.append(renderFollowUps(r.followUpQuestions));
     if (r.warnings && r.warnings.length > 0) {
-      result.append(section('Avisos', [el('ul', { className: 'warnings' }, r.warnings.map((w) => el('li', { text: w })))]));
+      result.append(section('Warnings', [el('ul', { className: 'warnings' }, r.warnings.map((w) => el('li', { text: w })))]));
     }
     result.append(renderMeta(r));
   }
@@ -132,26 +132,26 @@
       el('div', { className: 'source-head' }, [
         el('span', { className: 'source-title', text: `${c.docTitle} › ${c.heading}` }),
         el('span', { className: 'source-score', text: `score ${c.score.toFixed(3)}` }),
-        c.sanitized ? badge('neutralizado', 'sanitized') : null,
+        c.sanitized ? badge('neutralized', 'sanitized') : null,
       ]),
       el('p', { className: 'snippet', text: c.snippet }),
       el('p', { className: 'source-id', text: c.chunkId }),
     ])));
-    return section('Fontes', [list]);
+    return section('Sources', [list]);
   }
 
   function renderSql(sql) {
     const parts = [];
-    const corr = sql.corrections === 1 ? '1 correção' : `${sql.corrections} correções`;
-    parts.push(el('p', { className: 'muted', text: `${corr}${sql.limitApplied ? ' · LIMIT aplicado' : ''}${sql.truncated ? ' · resultado cortado' : ''}` }));
+    const corr = sql.corrections === 1 ? '1 correction' : `${sql.corrections} corrections`;
+    parts.push(el('p', { className: 'muted', text: `${corr}${sql.limitApplied ? ' · LIMIT applied' : ''}${sql.truncated ? ' · result truncated' : ''}` }));
     parts.push(el('pre', { className: 'code' }, [el('code', { text: sql.query })]));
     if (sql.originalQuery) {
       parts.push(el('details', { className: 'original' }, [
-        el('summary', { text: 'Consulta original (antes das correções)' }),
+        el('summary', { text: 'Original query (before the corrections)' }),
         el('pre', { className: 'code' }, [el('code', { text: sql.originalQuery })]),
       ]));
     }
-    if (sql.lastError) parts.push(el('p', { className: 'sql-error', text: `Último erro: ${sql.lastError}` }));
+    if (sql.lastError) parts.push(el('p', { className: 'sql-error', text: `Last error: ${sql.lastError}` }));
     if (sql.columns.length > 0 && sql.rows.length > 0) {
       const rows = sql.rows.slice(0, TABLE_ROWS);
       const table = el('table', {}, [
@@ -162,7 +162,7 @@
         }))))),
       ]);
       parts.push(el('div', { className: 'table-wrap' }, [table]));
-      parts.push(el('p', { className: 'muted', text: `Mostrando ${rows.length} de ${sql.rowCount} linha(s).` }));
+      parts.push(el('p', { className: 'muted', text: `Showing ${rows.length} of ${sql.rowCount} row(s).` }));
     }
     return section('SQL', parts);
   }
@@ -173,32 +173,32 @@
       b.addEventListener('click', () => ask(q));
       return el('li', {}, [b]);
     }));
-    return section('Perguntas para continuar', [list]);
+    return section('Follow-up questions', [list]);
   }
 
   function renderMeta(r) {
     const m = r.meta;
     const tokens = m.tokens.prompt + m.tokens.completion;
-    const cost = m.costUsd === null ? 'custo indisponível' : `US$ ${usd.format(m.costUsd)}${m.costIsFictional ? ' (fictício)' : ''}`;
+    const cost = m.costUsd === null ? 'cost unavailable' : `US$ ${usd.format(m.costUsd)}${m.costIsFictional ? ' (fictional)' : ''}`;
     const facts = [
-      `${m.llmCalls} chamada(s) ao LLM`,
-      `${nf.format(tokens)} tokens${m.tokens.estimated ? ' (estimados)' : ''}`,
+      `${m.llmCalls} LLM call(s)`,
+      `${nf.format(tokens)} tokens${m.tokens.estimated ? ' (estimated)' : ''}`,
       cost,
       `${nf.format(Math.round(m.latencyMs))} ms`,
-      m.models.length > 0 ? `modelos: ${m.models.join(', ')}` : 'nenhum modelo chamado',
+      m.models.length > 0 ? `models: ${m.models.join(', ')}` : 'no model called',
     ];
-    if (m.fallbackUsed) facts.push('fallback usado');
+    if (m.fallbackUsed) facts.push('fallback used');
     return el('footer', { className: 'meta' }, [
       el('p', { text: facts.join(' · ') }),
-      el('p', { className: 'trace', text: `nós: ${m.trace.map((t) => t.node).join(' → ')}` }),
-      el('p', { className: 'trace', text: `provedor ${m.provider} · embedder ${m.embedder} · req ${r.requestId}` }),
+      el('p', { className: 'trace', text: `nodes: ${m.trace.map((t) => t.node).join(' → ')}` }),
+      el('p', { className: 'trace', text: `provider ${m.provider} · embedder ${m.embedder} · req ${r.requestId}` }),
     ]);
   }
 
   function renderError(status, body) {
     const b = body || {};
-    result.append(el('div', { className: 'result-head' }, [badge(status ? `HTTP ${status}` : 'sem resposta', 'status-error'), badge(b.error || 'erro', 'blocked')]));
-    result.append(el('p', { className: 'answer', text: b.message || 'Erro desconhecido.' }));
+    result.append(el('div', { className: 'result-head' }, [badge(status ? `HTTP ${status}` : 'no response', 'status-error'), badge(b.error || 'error', 'blocked')]));
+    result.append(el('p', { className: 'answer', text: b.message || 'Unknown error.' }));
     if (Array.isArray(b.suggestions) && b.suggestions.length > 0) result.append(renderFollowUps(b.suggestions));
     if (b.requestId) result.append(el('p', { className: 'trace', text: `req ${b.requestId}` }));
   }
@@ -206,11 +206,11 @@
   function renderChips(questions) {
     clear(chips);
     for (const q of questions) {
-      const expected = `${q.expected.route ? ROUTE_LABEL[q.expected.route] || q.expected.route : 'sem rota'} · ${STATUS_LABEL[q.expected.status] || q.expected.status}`;
+      const expected = `${q.expected.route ? ROUTE_LABEL[q.expected.route] || q.expected.route : 'no route'} · ${STATUS_LABEL[q.expected.status] || q.expected.status}`;
       const b = el('button', { type: 'button', className: 'chip', title: q.question }, [
         el('span', { className: 'chip-id', text: String(q.id) }),
         el('span', { className: 'chip-label', text: q.label }),
-        el('span', { className: 'chip-expected', text: `esperado: ${expected}` }),
+        el('span', { className: 'chip-expected', text: `expected: ${expected}` }),
       ]);
       b.dataset.scenario = String(q.id);
       b.addEventListener('click', () => ask(q.question));
@@ -219,7 +219,7 @@
   }
 
   function runHashScenario(questions) {
-    const m = /cenario=(\d+)/.exec(window.location.hash);
+    const m = /scenario=(\d+)/.exec(window.location.hash);
     if (!m) return;
     const q = questions.find((x) => x.id === Number(m[1]));
     if (q) ask(q.question);
@@ -238,9 +238,9 @@
 
   getJson('/health').then((h) => {
     banner.hidden = h.provider !== 'fake';
-    health.textContent = `provedor ${h.provider} · embedder ${h.embedder} · guardrail ${h.guardrail} · ${h.kb.documents} documentos, ${h.kb.chunks} trechos (${h.kb.flagged} neutralizado) · ${nf.format(h.sales.orders)} pedidos`;
+    health.textContent = `provider ${h.provider} · embedder ${h.embedder} · guardrail ${h.guardrail} · ${h.kb.documents} documents, ${h.kb.chunks} passages (${h.kb.flagged} neutralized) · ${nf.format(h.sales.orders)} orders`;
   }).catch(() => {
-    health.textContent = 'Não foi possível ler /health.';
+    health.textContent = 'Could not read /health.';
   });
 
   getJson('/demo/questions').then((data) => {
@@ -248,6 +248,6 @@
     runHashScenario(data.questions);
     window.addEventListener('hashchange', () => runHashScenario(data.questions));
   }).catch(() => {
-    chips.append(el('li', { className: 'muted', text: 'Não foi possível carregar os cenários.' }));
+    chips.append(el('li', { className: 'muted', text: 'Could not load the scenarios.' }));
   });
 })();

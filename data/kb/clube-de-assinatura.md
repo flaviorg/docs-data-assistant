@@ -1,27 +1,27 @@
-# Clube de assinatura
+# Subscription club
 
-O clube entrega café fresco na sua casa todo mês, com frete grátis e preço menor do que o da compra avulsa.
+The club delivers fresh coffee to your home every month, with free shipping and a lower price than one-off purchases.
 
-## Planos
+## Plans
 
-- Plano Nova: 250 g por mês de um café da linha clássica, por R$ 49,90.
-- Plano Crescente: 500 g por mês, em dois cafés diferentes, por R$ 89,90.
-- Plano Cheia: 1 kg por mês, em dois cafés, sendo um deles microlote, por R$ 159,90.
+- New Moon plan: 250 g a month of a coffee from the classic line, for R$ 49.90.
+- Crescent plan: 500 g a month, as two different coffees, for R$ 89.90.
+- Full Moon plan: 1 kg a month, as two coffees, one of them a micro-lot, for R$ 159.90.
 
-Todos os planos podem vir em grão ou moídos para o seu método de preparo: espresso, coado, prensa francesa ou cafeteira italiana. A cobrança é mensal, no cartão de crédito, e a primeira entrega sai em até 5 dias úteis depois da adesão.
+Every plan can come as whole beans or ground for your brewing method: espresso, pour-over, French press or moka pot. Billing is monthly, on a credit card, and the first delivery ships within 5 business days after you sign up.
 
-## Troca de grão e de moagem
+## Changing beans and grind
 
-Você pode trocar o café, o tipo de moagem ou o plano quantas vezes quiser, pelo site, em "Minha assinatura". Alterações feitas até o dia 20 valem para a entrega do mês seguinte; depois disso, passam a valer a partir da entrega posterior. Se você não escolher nada, enviamos a seleção do mês, montada pela nossa equipe de provadores.
+You can change the coffee, the grind or the plan as often as you like on the website, under "My subscription". Changes made by the 20th apply to the next month's delivery; after that, they take effect from the delivery after that. If you do not choose anything, we send the selection of the month, put together by our team of tasters.
 
-## Pausar a assinatura
+## Pausing the subscription
 
-É possível pausar a assinatura por até 3 meses seguidos, sem multa. Durante a pausa não há cobrança, e as entregas voltam automaticamente no fim do período escolhido. Para ficar mais tempo sem receber, o caminho é cancelar e assinar de novo depois.
+You can pause the subscription for up to 3 consecutive months, without a penalty. There is no billing during the pause, and deliveries resume automatically at the end of the chosen period. To go longer without deliveries, the way to do it is to cancel and subscribe again later.
 
-## Cancelamento
+## Cancellation
 
-O cancelamento pode ser feito a qualquer momento em "Minha assinatura", sem fidelidade e sem multa. Se a cobrança do mês já tiver sido feita e o pedido ainda não tiver sido despachado, o valor é estornado integralmente. Se o pedido já tiver saído, ele é entregue normalmente e não há novas cobranças. Dúvidas sobre o clube podem ser enviadas para clube@moendalunar.example.
+You can cancel at any time under "My subscription", with no minimum term and no penalty. If the month's charge has already been made and the order has not shipped yet, the amount is refunded in full. If the order has already shipped, it is delivered normally and there are no further charges. Questions about the club can be sent to club@lunarmill.example.
 
-## Vantagens para assinantes
+## Subscriber perks
 
-Assinantes têm 10% de desconto em compras avulsas de equipamentos e acessórios no site, acesso antecipado aos microlotes sazonais e um convite por ano para uma degustação on-line com a equipe de torra.
+Subscribers get a 10% discount on one-off purchases of equipment and accessories on the website, early access to seasonal micro-lots and one invitation a year to an online tasting with the roasting team.

@@ -37,7 +37,7 @@ export function describeSchema(db: DatabaseSync): string {
   const stmt = db.prepare(`SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?`);
   const tables = SALES_ALLOWLIST.map((table) => {
     const row = stmt.get(table) as { sql: string | null } | undefined;
-    if (!row?.sql) throw new Error(`Tabela ${table} não encontrada no banco de vendas`);
+    if (!row?.sql) throw new Error(`Table ${table} not found in the sales database`);
     return `${withoutColumns(row.sql.trim(), DENIED_COLUMNS[table] ?? [])};`;
   });
   return `${tables.join('\n\n')}\n\n${BUSINESS_GLOSSARY}\n`;

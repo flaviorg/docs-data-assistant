@@ -17,7 +17,7 @@ export function createSqlGenerateNode(deps: { llm: LlmClient; prompt: typeof sql
     if (!r.success) {
       const warning = r.error.kind === 'truncated' ? 'llm_truncated' : 'llm_parse_failed';
       return {
-        sql: { query: '', originalQuery: null, corrections: 0, pendingError: { kind: 'correctable', message: 'o modelo não devolveu SQL válida' }, result: null },
+        sql: { query: '', originalQuery: null, corrections: 0, pendingError: { kind: 'correctable', message: 'the model did not return valid SQL' }, result: null },
         warnings: [warning],
         trace: [{ node: NODE.sqlGenerate, ms: elapsedMs(t0), note: warning }],
       };

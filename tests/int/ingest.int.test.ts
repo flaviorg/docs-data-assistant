@@ -37,8 +37,8 @@ test('GRD-04 o chunk envenenado fica flagged, redigido e com o span guardado', a
   const { store } = await ingestToMemory();
   const c = store.allChunks().find((x) => x.flagged)!;
   assert.ok(c.flagReasons.includes('automated_systems_note'));
-  assert.doesNotMatch(c.text, /LUA-CHEIA-100/);
-  assert.ok(c.redactedSpans.some((s) => s.includes('LUA-CHEIA-100')));
+  assert.doesNotMatch(c.text, /FULL-MOON-100/);
+  assert.ok(c.redactedSpans.some((s) => s.includes('FULL-MOON-100')));
 });
 test('documento apagado tem os chunks removidos', async () => {
   const { store, kbDir } = await freshCopy(); await ingestKnowledgeBase({ store, kbDir });
@@ -80,12 +80,12 @@ test('loadEmbedder sem IDF gravado exige reindexação; índice vazio ingere sem
   const kbDir = makeTempDir('dda');
   const r = await ingestKnowledgeBase({ store: empty, kbDir });
   assert.deepEqual([r.added, r.chunksRecreated], [0, 0]);
-  assert.deepEqual(empty.search((await loadEmbedder(empty).embed(['frete']))[0]!, 3), []);
+  assert.deepEqual(empty.search((await loadEmbedder(empty).embed(['shipping']))[0]!, 3), []);
 });
 test('o texto embedado inclui título e seção: a busca acha a seção pelo nome', async () => {
   const { store, embedder } = await ingestToMemory();
-  const [q] = await embedder.embed(['Rastreio do pedido']);
-  assert.equal(store.search(q!, 1)[0]?.chunk.id, 'frete-e-prazos#rastreio-do-pedido-1');
+  const [q] = await embedder.embed(['Order tracking']);
+  assert.equal(store.search(q!, 1)[0]?.chunk.id, 'frete-e-prazos#order-tracking-1');
 });
 test('CLI ingest grava app.db, imprime o relatório e a segunda execução não recria nada', () => {
   const dir = makeTempDir('dda');
@@ -93,14 +93,14 @@ test('CLI ingest grava app.db, imprime o relatório e a segunda execução não 
   const env = { ...process.env, APP_DB_PATH: appDb };
   const first = spawnSync(process.execPath, ['src/cli/ingest.ts', '--force'], { env, encoding: 'utf8' });
   assert.equal(first.status, 0, first.stderr);
-  assert.match(first.stdout, /documentos: 8 novos/);
-  assert.match(first.stdout, /chunks sinalizados: 1/);
+  assert.match(first.stdout, /documents: 8 new/);
+  assert.match(first.stdout, /chunks flagged: 1/);
   assert.ok(fs.existsSync(appDb));
   const second = spawnSync(process.execPath, ['src/cli/ingest.ts'], { env, encoding: 'utf8' });
   assert.equal(second.status, 0, second.stderr);
-  assert.match(second.stdout, /0 novos, 0 alterados, 8 inalterados/);
-  assert.match(second.stdout, /chunks recriados: 0/);
-  assert.match(second.stdout, /vetores recalculados: 0/);
+  assert.match(second.stdout, /0 new, 0 changed, 8 unchanged/);
+  assert.match(second.stdout, /chunks recreated: 0/);
+  assert.match(second.stdout, /vectors recomputed: 0/);
 });
 test('texto embedado: título, seção contada duas vezes (reforço do tópico) e o trecho', () => {
   assert.equal(embeddingText({ docTitle: 'Frete', heading: 'Rastreio do pedido', text: 'Código por e-mail.' }),

@@ -32,6 +32,8 @@ Consulta pública a `https://openrouter.ai/api/v1/models` em 2026-10-04. Preços
 
 Busca na web por "Moenda Lunar" café e por "Moenda Lunar Cafés Especiais" em 2026-10-04: nenhuma empresa real com esse nome (só cafés com "Lunar" no nome em outros países). Nome mantido, com aviso de ficção e domínio `moendalunar.example`.
 
+Atualização de 2026-10-08: com a tradução do produto para o inglês, a empresa passou a se chamar Lunar Mill Specialty Coffee (domínio `lunarmill.example`). Busca na web por "Lunar Mill" coffee em 2026-10-08: nenhuma empresa de café com esse nome.
+
 ## Divergências
 
 Nenhuma divergência em relação às assinaturas esperadas. Detalhe de tipagem anotado acima: a sonda do Fastify precisou de `InjectOptions` importado de `fastify` (`Parameters<typeof app.inject>[0]` não resolve por causa das sobrecargas).

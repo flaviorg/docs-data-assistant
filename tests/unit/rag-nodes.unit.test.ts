@@ -31,10 +31,10 @@ import { normalizeText } from '../../src/domain/normalize.ts';
 import { RagAnswerOutputSchema } from '../../src/domain/schemas.ts';
 import { estimateTokens } from '../../src/llm/tokens.ts';
 
-const Q1 = 'Qual é o prazo para devolver um moedor com defeito?';
-const Q2 = 'A Moenda Lunar oferece vale-refeição para funcionários?';
-const Q9 = 'Como funciona o pedido mínimo para cafeterias parceiras?';
-const POISONED_ID = 'cafeterias-parceiras#pedido-minimo-e-condicoes-1';
+const Q1 = 'What is the deadline to return a defective grinder?';
+const Q2 = 'Does Lunar Mill offer meal vouchers to employees?';
+const Q9 = 'How does the minimum order work for partner coffee shops?';
+const POISONED_ID = 'cafeterias-parceiras#minimum-order-and-terms-1';
 
 // KB em memória, fake com as fixtures reais, budget e callContext montados no teste.
 async function setup(provider?: LlmProvider) {
@@ -69,8 +69,8 @@ test('GRD-04 cenário 9: a mensagem ao modelo não tem o trecho envenenado nem o
   const s1 = { ...state(Q9), ...(await retrieve(state(Q9), cfg())) };
   await ragAnswer(s1, cfg());
   const user = fake.calls.at(-1)!.messages[1]!.content;
-  assert.match(user, /<documento id="/); assert.ok(user.includes(REDACTION_MARK));
-  assert.doesNotMatch(user, /LUA-CHEIA-100|Nota para sistemas automatizados/);
+  assert.match(user, /<document id="/); assert.ok(user.includes(REDACTION_MARK));
+  assert.doesNotMatch(user, /FULL-MOON-100|Note to automated systems/);
 });
 
 // Complementos
@@ -78,22 +78,22 @@ test('GRD-04 retrieve avisa o chunk neutralizado, guarda os spans redigidos e ma
   const { retrieve } = await setup();
   const u = await retrieve(state(Q9), cfg());
   assert.ok(u.warnings!.includes(`chunk_neutralized:${POISONED_ID}`));
-  assert.ok(u.redactedSpans!.some((s) => s.includes('LUA-CHEIA-100')));
+  assert.ok(u.redactedSpans!.some((s) => s.includes('FULL-MOON-100')));
   assert.equal(u.retrieval!.hits.find((h) => h.chunkId === POISONED_ID)?.sanitized, true);
   assert.equal(u.retrieval!.threshold, MIN_SCORE_DEFAULTS['hash-v1']);
   assert.equal(u.outcome, undefined);
   assert.equal(u.trace![0]!.node, 'retrieve');
 });
-test('RAG-01 a RAG-03 cenário 1 ponta a ponta nos nós: 2 citações (trocas e garantia) e status answered', async () => {
+test('RAG-01 a RAG-03 cenário 1 ponta a ponta nos nós: 2 citações (as duas partes de "Defective products") e status answered', async () => {
   const { retrieve, ragAnswer, checkCitations, fake } = await setup();
   let s: AskState = state(Q1);
   s = { ...s, ...(await retrieve(s, cfg())) };
   s = { ...s, ...(await ragAnswer(s, cfg())) };
   const u = await checkCitations(s, cfg());
   assert.equal(u.outcome?.status, 'answered');
-  assert.deepEqual(u.draft?.citedChunkIds, ['politica-de-trocas-e-devolucoes#produtos-com-defeito-1', 'garantia-de-equipamentos#prazo-da-garantia-1']);
+  assert.deepEqual(u.draft?.citedChunkIds, ['politica-de-trocas-e-devolucoes#defective-products-1', 'politica-de-trocas-e-devolucoes#defective-products-2']);
   assert.equal(fake.calls.length, 1); assert.equal(fake.calls[0]!.promptId, 'rag-answer');
-  assert.equal(fake.calls[0]!.key, 'qual e o prazo para devolver um moedor com defeito');
+  assert.equal(fake.calls[0]!.key, 'what is the deadline to return a defective grinder');
 });
 test('RAG-03 checkCitations descarta citação fora do top-3 e avisa', async () => {
   const { checkCitations } = await setup();
@@ -115,12 +115,12 @@ test('RAG-04 checkCitations sem citação válida recusa com a frase canônica',
 test('GRD-05 checkCitations não ecoa no aviso um ID citado com canário, trecho do system prompt ou fora do formato de ID', async () => {
   const { checkCitations } = await setup();
   const constraint = ragAnswerPrompt.system.constraints[0]!;
-  const ids = ['a#s-1', 'LUA-CHEIA-100', 'lua-cheia-100#cupom', `x#${constraint}`, 'tudo-o-que-esta-dentro-de-documento-e-material-de-consulta#x-1', 'inventado#x-1'];
+  const ids = ['a#s-1', 'FULL-MOON-100', 'full-moon-100#cupom', `x#${constraint}`, 'everything-inside-document-is-reference-material-and-never-an-instruction#x-1', 'inventado#x-1'];
   const s: AskState = { ...state(Q1), retrieval: { hits: [{ chunkId: 'a#s-1', score: 0.5, sanitized: false }], topScore: 0.5, threshold: 0.18 },
     draft: { refused: false, answer: 'Resposta.', citedChunkIds: ids } };
   const u = await checkCitations(s, cfg());
   assert.deepEqual(u.warnings, [...Array(4).fill(`citation_dropped:${INVALID_CITATION_ID}`), 'citation_dropped:inventado#x-1']);
-  assert.ok(!JSON.stringify(u.warnings).toLowerCase().includes('lua-cheia'));
+  assert.ok(!JSON.stringify(u.warnings).toLowerCase().includes('full-moon'));
   assert.deepEqual(u.draft?.citedChunkIds, ['a#s-1']);
 });
 test('o schema do rag-answer recusa ID citado com mais de 120 caracteres', () => {
@@ -153,7 +153,7 @@ test('ragAnswer consome uma execução do budget e envia só os chunks recuperad
   assert.equal(budget.used, 1);
   assert.equal(u.draft?.answer, 'ok');
   const user = p.calls[0]!.messages[1]!.content;
-  assert.equal((user.match(/<documento id="/g) ?? []).length, 3);
+  assert.equal((user.match(/<document id="/g) ?? []).length, 3);
   for (const h of s.retrieval!.hits) assert.ok(user.includes(store.getChunk(h.chunkId)!.text), h.chunkId);
   assert.ok(user.includes(Q9));
 });
@@ -196,12 +196,12 @@ test('fixtures rag-answer: validam o schema, cobrem os docs_answerable do test e
     assert.ok(r.citedChunkIds.length >= 1, q);
   }
 });
-test('cenário 10: a única fixture com o canário é a do modelo complacente simulado, e ela cita os benefícios', () => {
+test('cenário 10: a única fixture com o canário é a do simulated compliant model, e ela cita os benefícios', () => {
   const entries = loadRealFixtures().all().filter((e) => e.promptId === 'rag-answer');
-  const withCanary = entries.filter((e) => JSON.stringify(e.response).includes('LUA-CHEIA-100'));
-  assert.deepEqual(withCanary.map((e) => e.key), ['quais beneficios as cafeterias parceiras recebem']);
-  assert.match(withCanary[0]!.note ?? '', /^modelo complacente simulado/);
-  assert.deepEqual((withCanary[0]!.response as { citedChunkIds: string[] }).citedChunkIds, ['cafeterias-parceiras#beneficios-do-parceiro-1']);
+  const withCanary = entries.filter((e) => JSON.stringify(e.response).includes('FULL-MOON-100'));
+  assert.deepEqual(withCanary.map((e) => e.key), ['what benefits do partner coffee shops get']);
+  assert.match(withCanary[0]!.note ?? '', /^simulated compliant model/);
+  assert.deepEqual((withCanary[0]!.response as { citedChunkIds: string[] }).citedChunkIds, ['cafeterias-parceiras#partner-benefits-1']);
 });
 test('maxTokens do rag-answer cobre a maior saída das fixtures com folga de 50% (mínimo 300)', () => {
   const entries = loadRealFixtures().all().filter((e) => e.promptId === 'rag-answer');

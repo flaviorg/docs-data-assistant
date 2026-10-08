@@ -3,63 +3,63 @@
   "version": "v1",
   "entries": [
     {
-      "key": "qual foi o faturamento por canal em 2025",
+      "key": "what was the revenue by channel in 2025",
       "response": {
-        "answer": "Em 2025, contando só pedidos pagos, o site faturou R$ 944.397,08, o app R$ 391.837,18 e o marketplace R$ 146.140,00. O site lidera com mais que o dobro do faturamento do app.",
+        "answer": "In 2025, counting only paid orders, the website brought in R$ 944,397.08, the app R$ 391,837.18 and the marketplace R$ 146,140.00. The website leads with more than twice the app's revenue.",
         "followUpQuestions": [
-          "Como o faturamento do site variou mês a mês em 2025?",
-          "Qual foi o ticket médio dos pedidos pagos em cada canal?",
-          "Quais produtos mais venderam no marketplace em 2025?"
+          "How did website revenue change month by month in 2025?",
+          "What was the average order value of paid orders in each channel?",
+          "Which products sold the most on the marketplace in 2025?"
         ]
       }
     },
     {
-      "key": "quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025",
+      "key": "what were the top 5 products by quantity sold in the second half of 2025",
       "response": {
-        "answer": "No segundo semestre de 2025, os 5 produtos com mais unidades vendidas em pedidos pagos foram Grão Cerrado Estrelado 1 kg (926), Grão Pico do Luar 250 g (885), Grão Vale da Neblina 250 g (878), Grão Ribeirão Manso Fermentado 250 g (742) e Grão Vale da Neblina 1 kg (720). Os cinco são cafés em grão.",
+        "answer": "In the second half of 2025, the 5 products with the most units sold in paid orders were Starry Savanna Whole Bean 1 kg (926), Moonlight Peak Whole Bean 250 g (885), Misty Valley Whole Bean 250 g (878), Gentle Creek Fermented Whole Bean 250 g (742) and Misty Valley Whole Bean 1 kg (720). All five are whole-bean coffees.",
         "followUpQuestions": [
-          "Quais foram os 5 produtos mais vendidos no primeiro semestre de 2025?",
-          "Quanto esses 5 produtos faturaram no segundo semestre de 2025?"
+          "What were the 5 best-selling products in the first half of 2025?",
+          "How much revenue did these 5 products make in the second half of 2025?"
         ]
       }
     },
     {
-      "key": "como o faturamento do site variou mes a mes em 2025",
+      "key": "how did website revenue change month by month in 2025",
       "response": {
-        "answer": "Em 2025, o faturamento mensal do site com pedidos pagos foi de R$ 48.418,38 em janeiro, o menor do ano, até R$ 120.125,16 em novembro, o maior. Outubro fechou com R$ 99.661,07 e dezembro com R$ 107.821,45.",
+        "answer": "In 2025, the website's monthly revenue from paid orders went from R$ 48,418.38 in January, the lowest of the year, to R$ 120,125.16 in November, the highest. October closed at R$ 99,661.07 and December at R$ 107,821.45.",
         "followUpQuestions": [
-          "Como o faturamento do app variou mês a mês em 2025?",
-          "Quais produtos mais venderam no site em novembro de 2025?"
+          "How did app revenue change month by month in 2025?",
+          "Which products sold the most on the website in November 2025?"
         ]
       }
     },
     {
-      "key": "qual foi o ticket medio dos pedidos pagos em cada canal",
+      "key": "what was the average order value of paid orders in each channel",
       "response": {
-        "answer": "Nos pedidos pagos, o ticket médio foi de R$ 487,56 no site, R$ 365,52 no app e R$ 247,28 no marketplace. O site tem o maior pedido médio entre os três canais.",
+        "answer": "For paid orders, the average order value was R$ 487.56 on the website, R$ 365.52 in the app and R$ 247.28 on the marketplace. The website has the highest average order among the three channels.",
         "followUpQuestions": [
-          "Qual foi o faturamento por canal em 2025?",
-          "O ticket médio das cafeterias é maior que o do varejo?"
+          "What was the revenue by channel in 2025?",
+          "Is the average order value of coffee shops higher than that of retail customers?"
         ]
       }
     },
     {
-      "key": "quais foram os 5 produtos mais vendidos no primeiro semestre de 2025",
+      "key": "what were the 5 best selling products in the first half of 2025",
       "response": {
-        "answer": "No primeiro semestre de 2025, os 5 produtos com mais unidades vendidas em pedidos pagos foram Grão Cerrado Estrelado 1 kg (680), Grão Pico do Luar 250 g (619), Grão Vale da Neblina 250 g (570), Grão Microlote Lua Nova 200 g (554) e Grão Ribeirão Manso Fermentado 250 g (499).",
+        "answer": "In the first half of 2025, the 5 products with the most units sold in paid orders were Starry Savanna Whole Bean 1 kg (680), Moonlight Peak Whole Bean 250 g (619), Misty Valley Whole Bean 250 g (570), New Moon Micro-lot Whole Bean 200 g (554) and Gentle Creek Fermented Whole Bean 250 g (499).",
         "followUpQuestions": [
-          "Quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025?",
-          "Quanto esses 5 produtos faturaram no primeiro semestre de 2025?"
+          "What were the top 5 products by quantity sold in the second half of 2025?",
+          "How much revenue did these 5 products make in the first half of 2025?"
         ]
       }
     },
     {
-      "key": "qual o faturamento por categoria de produto em 2025",
+      "key": "what is the revenue by product category in 2025",
       "response": {
-        "answer": "Em 2025, contando só pedidos pagos, os grãos faturaram R$ 941.829,78, o café moído R$ 304.909,98, os equipamentos R$ 108.583,00, as cápsulas R$ 80.251,00 e os acessórios R$ 46.800,50. Os grãos lideram com folga entre as cinco categorias.",
+        "answer": "In 2025, counting only paid orders, whole beans brought in R$ 941,829.78, ground coffee R$ 304,909.98, equipment R$ 108,583.00, capsules R$ 80,251.00 and accessories R$ 46,800.50. Whole beans lead by a wide margin among the five categories.",
         "followUpQuestions": [
-          "Qual foi o faturamento por canal em 2025?",
-          "Quais equipamentos mais venderam em 2025?"
+          "What was the revenue by channel in 2025?",
+          "Which equipment sold the most in 2025?"
         ]
       }
     }

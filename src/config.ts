@@ -38,9 +38,10 @@ type EnvKey = (typeof ENV_KEYS)[number];
 // Limiar de recusa por embedder, escolhido com `npm run calibrate` só no split calibration (spec 002 e EVL-03).
 // Mudança de chunker, embedder ou base exige recalibrar.
 export const MIN_SCORE_DEFAULTS: Readonly<Record<'hash-v1', number>> = {
-  // calibrado em 2026-10-04 com 12 itens do split calibration (7 respondíveis, 5 não); separação 0,176
-  // (platô de acurácia 0,917 entre 0,18 e 0,19; ver docs/incidents/2026-10-04-calibracao-hash-v1.md)
-  'hash-v1': 0.18,
+  // recalibrado em 2026-10-08, depois da tradução da base e das perguntas para o inglês, com 12 itens do split
+  // calibration (7 respondíveis, 5 não); separação 0,157, acurácia 1,000 só em 0,22 (era 0,18 em português; ver
+  // docs/incidents/2026-10-08-translation-to-english.md e docs/incidents/2026-10-04-calibracao-hash-v1.md)
+  'hash-v1': 0.22,
 };
 
 export type ChaosMode = 'none' | 'primary-timeout-once' | 'primary-down' | 'all-down';
@@ -125,24 +126,24 @@ export function loadConfig(opts: {
   }
 
   if (raw.EMBEDDER !== undefined && raw.EMBEDDER.toLowerCase() === 'minilm') {
-    throw new ConfigError('EMBEDDER=minilm chega só no marco opcional M9; no v1 use EMBEDDER=hash', 'EMBEDDER');
+    throw new ConfigError('EMBEDDER=minilm only arrives with the optional milestone M9; in v1 use EMBEDDER=hash', 'EMBEDDER');
   }
 
   const parsed = EnvSchema.safeParse(raw);
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const variable = String(issue?.path[0] ?? 'desconhecida');
-    throw new ConfigError(`Variável de ambiente ${variable} inválida: ${issue?.message ?? 'valor inválido'}`, variable);
+    throw new ConfigError(`Invalid environment variable ${variable}: ${issue?.message ?? 'invalid value'}`, variable);
   }
   const e = parsed.data;
 
   const apiKey = e.OPENROUTER_API_KEY ?? null;
   const provider = e.LLM_PROVIDER ?? (apiKey ? 'openrouter' : 'fake');
   if (provider === 'openrouter' && !apiKey) {
-    throw new ConfigError('OPENROUTER_API_KEY ausente: é obrigatória com LLM_PROVIDER=openrouter', 'OPENROUTER_API_KEY');
+    throw new ConfigError('OPENROUTER_API_KEY missing: it is required with LLM_PROVIDER=openrouter', 'OPENROUTER_API_KEY');
   }
   if (e.RAG_CHUNK_OVERLAP >= e.RAG_CHUNK_SIZE) {
-    throw new ConfigError('RAG_CHUNK_OVERLAP precisa ser menor que RAG_CHUNK_SIZE', 'RAG_CHUNK_OVERLAP');
+    throw new ConfigError('RAG_CHUNK_OVERLAP must be smaller than RAG_CHUNK_SIZE', 'RAG_CHUNK_OVERLAP');
   }
 
   return {

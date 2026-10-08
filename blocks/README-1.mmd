@@ -1,0 +1,32 @@
+flowchart TD
+  Q["POST /ask, CLI, page"] --> S["AskService<br/>requestId, timeout, budget, ledger"]
+  S --> G0["guardrailInput<br/>input rules (+ model)"]
+  G0 -- unsafe --> F
+  G0 -- safe --> R["router<br/>docs, data or out_of_scope"]
+  R -- out_of_scope --> O[outOfScope] --> F
+
+  subgraph RAG ["RAG branch"]
+    RT["retrieve<br/>top-3 by cosine"]
+    RA[ragAnswer]
+    CC["checkCitations<br/>retrieved IDs only"]
+    RT -- ok --> RA --> CC
+  end
+
+  subgraph SQL ["SQL branch"]
+    SG[sqlGenerate] --> SV["sqlValidate<br/>lexer, EXPLAIN QUERY PLAN, authorizer"]
+    SV -- "correctable error" --> SC["sqlCorrect<br/>up to 3 corrections"]
+    SC --> SV
+    SV -- valid --> SE["sqlExecute<br/>child process with deadline"]
+    SE -- "execution error" --> SC
+    SE -- rows --> SA[sqlAnswer]
+  end
+
+  R -- docs --> RT
+  R -- data --> SG
+  RT -- "below threshold: refuse" --> F
+  CC --> F
+  SV -- "policy violated: block" --> F
+  SV -- "correction cap" --> F
+  SE -- "no results, deadline exceeded or cap" --> F
+  SA --> F
+  F["finalize<br/>output guard"] --> END[(AskResponse)]

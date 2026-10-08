@@ -37,11 +37,11 @@ export const SQL_MAX_VALUE_BYTES = 100_000;
  */
 export function assertSqliteFeatures(db: object): void {
   if (typeof (db as { setAuthorizer?: unknown }).setAuthorizer !== 'function') {
-    throw new Error(`Node 24.15 ou mais novo é necessário (DatabaseSync.setAuthorizer ausente; rodando ${process.version}).`);
+    throw new Error(`Node 24.15 or newer is required (DatabaseSync.setAuthorizer is missing; running ${process.version}).`);
   }
   const limits = (db as { limits?: unknown }).limits;
   if (typeof limits !== 'object' || limits === null) {
-    throw new Error(`Node 24.15 ou mais novo é necessário (DatabaseSync.limits ausente; rodando ${process.version}).`);
+    throw new Error(`Node 24.15 or newer is required (DatabaseSync.limits is missing; running ${process.version}).`);
   }
 }
 

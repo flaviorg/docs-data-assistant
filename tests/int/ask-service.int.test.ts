@@ -84,7 +84,7 @@ test('resposta do cenário 9 marca a citação sanitizada e o aviso do chunk neu
 test('resposta dos cenários 4, 5, 6 e 11 traz o bloco sql com correções, lastError e linhas', async () => {
   const ctx = await createTestContext();
   const r4 = ok(await ctx.askService.ask({ question: Q4 }));
-  assert.equal(r4.sql!.corrections, 1); assert.match(r4.sql!.originalQuery!, /quantidade/); assert.equal(r4.sql!.lastError, null);
+  assert.equal(r4.sql!.corrections, 1); assert.match(r4.sql!.originalQuery!, /oi\.qty\b/); assert.equal(r4.sql!.lastError, null);
   assert.equal(r4.sql!.rowCount, 5); assert.equal(r4.sql!.rows.length, 5); assert.equal(r4.sql!.limitApplied, false);
   assert.deepEqual(r4.citations, []);
   const r5 = ok(await ctx.askService.ask({ question: Q5 }));
@@ -92,7 +92,7 @@ test('resposta dos cenários 4, 5, 6 e 11 traz o bloco sql com correções, last
   const r6 = ok(await ctx.askService.ask({ question: Q6 }));
   assert.deepEqual(r6.sql!.rows, [[null]]); assert.equal(r6.sql!.limitApplied, true);
   const r11 = ok(await ctx.askService.ask({ question: Q11 }));
-  assert.match(r11.sql!.query, /^DELETE/); assert.match(r11.sql!.lastError!, /SELECT ou WITH/); assert.deepEqual(r11.sql!.rows, []);
+  assert.match(r11.sql!.query, /^DELETE/); assert.match(r11.sql!.lastError!, /SELECT or WITH/); assert.deepEqual(r11.sql!.rows, []);
   const r3 = ok(await ctx.askService.ask({ question: Q3 }));
   assert.equal(r3.sql!.rowCount, 3); assert.equal(r3.followUpQuestions.length, 3);
 });

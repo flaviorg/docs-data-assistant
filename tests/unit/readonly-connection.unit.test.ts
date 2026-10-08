@@ -67,7 +67,7 @@ test('SQL-12 texto e blob limitados a SQL_MAX_VALUE_BYTES: replace aninhado e gr
 
 // Complementos
 test('SQL-08 explain devolve o plano quando permitido e funções de janela e data passam', () => {
-  const r = conn().explain(`SELECT strftime('%m', ordered_at) m, SUM(total_cents) FROM orders WHERE status = 'pago' GROUP BY m`);
+  const r = conn().explain(`SELECT strftime('%m', ordered_at) m, SUM(total_cents) FROM orders WHERE status = 'paid' GROUP BY m`);
   assert.equal(r.ok, true);
   assert.ok(r.ok && r.plan.length > 0 && r.plan.every((s) => typeof s === 'string'));
   const w = conn().explain(`SELECT id, ROW_NUMBER() OVER (ORDER BY total_cents DESC) rk FROM orders`);
@@ -108,7 +108,7 @@ test('close fecha a conexão', () => {
   assert.throws(() => c.db.prepare('SELECT 1'));
 });
 test('SQL-09 CTE, subconsulta, alias e JOIN continuam sob o authorizer', () => {
-  assert.equal(conn().explain(`WITH t AS (SELECT customer_id, total_cents FROM orders WHERE status = 'pago')
+  assert.equal(conn().explain(`WITH t AS (SELECT customer_id, total_cents FROM orders WHERE status = 'paid')
     SELECT c.city, SUM(t.total_cents) FROM t JOIN customers c ON c.id = t.customer_id GROUP BY c.city`).ok, true);
   assert.deepEqual(denied(conn().explain(`WITH t AS (SELECT name FROM customers) SELECT * FROM t`)), [{ kind: 'table', table: 'customers', column: 'name' }]);
   assert.equal(denied(conn().explain(`SELECT x.n FROM (SELECT c.name AS n FROM customers c) x`))[0]?.kind, 'table');

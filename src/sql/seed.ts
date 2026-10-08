@@ -1,4 +1,4 @@
-// Seed determinístico do banco de vendas da Moenda Lunar (DATA-01).
+// Seed determinístico do banco de vendas da Lunar Mill (DATA-01).
 // Todos os nomes, cidades e produtos abaixo são listas fictícias escritas para este projeto.
 import { createHash } from 'node:crypto';
 import { DatabaseSync } from 'node:sqlite';
@@ -12,10 +12,10 @@ export interface SeedReport {
   fingerprint: string;
 }
 
-type Category = 'graos' | 'moido' | 'capsulas' | 'equipamentos' | 'acessorios';
-type Segment = 'varejo' | 'cafeteria';
+type Category = 'beans' | 'ground' | 'capsules' | 'equipment' | 'accessories';
+type Segment = 'retail' | 'coffee_shop';
 type Channel = 'site' | 'app' | 'marketplace';
-type OrderStatus = 'pago' | 'cancelado' | 'reembolsado';
+type OrderStatus = 'paid' | 'cancelled' | 'refunded';
 
 const VOLUME = { customers: 300, cafeteriaShare: 0.15, orders: 4000, paid: 0.90, cancelled: 0.06 } as const;
 
@@ -43,46 +43,46 @@ const CITIES: readonly (readonly [string, string, string, number])[] = [
 
 // [sku, nome, categoria, preço em centavos, ativo]
 const PRODUCTS: readonly (readonly [string, string, Category, number, 0 | 1])[] = [
-  ['GR-001', 'Grão Serra Azul 250 g', 'graos', 4290, 1],
-  ['GR-002', 'Grão Serra Azul 1 kg', 'graos', 14990, 1],
-  ['GR-003', 'Grão Vale da Neblina 250 g', 'graos', 4790, 1],
-  ['GR-004', 'Grão Vale da Neblina 1 kg', 'graos', 16490, 1],
-  ['GR-005', 'Grão Pico do Luar 250 g', 'graos', 5490, 1],
-  ['GR-006', 'Grão Pico do Luar 1 kg', 'graos', 18990, 1],
-  ['GR-007', 'Grão Cerrado Estrelado 250 g', 'graos', 3990, 1],
-  ['GR-008', 'Grão Cerrado Estrelado 1 kg', 'graos', 13490, 1],
-  ['GR-009', 'Grão Encosta Clara Natural 250 g', 'graos', 6290, 1],
-  ['GR-010', 'Grão Ribeirão Manso Fermentado 250 g', 'graos', 7490, 1],
-  ['GR-011', 'Grão Campo Dourado Descafeinado 250 g', 'graos', 4990, 1],
-  ['GR-012', 'Grão Microlote Lua Nova 200 g', 'graos', 8990, 0],
-  ['MO-001', 'Moído Serra Azul 250 g', 'moido', 4390, 1],
-  ['MO-002', 'Moído Serra Azul 500 g', 'moido', 7990, 1],
-  ['MO-003', 'Moído Vale da Neblina 250 g', 'moido', 4890, 1],
-  ['MO-004', 'Moído Cerrado Estrelado 250 g', 'moido', 3990, 1],
-  ['MO-005', 'Moído Cerrado Estrelado 500 g', 'moido', 7290, 1],
-  ['MO-006', 'Moído Pico do Luar 250 g', 'moido', 5590, 1],
-  ['MO-007', 'Moído Campo Dourado Descafeinado 250 g', 'moido', 5090, 1],
-  ['MO-008', 'Moído para Coado Planalto Sereno 500 g', 'moido', 6990, 1],
-  ['MO-009', 'Moído Fino para Espresso Encosta Clara 250 g', 'moido', 5990, 1],
-  ['MO-010', 'Moído Blend da Casa 1 kg', 'moido', 12990, 1],
-  ['CA-001', 'Cápsulas Serra Azul (10 un.)', 'capsulas', 2290, 1],
-  ['CA-002', 'Cápsulas Vale da Neblina (10 un.)', 'capsulas', 2490, 1],
-  ['CA-003', 'Cápsulas Pico do Luar Intenso (10 un.)', 'capsulas', 2690, 1],
-  ['CA-004', 'Cápsulas Cerrado Estrelado (10 un.)', 'capsulas', 1990, 1],
-  ['CA-005', 'Cápsulas Descafeinado Campo Dourado (10 un.)', 'capsulas', 2390, 1],
-  ['CA-006', 'Cápsulas Lungo Planalto Sereno (10 un.)', 'capsulas', 2290, 1],
-  ['CA-007', 'Cápsulas Sortidas (30 un.)', 'capsulas', 6490, 1],
-  ['CA-008', 'Cápsulas Edição Inverno (10 un.)', 'capsulas', 2890, 0],
-  ['EQ-001', 'Moedor Manual Órbita', 'equipamentos', 28900, 1],
-  ['EQ-002', 'Moedor Elétrico Órbita Pro', 'equipamentos', 74900, 1],
-  ['EQ-003', 'Prensa Francesa Crescente 600 ml', 'equipamentos', 18900, 1],
-  ['EQ-004', 'Cafeteira Italiana Eclipse 6 xícaras', 'equipamentos', 15900, 1],
-  ['EQ-005', 'Máquina de Espresso Lunar', 'equipamentos', 249000, 1],
-  ['AC-001', 'Filtro de Papel nº 103 (100 un.)', 'acessorios', 1890, 1],
-  ['AC-002', 'Balança Digital com Timer', 'acessorios', 13900, 1],
-  ['AC-003', 'Chaleira Bico de Ganso 1 L', 'acessorios', 21900, 1],
-  ['AC-004', 'Caneca de Cerâmica Fase da Lua', 'acessorios', 5900, 1],
-  ['AC-005', 'Porta-filtro de Cerâmica', 'acessorios', 8900, 0],
+  ['GR-001', 'Blue Range Whole Bean 250 g', 'beans', 4290, 1],
+  ['GR-002', 'Blue Range Whole Bean 1 kg', 'beans', 14990, 1],
+  ['GR-003', 'Misty Valley Whole Bean 250 g', 'beans', 4790, 1],
+  ['GR-004', 'Misty Valley Whole Bean 1 kg', 'beans', 16490, 1],
+  ['GR-005', 'Moonlight Peak Whole Bean 250 g', 'beans', 5490, 1],
+  ['GR-006', 'Moonlight Peak Whole Bean 1 kg', 'beans', 18990, 1],
+  ['GR-007', 'Starry Savanna Whole Bean 250 g', 'beans', 3990, 1],
+  ['GR-008', 'Starry Savanna Whole Bean 1 kg', 'beans', 13490, 1],
+  ['GR-009', 'Bright Slope Natural Whole Bean 250 g', 'beans', 6290, 1],
+  ['GR-010', 'Gentle Creek Fermented Whole Bean 250 g', 'beans', 7490, 1],
+  ['GR-011', 'Golden Field Decaf Whole Bean 250 g', 'beans', 4990, 1],
+  ['GR-012', 'New Moon Micro-lot Whole Bean 200 g', 'beans', 8990, 0],
+  ['MO-001', 'Blue Range Ground 250 g', 'ground', 4390, 1],
+  ['MO-002', 'Blue Range Ground 500 g', 'ground', 7990, 1],
+  ['MO-003', 'Misty Valley Ground 250 g', 'ground', 4890, 1],
+  ['MO-004', 'Starry Savanna Ground 250 g', 'ground', 3990, 1],
+  ['MO-005', 'Starry Savanna Ground 500 g', 'ground', 7290, 1],
+  ['MO-006', 'Moonlight Peak Ground 250 g', 'ground', 5590, 1],
+  ['MO-007', 'Golden Field Decaf Ground 250 g', 'ground', 5090, 1],
+  ['MO-008', 'Serene Plateau Pour-Over Ground 500 g', 'ground', 6990, 1],
+  ['MO-009', 'Bright Slope Fine Espresso Ground 250 g', 'ground', 5990, 1],
+  ['MO-010', 'House Blend Ground 1 kg', 'ground', 12990, 1],
+  ['CA-001', 'Blue Range Capsules (10 pcs)', 'capsules', 2290, 1],
+  ['CA-002', 'Misty Valley Capsules (10 pcs)', 'capsules', 2490, 1],
+  ['CA-003', 'Moonlight Peak Intense Capsules (10 pcs)', 'capsules', 2690, 1],
+  ['CA-004', 'Starry Savanna Capsules (10 pcs)', 'capsules', 1990, 1],
+  ['CA-005', 'Golden Field Decaf Capsules (10 pcs)', 'capsules', 2390, 1],
+  ['CA-006', 'Serene Plateau Lungo Capsules (10 pcs)', 'capsules', 2290, 1],
+  ['CA-007', 'Assorted Capsules (30 pcs)', 'capsules', 6490, 1],
+  ['CA-008', 'Winter Edition Capsules (10 pcs)', 'capsules', 2890, 0],
+  ['EQ-001', 'Orbit Manual Grinder', 'equipment', 28900, 1],
+  ['EQ-002', 'Orbit Pro Electric Grinder', 'equipment', 74900, 1],
+  ['EQ-003', 'Crescent French Press 600 ml', 'equipment', 18900, 1],
+  ['EQ-004', 'Eclipse Moka Pot 6 Cups', 'equipment', 15900, 1],
+  ['EQ-005', 'Lunar Espresso Machine', 'equipment', 249000, 1],
+  ['AC-001', 'Paper Filter No. 103 (100 pcs)', 'accessories', 1890, 1],
+  ['AC-002', 'Digital Scale with Timer', 'accessories', 13900, 1],
+  ['AC-003', 'Gooseneck Kettle 1 L', 'accessories', 21900, 1],
+  ['AC-004', 'Moon Phase Ceramic Mug', 'accessories', 5900, 1],
+  ['AC-005', 'Ceramic Pour-Over Dripper', 'accessories', 8900, 0],
 ];
 
 // Pico no 4º trimestre (Black Friday e fim de ano).
@@ -90,12 +90,12 @@ const MONTH_WEIGHTS = [7, 6.5, 7, 7, 7.5, 7.5, 8, 8, 8.5, 10, 12, 13];
 const MONTH_DAYS = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
 
 const CATEGORY_WEIGHTS: Record<Segment, Record<Category, number>> = {
-  varejo: { graos: 3, moido: 3, capsulas: 3, equipamentos: 0.4, acessorios: 1 },
-  cafeteria: { graos: 6, moido: 2, capsulas: 0.5, equipamentos: 0.3, acessorios: 0.6 },
+  retail: { beans: 3, ground: 3, capsules: 3, equipment: 0.4, accessories: 1 },
+  coffee_shop: { beans: 6, ground: 2, capsules: 0.5, equipment: 0.3, accessories: 0.6 },
 };
 const CHANNEL_WEIGHTS: Record<Segment, readonly (readonly [Channel, number])[]> = {
-  varejo: [['site', 45], ['app', 33], ['marketplace', 22]],
-  cafeteria: [['site', 80], ['app', 20]],
+  retail: [['site', 45], ['app', 33], ['marketplace', 22]],
+  coffee_shop: [['site', 80], ['app', 20]],
 };
 const ITEMS_PER_ORDER: readonly (readonly [number, number])[] = [[1, 30], [2, 30], [3, 25], [4, 15]];
 const CAFETERIA_DISCOUNT = 0.88; // preço de atacado em grãos e moídos
@@ -152,7 +152,7 @@ function buildCustomers(rng: Rng): CustomerRow[] {
     const [city, state, ddd] = pickWeighted(rng, cityItems);
     const first = FIRST_NAMES[Math.floor(rng() * FIRST_NAMES.length)]!;
     const last = LAST_NAMES[Math.floor(rng() * LAST_NAMES.length)]!;
-    return { id: i + 1, name: `${first} ${last}`, city, state, ddd, segment: cafeterias.has(i) ? 'cafeteria' : 'varejo', createdAt };
+    return { id: i + 1, name: `${first} ${last}`, city, state, ddd, segment: cafeterias.has(i) ? 'coffee_shop' : 'retail', createdAt };
   });
 }
 
@@ -163,8 +163,8 @@ function buildProducts(rng: Rng): ProductRow[] {
 }
 
 function quantityFor(rng: Rng, segment: Segment, category: Category): number {
-  if (category === 'equipamentos') return 1;
-  if (segment === 'cafeteria') return category === 'acessorios' ? 1 + Math.floor(rng() * 3) : 2 + Math.floor(rng() * 7);
+  if (category === 'equipment') return 1;
+  if (segment === 'coffee_shop') return category === 'accessories' ? 1 + Math.floor(rng() * 3) : 2 + Math.floor(rng() * 7);
   return pickWeighted(rng, [[1, 60], [2, 30], [3, 10]]);
 }
 
@@ -187,11 +187,11 @@ export function seedSales(db: DatabaseSync, opts: { seed?: number } = {}): SeedR
   const paid = Math.round(VOLUME.orders * VOLUME.paid);
   const cancelled = Math.round(VOLUME.orders * VOLUME.cancelled);
   const statuses = shuffle(rng, Array.from({ length: VOLUME.orders }, (_, i): OrderStatus =>
-    (i < paid ? 'pago' : i < paid + cancelled ? 'cancelado' : 'reembolsado')));
+    (i < paid ? 'paid' : i < paid + cancelled ? 'cancelled' : 'refunded')));
 
   // Clientes elegíveis numa data: prefixo da lista ordenada por cadastro. Cafeterias compram mais.
   const prefix: number[] = [0];
-  for (const c of customers) prefix.push(prefix[prefix.length - 1]! + (c.segment === 'cafeteria' ? 2.5 : 1));
+  for (const c of customers) prefix.push(prefix[prefix.length - 1]! + (c.segment === 'coffee_shop' ? 2.5 : 1));
   const eligibleCount = (date: string) => {
     let lo = 0;
     let hi = customers.length;
@@ -222,7 +222,7 @@ export function seedSales(db: DatabaseSync, opts: { seed?: number } = {}): SeedR
       insCustomer.run(c.id, c.name, c.city, c.state, c.segment, c.createdAt);
       const [first, ...rest] = c.name.split(' ');
       // Telefone começando por 0000: não existe número de assinante assim no Brasil.
-      insContact.run(c.id, `${slug(first ?? 'cliente')}.${slug(rest.join(''))}.${c.id}@email.example`, `(${c.ddd}) 0000-${pad(c.id, 4)}`);
+      insContact.run(c.id, `${slug(first ?? 'customer')}.${slug(rest.join(''))}.${c.id}@email.example`, `(${c.ddd}) 0000-${pad(c.id, 4)}`);
     }
     const insProduct = db.prepare('INSERT INTO products (id, sku, name, category, price_cents, active) VALUES (?, ?, ?, ?, ?, ?)');
     for (const p of products) insProduct.run(p.id, p.sku, p.name, p.category, p.price, p.active);
@@ -242,7 +242,7 @@ export function seedSales(db: DatabaseSync, opts: { seed?: number } = {}): SeedR
         chosen.set(p.id, p);
       }
       const items = [...chosen.values()].sort((a, b) => a.id - b.id).map((p) => {
-        const wholesale = customer.segment === 'cafeteria' && (p.category === 'graos' || p.category === 'moido');
+        const wholesale = customer.segment === 'coffee_shop' && (p.category === 'beans' || p.category === 'ground');
         return { p, quantity: quantityFor(rng, customer.segment, p.category), unit: wholesale ? Math.round(p.price * CAFETERIA_DISCOUNT) : p.price };
       });
       const total = items.reduce((s, it) => s + it.quantity * it.unit, 0);

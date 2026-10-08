@@ -42,13 +42,13 @@ const blank = (s: unknown): boolean => typeof s !== 'string' || s.trim() === '';
 export function assertPromptShape(def: PromptDef<unknown, unknown>): void {
   const p = def.system;
   const where = `prompt ${def.id}`;
-  if (def.version !== 'v1' || p.meta.version !== 'v1') throw new Error(`${where}: meta.version precisa ser v1`);
-  if (p.meta.id !== def.id) throw new Error(`${where}: meta.id (${p.meta.id}) diverge do id do PromptDef`);
-  if (blank(p.meta.description)) throw new Error(`${where}: bloco meta.description vazio`);
+  if (def.version !== 'v1' || p.meta.version !== 'v1') throw new Error(`${where}: meta.version must be v1`);
+  if (p.meta.id !== def.id) throw new Error(`${where}: meta.id (${p.meta.id}) differs from the PromptDef id`);
+  if (blank(p.meta.description)) throw new Error(`${where}: empty meta.description block`);
   for (const block of ['role', 'context', 'task', 'output'] as const) {
-    if (blank(p[block])) throw new Error(`${where}: bloco ${block} vazio`);
+    if (blank(p[block])) throw new Error(`${where}: empty ${block} block`);
   }
   if (!Array.isArray(p.constraints) || p.constraints.length === 0 || p.constraints.some(blank)) {
-    throw new Error(`${where}: bloco constraints vazio ou com item vazio`);
+    throw new Error(`${where}: constraints block empty or with an empty item`);
   }
 }

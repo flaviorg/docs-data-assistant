@@ -3,66 +3,66 @@
   "version": "v1",
   "entries": [
     {
-      "key": "quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025#1",
+      "key": "what were the top 5 products by quantity sold in the second half of 2025#1",
       "response": {
-        "correctedSql": "SELECT p.name, SUM(oi.quantity) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-07-01' AND o.ordered_at < '2026-01-01' GROUP BY p.name ORDER BY total DESC LIMIT 5",
-        "fix": "Troquei oi.quantidade por oi.quantity, que é o nome real da coluna em order_items."
+        "correctedSql": "SELECT p.name, SUM(oi.quantity) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-07-01' AND o.ordered_at < '2026-01-01' GROUP BY p.name ORDER BY total DESC LIMIT 5",
+        "fix": "Replaced oi.qty with oi.quantity, the real column name in order_items."
       }
     },
     {
-      "key": "qual a margem de lucro por fornecedor em 2025#1",
+      "key": "what is the profit margin by supplier in 2025#1",
       "response": {
-        "correctedSql": "SELECT f.nome AS fornecedor, ROUND(SUM(oi.quantity * oi.unit_price_cents - oi.quantity * f.custo_unitario_cents) / 100.0, 2) AS margem_reais FROM order_items oi JOIN fornecedores f ON f.produto_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY f.nome",
-        "fix": "Usei a tabela fornecedores no lugar de suppliers."
+        "correctedSql": "SELECT v.vendor_name AS supplier, ROUND(SUM(oi.quantity * oi.unit_price_cents - oi.quantity * v.unit_cost_cents) / 100.0, 2) AS margin_brl FROM order_items oi JOIN vendors v ON v.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY v.vendor_name",
+        "fix": "Used the vendors table instead of suppliers."
       },
-      "note": "Ainda inválida: 'fornecedores' também não existe (cenário 5, tentativa 1)."
+      "note": "Still invalid: 'vendors' does not exist either (scenario 5, attempt 1)."
     },
     {
-      "key": "qual a margem de lucro por fornecedor em 2025#2",
+      "key": "what is the profit margin by supplier in 2025#2",
       "response": {
-        "correctedSql": "SELECT pc.supplier_name AS fornecedor, ROUND(SUM(oi.quantity * (oi.unit_price_cents - pc.cost_cents)) / 100.0, 2) AS margem_reais FROM order_items oi JOIN product_costs pc ON pc.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY pc.supplier_name",
-        "fix": "Busquei o custo e o fornecedor numa tabela de custos por produto."
+        "correctedSql": "SELECT pc.supplier_name AS supplier, ROUND(SUM(oi.quantity * (oi.unit_price_cents - pc.cost_cents)) / 100.0, 2) AS margin_brl FROM order_items oi JOIN product_costs pc ON pc.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY pc.supplier_name",
+        "fix": "Looked up the cost and the supplier in a per-product cost table."
       },
-      "note": "Ainda inválida: 'product_costs' não existe (cenário 5, tentativa 2)."
+      "note": "Still invalid: 'product_costs' does not exist (scenario 5, attempt 2)."
     },
     {
-      "key": "qual a margem de lucro por fornecedor em 2025#3",
+      "key": "what is the profit margin by supplier in 2025#3",
       "response": {
-        "correctedSql": "SELECT s.name AS fornecedor, ROUND(SUM(oi.quantity * (oi.unit_price_cents - p.cost_cents)) / 100.0, 2) AS margem_reais FROM suppliers s JOIN products p ON p.supplier_id = s.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY s.name",
-        "fix": "Liguei fornecedores aos produtos por supplier_id e usei o custo do produto."
+        "correctedSql": "SELECT s.name AS supplier, ROUND(SUM(oi.quantity * (oi.unit_price_cents - p.cost_cents)) / 100.0, 2) AS margin_brl FROM suppliers s JOIN products p ON p.supplier_id = s.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' GROUP BY s.name",
+        "fix": "Linked suppliers to products by supplier_id and used the product cost."
       },
-      "note": "Ainda inválida: volta a 'suppliers', que não existe. Depois desta tentativa o teto de 3 correções encerra com status error (cenário 5)."
+      "note": "Still invalid: goes back to 'suppliers', which does not exist. After this attempt the cap of 3 corrections ends with status error (scenario 5)."
     },
     {
-      "key": "qual o faturamento por categoria de produto em 2025#1",
+      "key": "what is the revenue by product category in 2025#1",
       "response": {
-        "correctedSql": "SELECT p.category, ROUND(SUM(oi.quantity * oi.unit_price_cents) / 100.0, 2) AS faturamento_reais FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' GROUP BY p.category ORDER BY faturamento_reais DESC",
-        "fix": "Troquei oi.price_cents por oi.unit_price_cents, a coluna de preço que existe em order_items."
+        "correctedSql": "SELECT p.category, ROUND(SUM(oi.quantity * oi.unit_price_cents) / 100.0, 2) AS revenue_brl FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' GROUP BY p.category ORDER BY revenue_brl DESC",
+        "fix": "Replaced oi.price_cents with oi.unit_price_cents, the price column that exists in order_items."
       }
     },
     {
-      "key": "qual foi o custo total de frete dos pedidos em 2025#1",
+      "key": "what was the total shipping cost of orders in 2025#1",
       "response": {
-        "correctedSql": "SELECT ROUND(SUM(frete_cents) / 100.0, 2) AS frete_total_reais FROM orders WHERE status = 'pago' AND ordered_at >= '2025-01-01' AND ordered_at < '2026-01-01'",
-        "fix": "Usei frete_cents no lugar de shipping_cents."
+        "correctedSql": "SELECT ROUND(SUM(freight_cents) / 100.0, 2) AS total_shipping_brl FROM orders WHERE status = 'paid' AND ordered_at >= '2025-01-01' AND ordered_at < '2026-01-01'",
+        "fix": "Used freight_cents instead of shipping_cents."
       },
-      "note": "Ainda inválida: frete_cents também não existe (tentativa 1)."
+      "note": "Still invalid: freight_cents does not exist either (attempt 1)."
     },
     {
-      "key": "qual foi o custo total de frete dos pedidos em 2025#2",
+      "key": "what was the total shipping cost of orders in 2025#2",
       "response": {
-        "correctedSql": "SELECT ROUND(SUM(s.cost_cents) / 100.0, 2) AS frete_total_reais FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
-        "fix": "Busquei o custo de frete numa tabela de envios ligada aos pedidos."
+        "correctedSql": "SELECT ROUND(SUM(s.cost_cents) / 100.0, 2) AS total_shipping_brl FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.status = 'paid' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
+        "fix": "Looked up the shipping cost in a shipments table linked to the orders."
       },
-      "note": "Ainda inválida: a tabela shipments não existe (tentativa 2)."
+      "note": "Still invalid: the shipments table does not exist (attempt 2)."
     },
     {
-      "key": "qual foi o custo total de frete dos pedidos em 2025#3",
+      "key": "what was the total shipping cost of orders in 2025#3",
       "response": {
-        "correctedSql": "SELECT ROUND(SUM(o.total_cents - oi.subtotal_cents) / 100.0, 2) AS frete_total_reais FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
-        "fix": "Calculei o frete como o total do pedido menos o subtotal dos itens."
+        "correctedSql": "SELECT ROUND(SUM(o.total_cents - oi.subtotal_cents) / 100.0, 2) AS total_shipping_brl FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status = 'paid' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
+        "fix": "Computed shipping as the order total minus the item subtotal."
       },
-      "note": "Ainda inválida: order_items não tem subtotal_cents. Depois desta tentativa o teto de 3 correções encerra com status error."
+      "note": "Still invalid: order_items has no subtotal_cents. After this attempt the cap of 3 corrections ends with status error."
     }
   ]
 }

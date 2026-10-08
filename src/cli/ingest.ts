@@ -20,18 +20,18 @@ async function main(argv: string[]): Promise<number> {
         store: createVectorStore(db), kbDir: 'data/kb', force: values.force,
         chunkSize: config.rag.chunkSize, chunkOverlap: config.rag.chunkOverlap,
       });
-      console.log(`documentos: ${r.added} novos, ${r.changed} alterados, ${r.unchanged} inalterados, ${r.removed} removidos`);
-      console.log(`chunks recriados: ${r.chunksRecreated}`);
-      console.log(`vetores recalculados: ${r.vectorsRecomputed}`);
-      console.log(`chunks sinalizados: ${r.flagged}`);
+      console.log(`documents: ${r.added} new, ${r.changed} changed, ${r.unchanged} unchanged, ${r.removed} removed`);
+      console.log(`chunks recreated: ${r.chunksRecreated}`);
+      console.log(`vectors recomputed: ${r.vectorsRecomputed}`);
+      console.log(`chunks flagged: ${r.flagged}`);
       console.log(`fingerprint: ${r.fingerprint}`);
-      console.log(`índice: ${appDb}`);
+      console.log(`index: ${appDb}`);
     } finally {
       db.close();
     }
     return 0;
   } catch (err) {
-    console.error(`ingest falhou: ${err instanceof Error ? err.message : String(err)}`);
+    console.error(`ingest failed: ${err instanceof Error ? err.message : String(err)}`);
     return 1;
   }
 }

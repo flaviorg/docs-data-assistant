@@ -61,7 +61,7 @@ test('parse inválido gera 1 retry com o erro anexado e não consome budget extr
   const p = createScriptedProvider([okJson({ intent: 'x' }), okJson({ intent: 'docs', reason: 'ok r' })]);
   const c = ctx(); const r = await client(p).generateStructured(routerDef, { question: 'q' }, c);
   assert.equal(r.success && r.call.parseRetried, true); assert.equal(c.budget.used, 1);
-  assert.match(p.calls[1]!.messages[1]!.content, /não validou/);
+  assert.match(p.calls[1]!.messages[1]!.content, /did not validate/);
 });
 test('LLM-06 budget de 1 recusa a segunda execução', async () => {
   const c = ctx(1); const cl = client(createScriptedProvider([okJson({ intent: 'docs', reason: 'ok r' })]));

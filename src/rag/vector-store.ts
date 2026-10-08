@@ -148,7 +148,7 @@ export function createVectorStore(db: DatabaseSync): KbStore {
       cache ??= (q.withVectors.all() as Row[]).map((r) => ({ chunk: toChunk(r), vector: fromBlob(r.vector as Uint8Array) }));
       const scored: ScoredChunk[] = cache.map(({ chunk, vector }) => {
         if (vector.length !== query.length) {
-          throw new ReindexRequiredError(`vetor do chunk ${chunk.id} tem ${vector.length} dimensões e a consulta ${query.length}: rode npm run ingest -- --force`);
+          throw new ReindexRequiredError(`the vector of chunk ${chunk.id} has ${vector.length} dimensions and the query ${query.length}: run npm run ingest -- --force`);
         }
         let score = 0;
         for (let i = 0; i < vector.length; i++) score += vector[i]! * query[i]!;
@@ -159,9 +159,9 @@ export function createVectorStore(db: DatabaseSync): KbStore {
     },
     assertEmbedder(fingerprint) {
       const stored = getMeta('fingerprint');
-      if (stored === null) throw new ReindexRequiredError('o índice ainda não tem vetores: rode npm run ingest -- --force');
+      if (stored === null) throw new ReindexRequiredError('the index has no vectors yet: run npm run ingest -- --force');
       if (stored !== fingerprint) {
-        throw new ReindexRequiredError(`o índice foi gerado por ${stored}, mas o embedder ativo é ${fingerprint}: rode npm run ingest -- --force`);
+        throw new ReindexRequiredError(`the index was built by ${stored}, but the active embedder is ${fingerprint}: run npm run ingest -- --force`);
       }
     },
     counts() {

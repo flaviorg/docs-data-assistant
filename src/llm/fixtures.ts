@@ -42,11 +42,11 @@ const FileSchema = z.strictObject({
 function checkKey(promptId: PromptId, key: string, where: string): void {
   if (promptId === 'sql-correct') {
     const m = /^(.*)#([1-9])$/.exec(key);
-    if (!m) throw new Error(`${where}: chave "${key}" do sql-correct precisa terminar em #<tentativa>`);
-    if (normalizeText(m[1]!) !== m[1]) throw new Error(`${where}: chave "${key}" não está normalizada`);
+    if (!m) throw new Error(`${where}: sql-correct key "${key}" must end with #<attempt>`);
+    if (normalizeText(m[1]!) !== m[1]) throw new Error(`${where}: key "${key}" is not normalized`);
     return;
   }
-  if (normalizeText(key) !== key) throw new Error(`${where}: chave "${key}" não está normalizada (esperado "${normalizeText(key)}")`);
+  if (normalizeText(key) !== key) throw new Error(`${where}: key "${key}" is not normalized (expected "${normalizeText(key)}")`);
 }
 
 export function loadFixtures(
@@ -59,35 +59,35 @@ export function loadFixtures(
   for (const name of files) {
     const file = path.join(dir, name);
     const parsed = FileSchema.safeParse(JSON.parse(fs.readFileSync(file, 'utf8')));
-    if (!parsed.success) throw new Error(`Fixture inválida em ${file}: ${z.prettifyError(parsed.error)}`);
+    if (!parsed.success) throw new Error(`Invalid fixture in ${file}: ${z.prettifyError(parsed.error)}`);
     const { promptId, version, embedder, entries } = parsed.data;
     const expectedName = `${promptId}.${version}.json`;
-    if (name !== expectedName) throw new Error(`${file}: o cabeçalho pede o nome ${expectedName}`);
+    if (name !== expectedName) throw new Error(`${file}: the header requires the name ${expectedName}`);
     if (promptId === 'rag-answer' && embedder !== opts.activeEmbedderId) {
-      throw new Error(`${file}: cabeçalho embedder "${embedder ?? '(ausente)'}" diferente do embedder ativo "${opts.activeEmbedderId}"`);
+      throw new Error(`${file}: header embedder "${embedder ?? '(missing)'}" differs from the active embedder "${opts.activeEmbedderId}"`);
     }
 
     const slot = `${promptId}.${version}`;
     const map = byPrompt.get(slot) ?? new Map<string, FixtureEntry>();
     byPrompt.set(slot, map);
     entries.forEach((raw, i) => {
-      const where = `${file} (entrada ${i})`;
+      const where = `${file} (entry ${i})`;
       const e = EntrySchema.safeParse(raw);
       if (!e.success) throw new Error(`${where}: ${z.prettifyError(e.error)}`);
       const hasResponse = typeof raw === 'object' && raw !== null && 'response' in raw;
       const golden = e.data.responseFromGolden;
       if (hasResponse === (golden !== undefined)) {
-        throw new Error(`${where}: use exatamente um entre response e responseFromGolden`);
+        throw new Error(`${where}: use exactly one of response and responseFromGolden`);
       }
       checkKey(promptId, e.data.key, where);
       if (map.has(e.data.key)) throw new Error(`${where}: chave duplicada "${e.data.key}"`);
 
       let response: unknown = e.data.response;
       if (golden !== undefined) {
-        if (promptId !== 'sql-generate') throw new Error(`${where}: responseFromGolden só vale em sql-generate`);
+        if (promptId !== 'sql-generate') throw new Error(`${where}: responseFromGolden is only valid in sql-generate`);
         const sql = opts.resolveGoldenSql?.(golden);
-        if (sql === undefined) throw new Error(`${where}: responseFromGolden aponta para "${golden}", que não existe ou não tem expected.sql`);
-        response = { sql, rationale: 'consulta de referência' };
+        if (sql === undefined) throw new Error(`${where}: responseFromGolden points to "${golden}", which does not exist or has no expected.sql`);
+        response = { sql, rationale: 'reference query' };
       }
       map.set(e.data.key, {
         promptId, version, key: e.data.key, response, file,

@@ -32,8 +32,8 @@ test('golden v1 nesta etapa: 8+4 itens de docs no test e 7+5 no calibration, tod
 });
 test('cenários 1, 2, 9, 10 e 13 estão no split test', () => {
   const qs = loadGolden().filter((i) => i.split === 'test').map((i) => i.question);
-  for (const q of ['Qual é o prazo para devolver um moedor com defeito?', 'A Moenda Lunar oferece vale-refeição para funcionários?',
-    'Como funciona o pedido mínimo para cafeterias parceiras?', 'Quais benefícios as cafeterias parceiras recebem?', 'Qual é o prazo de estorno no cartão?']) {
+  for (const q of ['What is the deadline to return a defective grinder?', 'Does Lunar Mill offer meal vouchers to employees?',
+    'How does the minimum order work for partner coffee shops?', 'What benefits do partner coffee shops get?', 'What is the refund time on a credit card?']) {
     assert.ok(qs.includes(q), q);
   }
 });
@@ -44,8 +44,8 @@ test('todo chunkId esperado existe no índice', async () => {
 test('no split test, o limiar do config acerta ≥ 0,90 das recusas e todos os cenários de docs da demo', async () => {
   const { store, embedder } = await ingestToMemory();
   const t = MIN_SCORE_DEFAULTS['hash-v1'];
-  const demo = ['Qual é o prazo para devolver um moedor com defeito?', 'A Moenda Lunar oferece vale-refeição para funcionários?',
-    'Como funciona o pedido mínimo para cafeterias parceiras?', 'Quais benefícios as cafeterias parceiras recebem?', 'Qual é o prazo de estorno no cartão?'];
+  const demo = ['What is the deadline to return a defective grinder?', 'Does Lunar Mill offer meal vouchers to employees?',
+    'How does the minimum order work for partner coffee shops?', 'What benefits do partner coffee shops get?', 'What is the refund time on a credit card?'];
   const items = loadGolden().filter((x) => x.split === 'test' && x.category.startsWith('docs_'));
   let right = 0;
   for (const i of items) {

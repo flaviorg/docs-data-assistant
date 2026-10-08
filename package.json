@@ -2,7 +2,7 @@
   "name": "docs-data-assistant",
   "version": "0.1.0",
   "private": true,
-  "description": "Assistente que responde sobre uma empresa fictícia por RAG com recusa ou Text-to-SQL seguro, com guardrails em camadas e provedor fake roteirizado.",
+  "description": "Assistant that answers questions about a fictional company through RAG with refusal or safe Text-to-SQL, with layered guardrails and a scripted fake provider.",
   "type": "module",
   "license": "MIT",
   "engines": {

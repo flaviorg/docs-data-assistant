@@ -47,7 +47,7 @@ test('texto sem espaço é cortado à força sem passar do tamanho', () => {
 });
 test('na base real, o trecho envenenado fica no mesmo chunk do pedido mínimo', () => {
   const a = chunkMarkdown({ slug: 'cafeterias-parceiras', markdown: fs.readFileSync('data/kb/cafeterias-parceiras.md', 'utf8') }, { size: 600, overlap: 100 });
-  const c = a.find((x) => x.text.includes('LUA-CHEIA-100'))!;
-  assert.equal(c.id, 'cafeterias-parceiras#pedido-minimo-e-condicoes-1');
-  assert.match(c.text, /pedido mínimo é de 5 kg/);
+  const c = a.find((x) => x.text.includes('FULL-MOON-100'))!;
+  assert.equal(c.id, 'cafeterias-parceiras#minimum-order-and-terms-1');
+  assert.match(c.text, /minimum order is 5 kg/);
 });

@@ -20,5 +20,5 @@ test('citação repetida conta uma vez e a ordem do modelo é mantida', () => {
   assert.deepEqual(validateCitations({ refused: false, answer: 'x', citedChunkIds: ['b#s-1', 'a#s-1', 'b#s-1'] }, ['a#s-1', 'b#s-1']).citedIds, ['b#s-1', 'a#s-1']);
 });
 test('REFUSAL_TEXT é a frase canônica de recusa', () => {
-  assert.equal(REFUSAL_TEXT, 'Não encontrei essa informação nos documentos da Moenda Lunar.');
+  assert.equal(REFUSAL_TEXT, "I could not find this information in Lunar Mill's documents.");
 });

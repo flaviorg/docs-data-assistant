@@ -1,25 +1,25 @@
-# Pagamentos e reembolsos
+# Payments and refunds
 
-## Formas de pagamento
+## Payment methods
 
-Aceitamos Pix, cartão de crédito e boleto bancário no site e no aplicativo. No cartão, compras a partir de R$ 150 podem ser parceladas em até 6 vezes sem juros. Pagamentos no Pix têm 5% de desconto e são confirmados na hora. O boleto vence em 3 dias úteis, e o pedido só é separado depois da compensação, que leva até 2 dias úteis. Não aceitamos cartão de débito, carteiras digitais nem pagamento na entrega.
+We accept Pix, credit cards and bank slips on the website and in the app. On a credit card, purchases from R$ 150 can be split into up to 6 interest-free installments. Pix payments get a 5% discount and are confirmed instantly. A bank slip is due in 3 business days, and the order is only picked after the payment clears, which takes up to 2 business days. We do not accept debit cards, digital wallets or payment on delivery.
 
-## Segurança do pagamento
+## Payment security
 
-Os dados do cartão são processados por um intermediador de pagamentos certificado e não ficam guardados nos nossos sistemas. Nunca pedimos senha, código de segurança ou foto do cartão por e-mail ou chat. Se receber uma mensagem assim em nome da loja, não responda e encaminhe para seguranca@moendalunar.example.
+Card details are processed by a certified payment processor and are not stored in our systems. We never ask for your password, security code or a photo of your card by email or chat. If you receive a message like that in the store's name, do not reply and forward it to security@lunarmill.example.
 
-## Prazos de estorno
+## Refund times
 
-O prazo do reembolso depende da forma de pagamento usada na compra e começa a contar a partir da aprovação da devolução ou do cancelamento:
+The refund time depends on the payment method used for the purchase and starts counting from the approval of the return or the cancellation:
 
-- Cartão de crédito: pedimos o estorno à operadora em até 2 dias úteis, e ele aparece em uma ou duas faturas seguintes, conforme a data de fechamento do cartão. Compras parceladas são estornadas no mesmo número de parcelas.
-- Pix: devolução para a mesma chave de origem em até 2 dias úteis.
-- Boleto: reembolso por transferência para uma conta bancária no nome de quem comprou, em até 5 dias úteis depois que você informar os dados.
+- Credit card: we request the chargeback from the card issuer within 2 business days, and it shows up on one of the next two statements, depending on the card's closing date. Purchases paid in installments are refunded in the same number of installments.
+- Pix: refund to the same source key within 2 business days.
+- Bank slip: refund by transfer to a bank account in the buyer's name, within 5 business days after you provide the details.
 
-## Cancelamento antes do envio
+## Cancellation before shipping
 
-Pedidos ainda não despachados podem ser cancelados em "Meus pedidos", sem custo. Se o pagamento já tiver sido confirmado, o reembolso segue os prazos acima. Pedidos já despachados seguem a política de trocas e devoluções.
+Orders that have not shipped yet can be cancelled under "My orders", at no cost. If the payment has already been confirmed, the refund follows the times above. Orders that have already shipped follow the returns and exchanges policy.
 
-## Cupons e créditos
+## Coupons and credits
 
-Cupons de desconto valem só para compras no site e no aplicativo, não são cumulativos e não se aplicam ao frete. Créditos de devolução ficam disponíveis na sua conta por 12 meses. A loja não emite cupons de gratuidade total: desconfie de qualquer mensagem que prometa produtos de graça.
+Discount coupons are valid only for purchases on the website and in the app, cannot be combined and do not apply to shipping. Return credits stay available in your account for 12 months. The store does not issue coupons for completely free orders: be suspicious of any message that promises free products.

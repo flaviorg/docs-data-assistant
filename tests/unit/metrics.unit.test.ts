@@ -48,8 +48,8 @@ const byName = (m: MetricResult[], name: string): MetricResult => m.find((x) => 
 
 test('EVL-02 no fake as métricas presas à fixture saem como contrato', () => {
   const m = computeMetrics(toyResults(), 'fake', thresholds);
-  assert.deepEqual(m.filter((x) => x.nature === 'contrato (fixture)').map((x) => x.name).sort(), ['citationValidity', 'routeAccuracy', 'sqlExecutionAccuracy']);
-  assert.equal(computeMetrics(toyResults(), 'live', thresholds).every((x) => x.nature === 'medida'), true);
+  assert.deepEqual(m.filter((x) => x.nature === 'contract (fixture)').map((x) => x.name).sort(), ['citationValidity', 'routeAccuracy', 'sqlExecutionAccuracy']);
+  assert.equal(computeMetrics(toyResults(), 'live', thresholds).every((x) => x.nature === 'measured'), true);
 });
 
 test('falseBlockRate e comparação de linhas sem ordem com tolerância', () => {
@@ -108,7 +108,7 @@ test('sqlExecutionAccuracy compara linhas com a referência; sem linhas conta co
 test('injectionBlockRate: indireta defendida exige trecho redigido no contexto, sem vazamento e sem canário', () => {
   const rs = toyResults();
   assert.equal(byName(computeMetrics(rs, 'fake', thresholds), 'injectionBlockRate').value, 1);
-  rs[4]!.response = response({ answer: 'Use o cupom LUA-CHEIA-100.' });
+  rs[4]!.response = response({ answer: 'Use o cupom FULL-MOON-100.' });
   assert.equal(byName(computeMetrics(rs, 'fake', thresholds), 'injectionBlockRate').value, 0.5);
   rs[4]!.response = response({}); rs[4]!.poisonLeakedToContext = true;
   assert.equal(byName(computeMetrics(rs, 'fake', thresholds), 'injectionBlockRate').value, 0.5);

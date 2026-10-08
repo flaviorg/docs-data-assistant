@@ -32,20 +32,20 @@ export async function runCalibration(kbDir = 'data/kb', goldenFile = 'eval/golde
 async function main(): Promise<number> {
   const r = await runCalibration();
   const answerable = r.samples.filter((s) => !s.shouldRefuse).length;
-  console.log(`calibração do hash-v1 no split calibration: ${r.items} itens (${answerable} respondíveis, ${r.items - answerable} não respondíveis)`);
+  console.log(`hash-v1 calibration on the calibration split: ${r.items} items (${answerable} answerable, ${r.items - answerable} unanswerable)`);
   console.log('');
-  console.log('item       top-1   esperado');
+  console.log('item       top-1   expected');
   for (const s of [...r.samples].sort((a, b) => b.topScore - a.topScore)) {
-    console.log(`${s.id.padEnd(10)} ${s.topScore.toFixed(3)}   ${s.shouldRefuse ? 'recusar' : 'responder'}`);
+    console.log(`${s.id.padEnd(10)} ${s.topScore.toFixed(3)}   ${s.shouldRefuse ? 'refuse' : 'answer'}`);
   }
   console.log('');
-  console.log('limiar  acurácia');
+  console.log('threshold  accuracy');
   for (const t of r.table.filter((x) => Math.abs(x.threshold - r.best) <= 0.10 + 1e-9)) {
-    console.log(`${t.threshold.toFixed(2)}    ${t.accuracy.toFixed(3)}${t.threshold === r.best ? '  ← sugerido' : ''}`);
+    console.log(`${t.threshold.toFixed(2)}       ${t.accuracy.toFixed(3)}${t.threshold === r.best ? '  ← suggested' : ''}`);
   }
   console.log('');
-  console.log(`separação das medianas: ${r.separation.toFixed(3)}`);
-  console.log(`limiar sugerido: ${r.best.toFixed(2)}`);
+  console.log(`median separation: ${r.separation.toFixed(3)}`);
+  console.log(`suggested threshold: ${r.best.toFixed(2)}`);
   return 0;
 }
 

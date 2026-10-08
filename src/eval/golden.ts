@@ -27,13 +27,13 @@ const GoldenFileSchema = z.strictObject({ version: z.literal('v1'), items: z.arr
 
 export function loadGolden(file = 'eval/golden.v1.json'): GoldenItem[] {
   const parsed = GoldenFileSchema.safeParse(JSON.parse(fs.readFileSync(file, 'utf8')));
-  if (!parsed.success) throw new Error(`Perguntas-ouro inválidas em ${file}: ${z.prettifyError(parsed.error)}`);
+  if (!parsed.success) throw new Error(`Invalid golden questions in ${file}: ${z.prettifyError(parsed.error)}`);
   const seen = new Set<string>();
   for (const item of parsed.data.items) {
     if (seen.has(item.id)) throw new Error(`${file}: id duplicado ${item.id}`);
     seen.add(item.id);
     if (item.category === 'docs_answerable' && !item.expected.chunkIds) {
-      throw new Error(`${file}: ${item.id} é docs_answerable e precisa de expected.chunkIds`);
+      throw new Error(`${file}: ${item.id} is docs_answerable and needs expected.chunkIds`);
     }
   }
   return parsed.data.items;

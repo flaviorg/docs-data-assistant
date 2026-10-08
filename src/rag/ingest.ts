@@ -103,10 +103,10 @@ export async function ingestKnowledgeBase(deps: {
 /** Reconstrói o embedder a partir do IDF gravado no índice e confere o fingerprint. */
 export function loadEmbedder(store: KbStore): Embedder {
   const raw = store.getMeta('idf');
-  if (raw === null) throw new ReindexRequiredError('o índice não tem IDF gravado: rode npm run ingest -- --force');
+  if (raw === null) throw new ReindexRequiredError('the index has no stored IDF: run npm run ingest -- --force');
   const idf = JSON.parse(raw) as IdfTable;
   if (typeof idf?.n !== 'number' || typeof idf.df !== 'object' || idf.df === null) {
-    throw new ReindexRequiredError('IDF gravado no índice está corrompido: rode npm run ingest -- --force');
+    throw new ReindexRequiredError('the IDF stored in the index is corrupted: run npm run ingest -- --force');
   }
   const embedder = createHashEmbedder(idf);
   store.assertEmbedder(embedder.fingerprint);

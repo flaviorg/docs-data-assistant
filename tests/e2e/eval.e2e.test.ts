@@ -8,7 +8,7 @@ import { makeTempDir } from '../helpers/tmp.ts';
 
 test('EVL-01 eval fake passa com código 0 e rótulo FAKE', async () => {
   const r = await runEval({ live: false, split: 'test' });
-  assert.equal(r.exitCode, 0, r.text); assert.match(r.text, /perfil FAKE/); assert.match(r.text, /contrato \(fixture\)/);
+  assert.equal(r.exitCode, 0, r.text); assert.match(r.text, /profile FAKE/); assert.match(r.text, /contract \(fixture\)/);
 });
 
 test('EVL-01 limiar impossível termina com código 1', async () => {
@@ -24,16 +24,16 @@ test('EVL-02 CLI grava o relatório com o rótulo do perfil', () => {
 // Complementos
 test('EVL-02 o relatório traz provedor, embedder com fingerprint, guardrail, modelos, split, data e a frase dos contratos', async () => {
   const r = await runEval({ live: false, split: 'test' });
-  assert.match(r.text, /^EVAL docs-data-assistant · perfil FAKE \(geração roteirizada; recuperação, limiar, validação e bloqueio medidos de verdade\) · split test \(34 itens\)$/m);
-  assert.match(r.text, /^provider=fake embedder=hash-v1:idf=[0-9a-f]{12} guardrail=rules modelos=fake\/primary,fake\/fallback · \d{4}-\d{2}-\d{2}$/m);
-  assert.match(r.text, /Contratos \(fixture\) provam que fixtures, embedder e pipeline estão em sincronia; não medem qualidade de geração\./);
-  assert.match(r.text, /^Resultado: APROVADO \(código 0\)/m);
-  assert.match(r.text, /^Fixture de modelo complacente simulado \(testa a última linha de defesa\): docs-003, sql-atk-001$/m);
-  assert.match(r.text, /^Itens contra falseBlockRate: docs-003$/m);
+  assert.match(r.text, /^EVAL docs-data-assistant · profile FAKE \(scripted generation; retrieval, threshold, validation and blocking really measured\) · split test \(34 items\)$/m);
+  assert.match(r.text, /^provider=fake embedder=hash-v1:idf=[0-9a-f]{12} guardrail=rules models=fake\/primary,fake\/fallback · \d{4}-\d{2}-\d{2}$/m);
+  assert.match(r.text, /Contracts \(fixture\) prove that fixtures, embedder and pipeline are in sync; they do not measure generation quality\./);
+  assert.match(r.text, /^Result: PASSED \(exit code 0\)/m);
+  assert.match(r.text, /^Simulated compliant model fixture \(tests the last line of defense\): docs-003, sql-atk-001$/m);
+  assert.match(r.text, /^Items against falseBlockRate: docs-003$/m);
   for (const name of ['routeAccuracy', 'recallAt3', 'refusalAccuracy', 'citationValidity', 'sqlExecutionAccuracy', 'injectionBlockRate', 'falseBlockRate']) {
-    assert.match(r.text, new RegExp(`^${name} +(contrato \\(fixture\\)|mecanismo) +\\d\\.\\d{2} +(=|>=|<=)\\d\\.\\d{2} +sim`, 'm'), name);
+    assert.match(r.text, new RegExp(`^${name} +(contract \\(fixture\\)|mechanism) +\\d\\.\\d{2} +(=|>=|<=)\\d\\.\\d{2} +yes`, 'm'), name);
   }
-  assert.match(r.markdown, /^\| métrica \| natureza \| valor \| limiar \| ok \| itens \|$/m);
+  assert.match(r.markdown, /^\| metric \| nature \| value \| threshold \| ok \| items \|$/m);
   assert.match(r.markdown, /FAKE/);
 });
 
@@ -48,10 +48,10 @@ test('EVL-01 os valores do fake: contratos em 1, mecanismos medidos e o bloqueio
 
 test('EVL-01 split all inclui o calibration só na recuperação, sem chamar o modelo', async () => {
   const r = await runEval({ live: false, split: 'all' });
-  assert.match(r.text, /split all \(46 itens\)/);
+  assert.match(r.text, /split all \(46 items\)/);
   const v = Object.fromEntries(r.metrics.map((m) => [m.name, m.value]));
-  assert.equal(v.recallAt3, 14 / 15);   // cal-007 fica fora do top-3 (limite conhecido do hash-v1)
-  assert.equal(v.refusalAccuracy, 23 / 24);
+  assert.equal(v.recallAt3, 15 / 15);   // em inglês, cal-007 entra no top-3 (3º lugar)
+  assert.equal(v.refusalAccuracy, 24 / 24);   // limiar 0,22: as 24 decisões de recusa acertam
 });
 
 test('EVL-01 erro de execução: rules+model com o fake e --live sem chave saem com código 2 pela CLI', () => {
@@ -62,6 +62,6 @@ test('EVL-01 erro de execução: rules+model com o fake e --live sem chave saem 
   const live = spawnSync(process.execPath, ['src/eval/run-eval.ts', '--live', '--out', out], { env, encoding: 'utf8' });
   assert.equal(live.status, 2, live.stdout + live.stderr); assert.match(live.stderr, /OPENROUTER_API_KEY/);
   const bad = spawnSync(process.execPath, ['src/eval/run-eval.ts', '--split', 'calibration'], { env, encoding: 'utf8' });
-  assert.equal(bad.status, 2); assert.match(bad.stderr, /uso:/);
+  assert.equal(bad.status, 2); assert.match(bad.stderr, /usage:/);
   assert.equal(fs.existsSync(out), false);
 });

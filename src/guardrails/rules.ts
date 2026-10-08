@@ -50,7 +50,7 @@ export const RULES: readonly Rule[] = [
   {
     id: 'automated_systems_note', severity: 'high', scopes: BOTH,
     test: (n) => /\b(?:nota|aviso|mensagem|recado|instrucao|instrucoes|atencao) (?:para|aos|ao|as|a) (?:os |as )?(?:sistemas?|assistentes?|ias?|modelos?|robos?|bots?|agentes?|llms?|inteligencias? artificia(?:l|is))(?: automatizados?| automaticos?| de ia| de linguagem| virtua(?:l|is))?\b/.test(n)
-      || /\b(?:note|message|instructions?) (?:to|for) (?:all )?(?:ai|automated systems?|assistants?|ai assistants?|language models?|llms?|bots?|agents?)\b/.test(n),
+      || /\b(?:note|notice|message|warning|reminder|instructions?) (?:to|for) (?:all |any )?(?:ai|automated systems?|assistants?|ai assistants?|language models?|llms?|bots?|agents?)\b/.test(n),
   },
   {
     id: 'assistant_address', severity: 'high', scopes: DOC,
@@ -79,7 +79,7 @@ export const RULES: readonly Rule[] = [
   {
     id: 'discount_coupon_injection', severity: 'medium', scopes: BOTH,
     test: (n) => /\b(?:cupom|cupons|coupons?|voucher|codigo promocional|codigo de desconto)\b/.test(n)
-      && /\b(?:100|cem) (?:por cento |percent |porcento )?(?:de )?(?:desconto|off)\b|\bdesconto (?:total|integral)\b|\b(?:gratis|de graca|gratuito|free)\b/.test(n),
+      && /\b(?:100|cem) (?:por cento |percent |porcento )?(?:de )?(?:desconto|off|discount)\b|\bdesconto (?:total|integral)\b|\b(?:full|total) discount\b|\b(?:gratis|de graca|gratuito|free)\b/.test(n),
   },
   {
     id: 'policy_bypass', severity: 'medium', scopes: BOTH,
