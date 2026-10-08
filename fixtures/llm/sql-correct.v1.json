@@ -1,0 +1,68 @@
+{
+  "promptId": "sql-correct",
+  "version": "v1",
+  "entries": [
+    {
+      "key": "quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025#1",
+      "response": {
+        "correctedSql": "SELECT p.name, SUM(oi.quantity) AS total FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-07-01' AND o.ordered_at < '2026-01-01' GROUP BY p.name ORDER BY total DESC LIMIT 5",
+        "fix": "Troquei oi.quantidade por oi.quantity, que é o nome real da coluna em order_items."
+      }
+    },
+    {
+      "key": "qual a margem de lucro por fornecedor em 2025#1",
+      "response": {
+        "correctedSql": "SELECT f.nome AS fornecedor, ROUND(SUM(oi.quantity * oi.unit_price_cents - oi.quantity * f.custo_unitario_cents) / 100.0, 2) AS margem_reais FROM order_items oi JOIN fornecedores f ON f.produto_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY f.nome",
+        "fix": "Usei a tabela fornecedores no lugar de suppliers."
+      },
+      "note": "Ainda inválida: 'fornecedores' também não existe (cenário 5, tentativa 1)."
+    },
+    {
+      "key": "qual a margem de lucro por fornecedor em 2025#2",
+      "response": {
+        "correctedSql": "SELECT pc.supplier_name AS fornecedor, ROUND(SUM(oi.quantity * (oi.unit_price_cents - pc.cost_cents)) / 100.0, 2) AS margem_reais FROM order_items oi JOIN product_costs pc ON pc.product_id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY pc.supplier_name",
+        "fix": "Busquei o custo e o fornecedor numa tabela de custos por produto."
+      },
+      "note": "Ainda inválida: 'product_costs' não existe (cenário 5, tentativa 2)."
+    },
+    {
+      "key": "qual a margem de lucro por fornecedor em 2025#3",
+      "response": {
+        "correctedSql": "SELECT s.name AS fornecedor, ROUND(SUM(oi.quantity * (oi.unit_price_cents - p.cost_cents)) / 100.0, 2) AS margem_reais FROM suppliers s JOIN products p ON p.supplier_id = s.id JOIN order_items oi ON oi.product_id = p.id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' GROUP BY s.name",
+        "fix": "Liguei fornecedores aos produtos por supplier_id e usei o custo do produto."
+      },
+      "note": "Ainda inválida: volta a 'suppliers', que não existe. Depois desta tentativa o teto de 3 correções encerra com status error (cenário 5)."
+    },
+    {
+      "key": "qual o faturamento por categoria de produto em 2025#1",
+      "response": {
+        "correctedSql": "SELECT p.category, ROUND(SUM(oi.quantity * oi.unit_price_cents) / 100.0, 2) AS faturamento_reais FROM order_items oi JOIN products p ON p.id = oi.product_id JOIN orders o ON o.id = oi.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01' GROUP BY p.category ORDER BY faturamento_reais DESC",
+        "fix": "Troquei oi.price_cents por oi.unit_price_cents, a coluna de preço que existe em order_items."
+      }
+    },
+    {
+      "key": "qual foi o custo total de frete dos pedidos em 2025#1",
+      "response": {
+        "correctedSql": "SELECT ROUND(SUM(frete_cents) / 100.0, 2) AS frete_total_reais FROM orders WHERE status = 'pago' AND ordered_at >= '2025-01-01' AND ordered_at < '2026-01-01'",
+        "fix": "Usei frete_cents no lugar de shipping_cents."
+      },
+      "note": "Ainda inválida: frete_cents também não existe (tentativa 1)."
+    },
+    {
+      "key": "qual foi o custo total de frete dos pedidos em 2025#2",
+      "response": {
+        "correctedSql": "SELECT ROUND(SUM(s.cost_cents) / 100.0, 2) AS frete_total_reais FROM shipments s JOIN orders o ON o.id = s.order_id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
+        "fix": "Busquei o custo de frete numa tabela de envios ligada aos pedidos."
+      },
+      "note": "Ainda inválida: a tabela shipments não existe (tentativa 2)."
+    },
+    {
+      "key": "qual foi o custo total de frete dos pedidos em 2025#3",
+      "response": {
+        "correctedSql": "SELECT ROUND(SUM(o.total_cents - oi.subtotal_cents) / 100.0, 2) AS frete_total_reais FROM orders o JOIN order_items oi ON oi.order_id = o.id WHERE o.status = 'pago' AND o.ordered_at >= '2025-01-01' AND o.ordered_at < '2026-01-01'",
+        "fix": "Calculei o frete como o total do pedido menos o subtotal dos itens."
+      },
+      "note": "Ainda inválida: order_items não tem subtotal_cents. Depois desta tentativa o teto de 3 correções encerra com status error."
+    }
+  ]
+}

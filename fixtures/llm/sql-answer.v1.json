@@ -1,0 +1,67 @@
+{
+  "promptId": "sql-answer",
+  "version": "v1",
+  "entries": [
+    {
+      "key": "qual foi o faturamento por canal em 2025",
+      "response": {
+        "answer": "Em 2025, contando só pedidos pagos, o site faturou R$ 944.397,08, o app R$ 391.837,18 e o marketplace R$ 146.140,00. O site lidera com mais que o dobro do faturamento do app.",
+        "followUpQuestions": [
+          "Como o faturamento do site variou mês a mês em 2025?",
+          "Qual foi o ticket médio dos pedidos pagos em cada canal?",
+          "Quais produtos mais venderam no marketplace em 2025?"
+        ]
+      }
+    },
+    {
+      "key": "quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025",
+      "response": {
+        "answer": "No segundo semestre de 2025, os 5 produtos com mais unidades vendidas em pedidos pagos foram Grão Cerrado Estrelado 1 kg (926), Grão Pico do Luar 250 g (885), Grão Vale da Neblina 250 g (878), Grão Ribeirão Manso Fermentado 250 g (742) e Grão Vale da Neblina 1 kg (720). Os cinco são cafés em grão.",
+        "followUpQuestions": [
+          "Quais foram os 5 produtos mais vendidos no primeiro semestre de 2025?",
+          "Quanto esses 5 produtos faturaram no segundo semestre de 2025?"
+        ]
+      }
+    },
+    {
+      "key": "como o faturamento do site variou mes a mes em 2025",
+      "response": {
+        "answer": "Em 2025, o faturamento mensal do site com pedidos pagos foi de R$ 48.418,38 em janeiro, o menor do ano, até R$ 120.125,16 em novembro, o maior. Outubro fechou com R$ 99.661,07 e dezembro com R$ 107.821,45.",
+        "followUpQuestions": [
+          "Como o faturamento do app variou mês a mês em 2025?",
+          "Quais produtos mais venderam no site em novembro de 2025?"
+        ]
+      }
+    },
+    {
+      "key": "qual foi o ticket medio dos pedidos pagos em cada canal",
+      "response": {
+        "answer": "Nos pedidos pagos, o ticket médio foi de R$ 487,56 no site, R$ 365,52 no app e R$ 247,28 no marketplace. O site tem o maior pedido médio entre os três canais.",
+        "followUpQuestions": [
+          "Qual foi o faturamento por canal em 2025?",
+          "O ticket médio das cafeterias é maior que o do varejo?"
+        ]
+      }
+    },
+    {
+      "key": "quais foram os 5 produtos mais vendidos no primeiro semestre de 2025",
+      "response": {
+        "answer": "No primeiro semestre de 2025, os 5 produtos com mais unidades vendidas em pedidos pagos foram Grão Cerrado Estrelado 1 kg (680), Grão Pico do Luar 250 g (619), Grão Vale da Neblina 250 g (570), Grão Microlote Lua Nova 200 g (554) e Grão Ribeirão Manso Fermentado 250 g (499).",
+        "followUpQuestions": [
+          "Quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025?",
+          "Quanto esses 5 produtos faturaram no primeiro semestre de 2025?"
+        ]
+      }
+    },
+    {
+      "key": "qual o faturamento por categoria de produto em 2025",
+      "response": {
+        "answer": "Em 2025, contando só pedidos pagos, os grãos faturaram R$ 941.829,78, o café moído R$ 304.909,98, os equipamentos R$ 108.583,00, as cápsulas R$ 80.251,00 e os acessórios R$ 46.800,50. Os grãos lideram com folga entre as cinco categorias.",
+        "followUpQuestions": [
+          "Qual foi o faturamento por canal em 2025?",
+          "Quais equipamentos mais venderam em 2025?"
+        ]
+      }
+    }
+  ]
+}

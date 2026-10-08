@@ -1,0 +1,11 @@
+{
+  "updatedAt": "2026-10-04",
+  "models": {
+    "openai/gpt-oss-120b": { "prompt": 0.037, "completion": 0.17 },
+    "google/gemini-2.5-flash": { "prompt": 0.30, "completion": 2.50 },
+    "openai/gpt-oss-safeguard-20b": { "prompt": 0.075, "completion": 0.30 },
+    "fake/primary": { "prompt": 0.10, "completion": 0.40, "fictional": true },
+    "fake/fallback": { "prompt": 0.20, "completion": 0.80, "fictional": true },
+    "fake/guardrail": { "prompt": 0.05, "completion": 0.20, "fictional": true }
+  }
+}

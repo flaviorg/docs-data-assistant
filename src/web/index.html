@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Moenda Lunar · assistente de documentos e dados</title>
+  <link rel="stylesheet" href="/app.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <div id="demo-banner" class="demo-banner" role="status" hidden>MODO DEMO: respostas do modelo roteirizadas (fake)</div>
+
+  <div class="page">
+    <header class="site-header">
+      <p class="eyebrow">Moenda Lunar Cafés Especiais · empresa fictícia</p>
+      <h1>Assistente de documentos e dados</h1>
+      <p class="lede">Pergunte sobre as políticas da loja (trocas, frete, garantia, pagamentos, assinatura e parcerias) ou sobre as vendas de 2025. Perguntas de política respondem com fonte ou recusam; perguntas de vendas viram uma consulta SQL somente leitura.</p>
+      <p id="health" class="health" aria-live="polite"></p>
+    </header>
+
+    <main>
+      <form id="ask-form" class="ask-form" autocomplete="off" novalidate>
+        <label for="question">Sua pergunta</label>
+        <div class="ask-row">
+          <textarea id="question" name="question" rows="2" maxlength="500" required placeholder="Ex.: Qual é o prazo para devolver um moedor com defeito?"></textarea>
+          <button type="submit" id="ask-button">Perguntar</button>
+        </div>
+        <p id="form-hint" class="form-hint">De 3 a 500 caracteres.</p>
+      </form>
+
+      <section class="scenarios" aria-labelledby="chips-title">
+        <h2 id="chips-title">Cenários de demonstração</h2>
+        <ul id="chips" class="chips"></ul>
+      </section>
+
+      <section id="result" class="result" aria-live="polite" aria-busy="false" aria-label="Resposta">
+        <p class="placeholder">Escolha um cenário ou escreva uma pergunta.</p>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <p>Empresa, documentos e vendas são fictícios. Cada resposta mostra as chamadas ao modelo, os tokens, o custo estimado, a latência e a sequência de nós do grafo.</p>
+    </footer>
+  </div>
+</body>
+</html>

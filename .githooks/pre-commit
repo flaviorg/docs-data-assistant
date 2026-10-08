@@ -1,0 +1,5 @@
+#!/bin/sh
+# Barra o commit se o typecheck ou a suíte falharem. Instale com: npm run hooks:install
+set -e
+npm run typecheck
+npm test

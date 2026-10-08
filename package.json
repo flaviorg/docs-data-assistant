@@ -1,0 +1,39 @@
+{
+  "name": "docs-data-assistant",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Assistente que responde sobre uma empresa fictícia por RAG com recusa ou Text-to-SQL seguro, com guardrails em camadas e provedor fake roteirizado.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=24.15"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env src/index.ts",
+    "dev": "node --env-file-if-exists=.env --watch --inspect src/index.ts",
+    "ask": "node --env-file-if-exists=.env src/cli/ask.ts",
+    "seed": "node src/cli/seed.ts",
+    "ingest": "node --env-file-if-exists=.env src/cli/ingest.ts",
+    "demo": "node src/cli/demo.ts",
+    "eval": "node --env-file-if-exists=.env src/eval/run-eval.ts",
+    "calibrate": "node src/eval/calibrate.ts",
+    "layers": "node src/eval/layers.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "node --import ./tests/helpers/no-network.ts --test \"tests/unit/**/*.test.ts\" \"tests/int/**/*.test.ts\" \"tests/e2e/**/*.test.ts\"",
+    "test:unit": "node --import ./tests/helpers/no-network.ts --test \"tests/unit/**/*.test.ts\"",
+    "test:live": "node --env-file-if-exists=.env --test \"tests/live/**/*.test.ts\"",
+    "check": "npm run typecheck && npm test && npm run eval",
+    "hooks:install": "git config core.hooksPath .githooks"
+  },
+  "dependencies": {
+    "@langchain/core": "1.2.14",
+    "@langchain/langgraph": "1.4.19",
+    "fastify": "5.12.5",
+    "openai": "7.27.0",
+    "zod": "4.6.5"
+  },
+  "devDependencies": {
+    "@types/node": "24.19.1",
+    "typescript": "7.0.2"
+  }
+}
