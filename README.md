@@ -2,140 +2,139 @@
 
 # docs-data-assistant
 
-**Assistente de documentos e dados que sabe recusar, cita as fontes e tem a qualidade medida no CI.**
+**A documents and data assistant that knows how to refuse, cites its sources, and has its quality measured in CI.**
 
-RAG com recusa calibrada · Text-to-SQL somente leitura com cinco camadas de defesa · guardrails em camadas · eval gate
+RAG with calibrated refusal · read-only Text-to-SQL with five layers of defense · layered guardrails · eval gate
 
 [![CI](https://github.com/flaviorg/docs-data-assistant/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/flaviorg/docs-data-assistant/actions/workflows/ci.yml)
-[![Licença MIT](https://img.shields.io/badge/licen%C3%A7a-MIT-blue)](LICENSE)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 [![Node ≥ 24.15](https://img.shields.io/badge/node-%E2%89%A524.15-339933?logo=nodedotjs&logoColor=white)](package.json)
 [![TypeScript 7](https://img.shields.io/badge/TypeScript-7.0-3178C6?logo=typescript&logoColor=white)](tsconfig.json)
-[![Eval gate](https://img.shields.io/badge/eval%20gate-7%2F7%20m%C3%A9tricas%20%C2%B7%20fake-2ea44f)](eval/reports/example-fake.md)
+[![Eval gate](https://img.shields.io/badge/eval%20gate-7%2F7%20metrics%20%C2%B7%20fake-2ea44f)](eval/reports/example-fake.md)
 
 </div>
 
-> [!NOTE]
-> **TL;DR in English.** A TypeScript assistant that answers questions about a fictional coffee e-commerce, either by retrieval with citations (and an explicit refusal when evidence is weak) or by generating SQL that is validated, sandboxed and read-only.
-> It runs with one command and no API key: a scripted fake LLM provider replaces only the model call, while retrieval, thresholds, SQL validation, the SQLite authorizer, guardrails, retries and fallbacks run for real.
-> CI runs typecheck, an offline test suite, an eval gate over 34 golden questions (each metric labeled *mechanism* or *fixture contract*) and an attack × defense-layer matrix.
-> Measuring real generation quality requires an OpenRouter key (`npm run eval -- --live`), which has not been run yet.
+A TypeScript assistant that answers questions about a fictional specialty-coffee e-commerce, either by retrieval with citations (and an explicit refusal when evidence is weak) or by generating SQL that is validated, sandboxed and read-only. It runs with one command and no API key: a scripted fake LLM provider replaces only the model call, while retrieval, thresholds, SQL validation, the SQLite authorizer, guardrails, retries and fallbacks run for real. CI runs typecheck, an offline test suite, an eval gate over 34 golden questions (each metric labeled *mechanism* or *fixture contract*) and an attack × defense-layer matrix. Measuring real generation quality requires an OpenRouter key (`npm run eval -- --live`), which has not been run yet.
 
 > [!IMPORTANT]
-> **Empresa fictícia.** A Moenda Lunar Cafés Especiais, seus documentos, clientes e vendas foram inventados para este projeto. E-mails e sites usam o domínio reservado `.example`.
+> **Fictional company.** Moenda Lunar Cafés Especiais, its documents, customers and sales were invented for this project. Emails and websites use the reserved `.example` domain.
 
-![Página de demonstração respondendo "Qual é o prazo para devolver um moedor com defeito?" com duas fontes citadas](docs/img/demo.png)
+> [!NOTE]
+> **Language.** The fictional company's documents, the golden questions and the model fixtures are in Portuguese, so the assistant answers in Brazilian Portuguese. The terminal output blocks below are real program output and are kept verbatim.
+
+![Demo page answering "Qual é o prazo para devolver um moedor com defeito?" (what is the deadline to return a defective grinder?) with two cited sources](docs/img/demo.png)
 
 <details>
-<summary>Captura da mesma página respondendo uma pergunta de vendas com SQL corrigida</summary>
+<summary>Screenshot of the same page answering a sales question with a corrected SQL query</summary>
 
-![Página de demonstração com a SQL corrigida, a tabela de 5 linhas e as perguntas para continuar](docs/img/demo-sql.png)
+![Demo page with the corrected SQL, the 5-row table and the follow-up questions](docs/img/demo-sql.png)
 
 </details>
 
-## Sumário
+## Table of contents
 
-- [Por que este projeto existe](#por-que-este-projeto-existe)
-- [Destaques](#destaques)
-- [Arquitetura](#arquitetura)
-- [Início rápido](#início-rápido)
-- [Como perguntar](#como-perguntar)
-- [Ramo RAG: responder com fonte ou recusar](#ramo-rag-responder-com-fonte-ou-recusar)
-- [Ramo SQL e suas defesas](#ramo-sql-e-suas-defesas)
-- [Guardrails e matriz de ataques](#guardrails-e-matriz-de-ataques)
+- [Why this project exists](#why-this-project-exists)
+- [Highlights](#highlights)
+- [Architecture](#architecture)
+- [Quick start](#quick-start)
+- [How to ask](#how-to-ask)
+- [RAG branch: answer with a source or refuse](#rag-branch-answer-with-a-source-or-refuse)
+- [SQL branch and its defenses](#sql-branch-and-its-defenses)
+- [Guardrails and attack matrix](#guardrails-and-attack-matrix)
 - [Eval gate](#eval-gate)
-- [Modelo real via OpenRouter](#modelo-real-via-openrouter)
-- [Observabilidade](#observabilidade)
-- [Testes e qualidade](#testes-e-qualidade)
-- [Estrutura do repositório](#estrutura-do-repositório)
-- [A empresa fictícia](#a-empresa-fictícia)
-- [Aulas do curso aplicadas](#aulas-do-curso-aplicadas)
-- [O que mudei em relação à aula](#o-que-mudei-em-relação-à-aula)
-- [Limitações](#limitações)
-- [Licença](#licença)
+- [Real model via OpenRouter](#real-model-via-openrouter)
+- [Observability](#observability)
+- [Tests and quality](#tests-and-quality)
+- [Repository structure](#repository-structure)
+- [The fictional company](#the-fictional-company)
+- [Course lessons applied](#course-lessons-applied)
+- [What I changed from the lessons](#what-i-changed-from-the-lessons)
+- [Limitations](#limitations)
+- [License](#license)
 
-## Por que este projeto existe
+## Why this project exists
 
-Os exemplos típicos de RAG e Text-to-SQL respondem a qualquer coisa, confiam no system prompt para se proteger e não dizem quão bem funcionam. Este projeto parte do contrário:
+Typical RAG and Text-to-SQL examples answer anything, trust the system prompt to protect themselves, and never say how well they work. This project starts from the opposite premise:
 
-- **Recusar é recurso.** Sem evidência suficiente, o assistente recusa. Uma resposta inventada é defeito; uma recusa correta é sucesso. O limiar de recusa é calibrado num split separado, não escolhido a olho.
-- **Toda afirmação tem origem.** Respostas de documentos citam só os trechos recuperados; respostas de dados mostram a SQL executada, as linhas e, se houve correção, a consulta original.
-- **SQL gerada é entrada não confiável.** Ela passa por lexer, `EXPLAIN QUERY PLAN`, authorizer e `query_only`, roda num processo filho com prazo, e violação de política bloqueia sem voltar ao modelo.
-- **A qualidade é medida, não presumida.** Perguntas-ouro versionadas, 7 métricas com limiar por perfil e um CI que reprova abaixo do limiar. Cada métrica diz se é *mecanismo* (medido de verdade) ou *contrato de fixture*.
+- **Refusing is a feature.** Without enough evidence, the assistant refuses. A made-up answer is a defect; a correct refusal is a success. The refusal threshold is calibrated on a separate split, not picked by eye.
+- **Every claim has a source.** Document answers cite only the retrieved passages; data answers show the executed SQL, the rows and, if a correction happened, the original query.
+- **Generated SQL is untrusted input.** It goes through a lexer, `EXPLAIN QUERY PLAN`, an authorizer and `query_only`, runs in a child process with a deadline, and a policy violation blocks without going back to the model.
+- **Quality is measured, not assumed.** Versioned golden questions, 7 metrics with per-profile thresholds, and a CI that fails below the threshold. Each metric says whether it is a *mechanism* (really measured) or a *fixture contract*.
 
-Os princípios completos estão na [constituição do projeto](specs/constitution.md).
+The full principles are in the [project constitution](specs/constitution.md).
 
-## Destaques
+## Highlights
 
 | | |
 |---|---|
-| **Roda sem chave** | `npm install && npm run demo`: 13 cenários em memória, sem `.env`, Docker nem rede depois do `npm install` |
-| **Fake honesto** | O provedor `fake` troca só a chamada ao modelo; recuperação, limiar, validação de SQL, authorizer, guardrails, retry, fallback e ledger rodam de verdade |
-| **Grafo LangGraph** | 12 nós, um por arquivo, com arestas puras e testadas à parte; todo laço tem teto |
-| **RAG com recusa** | Top-3 por cosseno sobre 8 documentos, limiar calibrado (0,18), citações filtradas pelo conjunto recuperado |
-| **Text-to-SQL seguro** | Schema real por introspecção, até 3 correções, `no_results` distinto de `error`, processo filho com `SIGKILL` no prazo |
-| **Defesa em camadas** | Regras de entrada, sanitização na ingestão, política SQL, authorizer, `query_only` e guarda de saída; 19 ataques, todos barrados |
-| **Eval gate no CI** | 34 perguntas-ouro, 7 métricas, perfis `fake` e `live` com limiares próprios |
-| **Spec-driven** | 5 specs com 49 critérios EARS; um teste falha se algum critério ficar sem teste |
-| **Enxuto** | 5 dependências de runtime, TypeScript executado direto pelo Node (*type stripping*), sem etapa de build |
+| **Runs without a key** | `npm install && npm run demo`: 13 in-memory scenarios, no `.env`, no Docker and no network after `npm install` |
+| **Honest fake** | The `fake` provider replaces only the model call; retrieval, threshold, SQL validation, authorizer, guardrails, retry, fallback and ledger run for real |
+| **LangGraph graph** | 12 nodes, one per file, with pure edges tested separately; every loop has a cap |
+| **RAG with refusal** | Top-3 by cosine over 8 documents, calibrated threshold (0.18), citations filtered by the retrieved set |
+| **Safe Text-to-SQL** | Real schema by introspection, up to 3 corrections, `no_results` distinct from `error`, child process with `SIGKILL` at the deadline |
+| **Layered defense** | Input rules, ingestion sanitization, SQL policy, authorizer, `query_only` and an output guard; 19 attacks, all stopped |
+| **Eval gate in CI** | 34 golden questions, 7 metrics, `fake` and `live` profiles with their own thresholds |
+| **Spec-driven** | 5 specs with 49 EARS criteria; a test fails if any criterion is left without a test |
+| **Lean** | 5 runtime dependencies, TypeScript run directly by Node (*type stripping*), no build step |
 
-## Arquitetura
+## Architecture
 
-Toda entrada (API, CLI, página, demo e eval) passa pelo mesmo `AskService`, que invoca um único grafo LangGraph.
+Every entry point (API, CLI, page, demo and eval) goes through the same `AskService`, which invokes a single LangGraph graph.
 
 ```mermaid
 flowchart TD
-  Q["POST /ask, CLI, página"] --> S["AskService<br/>requestId, timeout, budget, ledger"]
-  S --> G0["guardrailInput<br/>regras de entrada (+ modelo)"]
+  Q["POST /ask, CLI, page"] --> S["AskService<br/>requestId, timeout, budget, ledger"]
+  S --> G0["guardrailInput<br/>input rules (+ model)"]
   G0 -- unsafe --> F
-  G0 -- safe --> R["router<br/>docs, data ou out_of_scope"]
+  G0 -- safe --> R["router<br/>docs, data or out_of_scope"]
   R -- out_of_scope --> O[outOfScope] --> F
 
-  subgraph RAG ["Ramo RAG"]
-    RT["retrieve<br/>top-3 por cosseno"]
+  subgraph RAG ["RAG branch"]
+    RT["retrieve<br/>top-3 by cosine"]
     RA[ragAnswer]
-    CC["checkCitations<br/>só IDs recuperados"]
+    CC["checkCitations<br/>retrieved IDs only"]
     RT -- ok --> RA --> CC
   end
 
-  subgraph SQL ["Ramo SQL"]
+  subgraph SQL ["SQL branch"]
     SG[sqlGenerate] --> SV["sqlValidate<br/>lexer, EXPLAIN QUERY PLAN, authorizer"]
-    SV -- "erro corrigível" --> SC["sqlCorrect<br/>até 3 correções"]
+    SV -- "correctable error" --> SC["sqlCorrect<br/>up to 3 corrections"]
     SC --> SV
-    SV -- válida --> SE["sqlExecute<br/>processo filho com prazo"]
-    SE -- "erro de execução" --> SC
-    SE -- linhas --> SA[sqlAnswer]
+    SV -- valid --> SE["sqlExecute<br/>child process with deadline"]
+    SE -- "execution error" --> SC
+    SE -- rows --> SA[sqlAnswer]
   end
 
   R -- docs --> RT
   R -- data --> SG
-  RT -- "abaixo do limiar: recusa" --> F
+  RT -- "below threshold: refuse" --> F
   CC --> F
-  SV -- "política violada: bloqueia" --> F
-  SV -- "teto de correções" --> F
-  SE -- "sem resultados, prazo estourado ou teto" --> F
+  SV -- "policy violated: block" --> F
+  SV -- "correction cap" --> F
+  SE -- "no results, deadline exceeded or cap" --> F
   SA --> F
-  F["finalize<br/>guarda de saída"] --> END[(AskResponse)]
+  F["finalize<br/>output guard"] --> END[(AskResponse)]
 ```
 
-O caminho mais longo tem 16 passos; o `recursionLimit` de 25 é só rede de segurança, e um teste prova que ele não é atingido.
+The longest path has 16 steps; the `recursionLimit` of 25 is only a safety net, and a test proves it is never reached.
 
-| Componente | Onde | Papel |
+| Component | Where | Role |
 |---|---|---|
-| `AskService` | `src/ask-service.ts` | Serviço único usado pela API, CLIs, demo e eval: `requestId`, timeout, budget de chamadas, mapeamento de erros para HTTP, validação da resposta e ledger |
-| Grafo | `src/graph/` | 12 nós LangGraph, um por arquivo, com arestas puras em `routing.ts` e reducers explícitos no estado |
-| Cliente de LLM | `src/llm/` | Provider `fake` (fixtures) ou `openrouter` (SDK `openai`); `LlmClient` com retry, fallback, parse com Zod, tokens, custo e teto por requisição |
-| RAG | `src/rag/`, `src/embeddings/` | Chunker por seção, embedder lexical `hash-v1`, vector store em `node:sqlite`, sanitizador e validação de citações |
-| SQL | `src/sql/` | Seed determinístico, lexer, política estática, `EXPLAIN QUERY PLAN`, conexão somente leitura com authorizer e teto de 100.000 bytes por valor, executor num processo filho com prazo (`SQL_TIMEOUT_MS`) |
-| Guardrails | `src/guardrails/` | Regras de entrada, classificador por modelo (opcional) e guarda de saída |
-| Observabilidade | `src/obs/` | Ledger em SQLite, `/stats` com P50 e P95, logger JSON em stderr com chaves mascaradas |
-| Interfaces | `src/server.ts`, `src/web/`, `src/cli/` | Fastify, página estática sem build, CLIs |
-| Eval | `src/eval/`, `eval/` | Perguntas-ouro, métricas, relatório, calibração e matriz de camadas |
+| `AskService` | `src/ask-service.ts` | Single service used by the API, CLIs, demo and eval: `requestId`, timeout, call budget, error-to-HTTP mapping, response validation and ledger |
+| Graph | `src/graph/` | 12 LangGraph nodes, one per file, with pure edges in `routing.ts` and explicit reducers in the state |
+| LLM client | `src/llm/` | `fake` provider (fixtures) or `openrouter` (`openai` SDK); `LlmClient` with retry, fallback, Zod parsing, tokens, cost and a per-request cap |
+| RAG | `src/rag/`, `src/embeddings/` | Section-based chunker, lexical `hash-v1` embedder, vector store on `node:sqlite`, sanitizer and citation validation |
+| SQL | `src/sql/` | Deterministic seed, lexer, static policy, `EXPLAIN QUERY PLAN`, read-only connection with authorizer and a 100,000-byte cap per value, executor in a child process with a deadline (`SQL_TIMEOUT_MS`) |
+| Guardrails | `src/guardrails/` | Input rules, model classifier (optional) and output guard |
+| Observability | `src/obs/` | SQLite ledger, `/stats` with P50 and P95, JSON logger on stderr with masked keys |
+| Interfaces | `src/server.ts`, `src/web/`, `src/cli/` | Fastify, static page with no build, CLIs |
+| Eval | `src/eval/`, `eval/` | Golden questions, metrics, report, calibration and layer matrix |
 
-As decisões por trás desse desenho, com spec e incidente de cada uma, estão em [`docs/decisoes-de-engenharia.md`](docs/decisoes-de-engenharia.md).
+The decisions behind this design, with the spec and incident for each, are in [`docs/decisoes-de-engenharia.md`](docs/decisoes-de-engenharia.md) (in Portuguese).
 
-## Início rápido
+## Quick start
 
-Requer **Node 24.15 ou mais novo**, a primeira versão cujo `node:sqlite` expõe `DatabaseSync.limits` (o `.npmrc` liga `engine-strict`, então o `npm install` falha logo em versão mais antiga). Sem chave, sem Docker e sem rede depois do `npm install`.
+Requires **Node 24.15 or newer**, the first version whose `node:sqlite` exposes `DatabaseSync.limits` (`.npmrc` turns on `engine-strict`, so `npm install` fails right away on an older version). No key, no Docker and no network after `npm install`.
 
 ```bash
 git clone https://github.com/flaviorg/docs-data-assistant.git
@@ -143,11 +142,11 @@ cd docs-data-assistant
 npm install && npm run demo
 ```
 
-A demo monta tudo em memória (semeia o banco de vendas e indexa os documentos), roda os 13 cenários e não lê `.env` nem grava em `data/`.
+The demo builds everything in memory (seeds the sales database and indexes the documents), runs the 13 scenarios, and neither reads `.env` nor writes to `data/`.
 
-### Demo no terminal
+### Terminal demo
 
-Saída real de `npm run demo` (sem edição):
+Real output of `npm run demo` (unedited; the scenario names and details are program output in Portuguese):
 
 ```text
 Moenda Lunar · docs-data-assistant · demo roteirizada
@@ -176,11 +175,11 @@ Recuperação, limiar, validação de SQL, authorizer, guardrails, retry e fallb
 /stats: 13 req · P50 7 ms · P95 1755 ms · 28 chamadas LLM · 4 retries · 2 fallbacks · US$ 0,0028 (fictício)
 ```
 
-Os cenários 10 e 11 usam **fixture: modelo complacente simulado**. A fixture encena um modelo que cedeu à instrução embutida (no 10, repete o cupom do documento envenenado; no 11, devolve um `DELETE`), para provar que a última linha de defesa barra mesmo assim. Um modelo real nem receberia o trecho do cenário 10, que já foi redigido na ingestão. O P95 alto vem do cenário 13, que espera o backoff real dos retries; no fake, as latências medem só o processamento local, sem atraso simulado, e variam de uma execução para outra.
+Scenarios 10 and 11 use a **fixture: simulated compliant model**. The fixture stages a model that gave in to the embedded instruction (in 10, it repeats the coupon from the poisoned document; in 11, it returns a `DELETE`), to prove that the last line of defense blocks it anyway. A real model would not even receive the passage from scenario 10, which was already redacted at ingestion. The high P95 comes from scenario 13, which waits for the real retry backoff; with the fake, latencies measure only local processing, with no simulated delay, and vary from run to run.
 
-### Eval gate em um comando
+### Eval gate in one command
 
-Saída real de `npm run eval` (relatório completo em [`eval/reports/example-fake.md`](eval/reports/example-fake.md)):
+Real output of `npm run eval` (full report in [`eval/reports/example-fake.md`](eval/reports/example-fake.md)):
 
 - Perfil: FAKE (geração roteirizada; recuperação, limiar, validação e bloqueio medidos de verdade)
 - Provedor: fake · Embedder: `hash-v1:idf=a01336992456` · Guardrail: rules
@@ -196,28 +195,29 @@ Saída real de `npm run eval` (relatório completo em [`eval/reports/example-fak
 | injectionBlockRate | mecanismo | 1.00 | =1.00 | sim | 8/8 |
 | falseBlockRate | mecanismo | 0.04 | <=0.05 | sim | 1/26 |
 
-Resultado: **APROVADO** (código 0). A leitura de cada métrica está em [Eval gate](#eval-gate).
 
-### Todos os comandos
+Result: **APROVADO** (passed, exit code 0). How to read each metric is explained in [Eval gate](#eval-gate).
 
-| Comando | O que faz |
+### All commands
+
+| Command | What it does |
 |---|---|
-| `npm run demo` | Os 13 cenários em memória, sem `.env` e sem gravar em `data/` |
-| `npm start` | API e página em `http://127.0.0.1:3000`. Na primeira vez, semeia `data/sales.db` e indexa `data/app.db` |
-| `npm run ask -- "pergunta"` | Responde no terminal (`--json` para a resposta crua, `--route docs\|data` para pular o roteador). Usa os mesmos `data/sales.db` e `data/app.db` do `npm start` e os cria na primeira vez (os dois ficam fora do Git) |
-| `npm test` | Suíte inteira (unidade, integração do grafo, ponta a ponta), com a rede bloqueada |
+| `npm run demo` | The 13 in-memory scenarios, without `.env` and without writing to `data/` |
+| `npm start` | API and page at `http://127.0.0.1:3000`. The first time, it seeds `data/sales.db` and indexes `data/app.db` |
+| `npm run ask -- "question"` | Answers in the terminal (`--json` for the raw response, `--route docs\|data` to skip the router). Uses the same `data/sales.db` and `data/app.db` as `npm start` and creates them the first time (both are kept out of Git) |
+| `npm test` | The whole suite (unit, graph integration, end to end), with the network blocked |
 | `npm run typecheck` | `tsc --noEmit` |
-| `npm run eval` | Eval gate; sai com código 1 se alguma métrica ficar abaixo do limiar |
-| `npm run layers` | Matriz ataque × camada; sai com código 1 se algum ataque passar por todas |
-| `npm run calibrate` | Tabela limiar × acurácia de recusa no split de calibração |
-| `npm run seed` / `npm run ingest` | Semeia o banco de vendas / indexa os documentos |
-| `npm run check` | `typecheck`, `test` e `eval` em sequência |
+| `npm run eval` | Eval gate; exits with code 1 if any metric falls below its threshold |
+| `npm run layers` | Attack × layer matrix; exits with code 1 if any attack gets through every layer |
+| `npm run calibrate` | Threshold × refusal-accuracy table on the calibration split |
+| `npm run seed` / `npm run ingest` | Seeds the sales database / indexes the documents |
+| `npm run check` | `typecheck`, `test` and `eval` in sequence |
 
-## Como perguntar
+## How to ask
 
 ### CLI
 
-Saídas reais de `npm run ask`:
+Real outputs of `npm run ask` (the assistant answers in Brazilian Portuguese because the company's documents are in Portuguese):
 
 ```text
 $ npm run ask -- "Qual é o prazo para devolver um moedor com defeito?"
@@ -235,7 +235,7 @@ Fontes
 ```
 
 <details>
-<summary>Pergunta de vendas com SQL corrigida pelo modelo</summary>
+<summary>Sales question with SQL corrected by the model</summary>
 
 ```text
 $ npm run ask -- "Quais os 5 produtos mais vendidos em quantidade no segundo semestre de 2025?"
@@ -270,15 +270,15 @@ Perguntas para continuar:
 4 chamadas LLM · 3.175 tokens (estimados) · US$ 0,0004 (fictício) · 1 correção · 92 ms · req 8cd633bc
 ```
 
-A CLI mostra a consulta original (a que o modelo escreveu primeiro, com `oi.quantidade`, coluna que não existe); o validador acusou `no such column` no `EXPLAIN QUERY PLAN` e o modelo corrigiu para `oi.quantity`. Os 92 ms incluem subir o processo filho que executa a SQL, na primeira consulta; as latências do fake variam com a carga da máquina.
+The CLI shows the original query (the one the model wrote first, with `oi.quantidade`, a column that does not exist); the validator reported `no such column` in `EXPLAIN QUERY PLAN` and the model corrected it to `oi.quantity`. The 92 ms include starting the child process that executes the SQL, on the first query; the fake's latencies vary with machine load.
 
 </details>
 
-No modo fake, só as perguntas que têm fixture em `fixtures/llm/` são respondidas; qualquer outra dá erro explícito (422 na API), nunca uma resposta genérica.
+In fake mode, only questions that have a fixture in `fixtures/llm/` are answered; any other one yields an explicit error (422 in the API), never a generic answer.
 
 ### HTTP
 
-`npm start` sobe a API em `http://127.0.0.1:3000`:
+`npm start` brings up the API at `http://127.0.0.1:3000`:
 
 ```bash
 curl -s http://127.0.0.1:3000/ask \
@@ -286,95 +286,95 @@ curl -s http://127.0.0.1:3000/ask \
   -d '{"question": "Qual é o prazo para devolver um moedor com defeito?"}'
 ```
 
-| Rota | O que faz |
+| Route | What it does |
 |---|---|
-| `POST /ask` | Corpo `{ "question": string (3 a 500 caracteres), "forceRoute"?: "docs" \| "data" }`, até 16 KB |
-| `GET /stats?since=24h` | Snapshot do ledger; `since` aceita `15m`, `1h`, `24h` ou `7d` |
-| `GET /health` | Provedor, *fingerprint* do embedder, modelos, modo do guardrail, contagens da base e dos pedidos |
-| `GET /demo/questions` | Perguntas de demonstração usadas pela página (cenários 1 a 12) |
+| `POST /ask` | Body `{ "question": string (3 to 500 characters), "forceRoute"?: "docs" \| "data" }`, up to 16 KB |
+| `GET /stats?since=24h` | Ledger snapshot; `since` accepts `15m`, `1h`, `24h` or `7d` |
+| `GET /health` | Provider, embedder *fingerprint*, models, guardrail mode, knowledge-base and order counts |
+| `GET /demo/questions` | Demo questions used by the page (scenarios 1 to 12) |
 
 <details>
-<summary>Contrato da resposta e dos erros</summary>
+<summary>Response and error contract</summary>
 
-A resposta de `POST /ask` é validada por schema Zod (`AskResponseSchema`, em `src/domain/schemas.ts`) antes de sair:
+The `POST /ask` response is validated by a Zod schema (`AskResponseSchema`, in `src/domain/schemas.ts`) before it leaves:
 
-| Campo | Conteúdo |
+| Field | Content |
 |---|---|
-| `requestId` | ID da requisição, também no header `X-Request-Id` de toda resposta, inclusive de erro |
-| `route`, `routeReason`, `overridden` | Rota escolhida (`docs`, `data`, `out_of_scope` ou `null` se bloqueada antes do roteador), motivo do roteador e se `forceRoute` foi usado |
-| `status`, `blockedBy` | `answered`, `refused`, `no_results`, `blocked` ou `error`; camada que bloqueou (`input_rules`, `input_model`, `sql_policy`, `sql_authorizer`, `output_guard`) |
-| `answer`, `citations` | Texto da resposta e até 3 citações (`chunkId`, `docTitle`, `heading`, `score`, `snippet`, `sanitized`) |
-| `sql` | Consulta final, consulta original, número de correções, `limitApplied`, colunas, até 50 linhas e `lastError` |
-| `followUpQuestions` | Até 3 perguntas para continuar |
-| `guardrail`, `warnings` | Veredito da entrada (camada e regras) e avisos (por exemplo, `citation_dropped`, `sql_timeout`) |
-| `meta` | Provedor, embedder, modelos, chamadas ao LLM, fallback, tokens, custo (com `costIsFictional`), latência e o *trace* de nós do grafo |
+| `requestId` | Request ID, also in the `X-Request-Id` header of every response, including errors |
+| `route`, `routeReason`, `overridden` | Chosen route (`docs`, `data`, `out_of_scope`, or `null` if blocked before the router), the router's reason, and whether `forceRoute` was used |
+| `status`, `blockedBy` | `answered`, `refused`, `no_results`, `blocked` or `error`; the layer that blocked (`input_rules`, `input_model`, `sql_policy`, `sql_authorizer`, `output_guard`) |
+| `answer`, `citations` | Answer text and up to 3 citations (`chunkId`, `docTitle`, `heading`, `score`, `snippet`, `sanitized`) |
+| `sql` | Final query, original query, number of corrections, `limitApplied`, columns, up to 50 rows and `lastError` |
+| `followUpQuestions` | Up to 3 follow-up questions |
+| `guardrail`, `warnings` | Input verdict (layer and rules) and warnings (for example, `citation_dropped`, `sql_timeout`) |
+| `meta` | Provider, embedder, models, LLM calls, fallback, tokens, cost (with `costIsFictional`), latency and the graph's node *trace* |
 
-Erros saem como `{ error, message, requestId }`, sem stack: 400 (corpo inválido), 404 (rota inexistente), 413 (corpo acima de 16 KB), 415 (tipo de conteúdo), 422 (sem fixture no modo fake), 503 (modelos indisponíveis) e 504 (passou de `ASK_TIMEOUT_MS`).
+Errors come out as `{ error, message, requestId }`, with no stack: 400 (invalid body), 404 (unknown route), 413 (body above 16 KB), 415 (content type), 422 (no fixture in fake mode), 503 (models unavailable) and 504 (exceeded `ASK_TIMEOUT_MS`).
 
 </details>
 
-### Página web
+### Web page
 
-A mesma `npm start` serve uma página estática em `http://127.0.0.1:3000`: campo de pergunta, *chips* com os cenários de demonstração, faixa "MODO DEMO" quando o provedor é o fake, e, em cada resposta, as fontes ou a SQL com a tabela, além das chamadas ao modelo, tokens, custo estimado, latência e a sequência de nós do grafo. A página não usa HTML cru (só `textContent` e `createElement`), não tem script nem estilo inline e sai com CSP `default-src 'none'`, porque mostra texto de documentos (inclusive o envenenado) e do modelo.
+The same `npm start` serves a static page at `http://127.0.0.1:3000`: a question field, *chips* with the demo scenarios, a "MODO DEMO" banner when the provider is the fake, and, for each answer, the sources or the SQL with its table, plus the model calls, tokens, estimated cost, latency and the sequence of graph nodes. The page uses no raw HTML (only `textContent` and `createElement`), has no inline script or style, and is served with the CSP `default-src 'none'`, because it displays text from documents (including the poisoned one) and from the model.
 
-## Ramo RAG: responder com fonte ou recusar
+## RAG branch: answer with a source or refuse
 
-| Etapa | Como funciona |
+| Step | How it works |
 |---|---|
-| Base | 8 documentos Markdown em `data/kb/`, escritos do zero, um deles envenenado de propósito |
-| Chunking | Corte por H2 e H3, depois por tamanho: 600 caracteres com overlap de 100; IDs estáveis `<slug>#<seção>-<n>` |
-| Embedder | `hash-v1`: TF-IDF com *feature hashing* (2048 dimensões), determinístico e sem rede; toda métrica leva o *fingerprint* |
-| Busca | Top-3 por cosseno num vector store em `node:sqlite` (`app.db`); reingestão sem mudança não recria chunks |
-| Recusa | Abaixo do limiar (0,18, calibrado no split `calibration`), recusa **sem chamar o modelo de geração** |
-| Citações | O código descarta IDs citados fora do conjunto recuperado (aviso `citation_dropped`) e recusa se não sobrar nenhuma |
-| Sanitização | Instruções embutidas são redigidas **na ingestão**; o modelo recebe `[trecho removido: possível instrução embutida]` e cada trecho vai entre `<documento id="...">` com escape |
+| Base | 8 Markdown documents in `data/kb/`, written from scratch, one of them deliberately poisoned |
+| Chunking | Split by H2 and H3, then by size: 600 characters with an overlap of 100; stable IDs `<slug>#<section>-<n>` |
+| Embedder | `hash-v1`: TF-IDF with *feature hashing* (2048 dimensions), deterministic and offline; every metric carries the *fingerprint* |
+| Search | Top-3 by cosine in a vector store on `node:sqlite` (`app.db`); re-ingesting without changes does not recreate chunks |
+| Refusal | Below the threshold (0.18, calibrated on the `calibration` split), it refuses **without calling the generation model** |
+| Citations | The code drops cited IDs outside the retrieved set (`citation_dropped` warning) and refuses if none remain |
+| Sanitization | Embedded instructions are redacted **at ingestion**; the model receives `[trecho removido: possível instrução embutida]` and each passage is wrapped in an escaped `<documento id="...">` tag |
 
-O embedder `hash-v1` é lexical: perguntas com vocabulário diferente do documento recuperam pior. Um embedder semântico entra pela interface `Embedder`, como descreve o [ADR 001](docs/adr/001-embedder-plugavel.md). Spec completa: [002, RAG com recusa](specs/002-rag-com-recusa/spec.md).
+The `hash-v1` embedder is lexical: questions whose vocabulary differs from the document retrieve worse. A semantic embedder plugs in through the `Embedder` interface, as described in [ADR 001](docs/adr/001-embedder-plugavel.md). Full spec: [002, RAG with refusal](specs/002-rag-com-recusa/spec.md).
 
-## Ramo SQL e suas defesas
+## SQL branch and its defenses
 
-A SQL vem de um modelo e é tratada como entrada não confiável. Cinco camadas independentes decidem se ela roda, e um prazo de execução decide até quando.
+The SQL comes from a model and is treated as untrusted input. Five independent layers decide whether it runs, and an execution deadline decides for how long.
 
-| # | Defesa | O que barra |
+| # | Defense | What it stops |
 |---|---|---|
-| 1 | **Schema real e bancos separados** | O prompt recebe o DDL por introspecção, sem colunas negadas. `sales.db` não tem tabelas internas: documentos, vetores e ledger ficam em `app.db` |
-| 2 | **Lexer e política estática** | Mais de uma instrução, o que não começa por `SELECT`/`WITH`, palavras-chave de escrita (inclusive `INTO`), junção sem condição, funções de risco (`load_extension`, `printf`, `format`, `zeroblob`...). Reescreve o `LIMIT` para no máximo 200 |
-| 3 | **`EXPLAIN QUERY PLAN` + authorizer** | Compila sem executar; o authorizer nega toda ação diferente de leitura e toda tabela, coluna ou função fora da allowlist (`customer_contacts`, `customers.name`) |
-| 4 | **Conexão somente leitura** | `query_only`, snapshot desserializado e teto de 100.000 bytes por valor (`DatabaseSync.limits.length`) |
-| 5 | **Processo filho com prazo** | A consulta roda fora da thread principal; passando de `SQL_TIMEOUT_MS` (5 s), o filho leva `SIGKILL` sem travar o servidor |
+| 1 | **Real schema and separate databases** | The prompt receives the DDL by introspection, without denied columns. `sales.db` has no internal tables: documents, vectors and ledger live in `app.db` |
+| 2 | **Lexer and static policy** | More than one statement, anything not starting with `SELECT`/`WITH`, write keywords (including `INTO`), joins without a condition, risky functions (`load_extension`, `printf`, `format`, `zeroblob`...). Rewrites `LIMIT` to at most 200 |
+| 3 | **`EXPLAIN QUERY PLAN` + authorizer** | Compiles without executing; the authorizer denies every action other than reads and every table, column or function outside the allowlist (`customer_contacts`, `customers.name`) |
+| 4 | **Read-only connection** | `query_only`, deserialized snapshot and a 100,000-byte cap per value (`DatabaseSync.limits.length`) |
+| 5 | **Child process with a deadline** | The query runs off the main thread; past `SQL_TIMEOUT_MS` (5 s), the child gets `SIGKILL` without freezing the server |
 
-Regras de fluxo:
+Flow rules:
 
-- **Violação de política bloqueia e nunca volta ao modelo.** Mandar para correção daria ao atacante novas tentativas. Só erro de sintaxe, tabela ou coluna inexistente e função comum fora da allowlist são corrigíveis, até 3 vezes; esgotado o teto, `status: error` com `lastError`, sem nova chamada.
-- **"Sem resultados" é distinto de erro.** Zero linhas, ou linhas só com `NULL` (como `SUM` sobre vazio), viram `no_results`; `COUNT` sobre vazio é resultado válido.
-- **O modelo vê no máximo 50 linhas** para escrever a análise e de 1 a 3 perguntas de acompanhamento.
+- **A policy violation blocks and never goes back to the model.** Sending it for correction would give an attacker new attempts. Only syntax errors, a missing table or column, and an ordinary function outside the allowlist are correctable, up to 3 times; once the cap is reached, `status: error` with `lastError`, with no new call.
+- **"No results" is distinct from an error.** Zero rows, or rows with only `NULL` (such as `SUM` over an empty set), become `no_results`; `COUNT` over an empty set is a valid result.
+- **The model sees at most 50 rows** to write the analysis and 1 to 3 follow-up questions.
 
 <details>
-<summary>Incidentes que moldaram essas defesas</summary>
+<summary>Incidents that shaped these defenses (docs in Portuguese)</summary>
 
-- [`prepare()` descarta instruções extras em silêncio](docs/incidents/2026-10-04-prepare-descarta-instrucoes.md): por isso o lexer rejeita uma segunda instrução.
-- [`readOnly` não vale em memória compartilhada](docs/incidents/2026-10-04-readonly-nao-vale-em-memoria-compartilhada.md): por isso snapshot, `query_only` e authorizer.
-- [Produto cartesiano passava pela política e travava o servidor](docs/incidents/2026-10-04-produto-cartesiano-trava-o-servidor.md) e [`Worker.terminate()` não interrompe o `node:sqlite`](docs/incidents/2026-10-04-terminate-nao-interrompe-sqlite.md): por isso o processo filho.
-- [Funções de texto alocavam centenas de MB dentro do prazo](docs/incidents/2026-10-04-funcoes-de-texto-sem-teto.md): por isso o teto por valor.
-- [`LIKE` negado pelo authorizer](docs/incidents/2026-10-04-like-negado-pelo-authorizer.md).
+- [`prepare()` silently drops extra statements](docs/incidents/2026-10-04-prepare-descarta-instrucoes.md): hence the lexer rejects a second statement.
+- [`readOnly` does not hold on shared memory](docs/incidents/2026-10-04-readonly-nao-vale-em-memoria-compartilhada.md): hence snapshot, `query_only` and authorizer.
+- [A Cartesian product got through the policy and froze the server](docs/incidents/2026-10-04-produto-cartesiano-trava-o-servidor.md) and [`Worker.terminate()` does not interrupt `node:sqlite`](docs/incidents/2026-10-04-terminate-nao-interrompe-sqlite.md): hence the child process.
+- [Text functions allocated hundreds of MB within the deadline](docs/incidents/2026-10-04-funcoes-de-texto-sem-teto.md): hence the per-value cap.
+- [`LIKE` denied by the authorizer](docs/incidents/2026-10-04-like-negado-pelo-authorizer.md).
 
 </details>
 
-Spec completa: [003, Text-to-SQL seguro](specs/003-text-to-sql-seguro/spec.md).
+Full spec: [003, safe Text-to-SQL](specs/003-text-to-sql-seguro/spec.md).
 
-## Guardrails e matriz de ataques
+## Guardrails and attack matrix
 
-O system prompt não é firewall. A segurança fica em código determinístico, em camadas:
+The system prompt is not a firewall. Security lives in deterministic code, in layers:
 
-| Camada | Onde age | Como |
+| Layer | Where it acts | How |
 |---|---|---|
-| Regras de entrada | Antes do roteador | Regras como `instruction_override`, `reveal_system_prompt`, `developer_mode`, `role_hijack`, `system_tag`, `base64_blob` |
-| Classificador por modelo | Antes do roteador, opcional | `rules+model` com chave; falha fechado (resposta fora do formato bloqueia) |
-| Sanitizador | Na ingestão | Redige instruções embutidas nos documentos antes de qualquer modelo vê-las |
-| Política SQL, authorizer, `query_only` | Ramo SQL | Ver [Ramo SQL e suas defesas](#ramo-sql-e-suas-defesas) |
-| Guarda de saída | No `finalize` | Confere resposta, motivo da rota, IDs citados e o bloco SQL contra o canário, os trechos redigidos e vazamento do system prompt |
+| Input rules | Before the router | Rules such as `instruction_override`, `reveal_system_prompt`, `developer_mode`, `role_hijack`, `system_tag`, `base64_blob` |
+| Model classifier | Before the router, optional | `rules+model` with a key; fails closed (a response outside the expected format blocks) |
+| Sanitizer | At ingestion | Redacts embedded instructions in documents before any model sees them |
+| SQL policy, authorizer, `query_only` | SQL branch | See [SQL branch and its defenses](#sql-branch-and-its-defenses) |
+| Output guard | In `finalize` | Checks the answer, the route reason, the cited IDs and the SQL block against the canary, the redacted passages and system-prompt leakage |
 
-Saída real de `npm run layers`. Cada ataque de `eval/attacks.v1.json` (19, escritos para o projeto) passa por **cada camada sozinha**, sem LLM. `—` quer dizer que a camada não se aplica ao vetor.
+Real output of `npm run layers` (column headers and cell values are program output in Portuguese: `bloqueia` = blocks, `passa` = passes). Each attack in `eval/attacks.v1.json` (19, written for the project) goes through **each layer on its own**, without an LLM. `—` means the layer does not apply to that vector.
 
 | ataque | vetor | regras de entrada | sanitizador | política SQL (lexer) | authorizer | query_only | guarda de saída |
 |---|---|---|---|---|---|---|---|
@@ -398,24 +398,24 @@ Saída real de `npm run layers`. Cada ataque de `eval/attacks.v1.json` (19, escr
 | out-citation-id | output | — | — | — | — | — | bloqueia |
 | out-sql-literal | output | — | — | — | — | — | bloqueia |
 
-19 ataques; todos barrados por ao menos uma camada; escritas via SQL barradas por 3, 2, 3 e 3 camadas.
+19 attacks; all stopped by at least one layer; SQL writes stopped by 3, 2, 3 and 3 layers.
 
-Em resumo: **as regras de entrada são a camada mais fraca** (`ind-assistant` passa por elas e só o sanitizador o barra), e a defesa principal é arquitetural. Escritas via SQL têm redundância real, e dados pessoais só o authorizer barra. A leitura linha a linha, com o incidente de cada achado, está em [`docs/defesas-em-camadas.md`](docs/defesas-em-camadas.md). Spec: [004, guardrails e grafo](specs/004-guardrails-e-grafo/spec.md).
+In short: **the input rules are the weakest layer** (`ind-assistant` gets past them and only the sanitizer stops it), and the main defense is architectural. SQL writes have real redundancy, and only the authorizer stops personal data. A line-by-line reading, with the incident behind each finding, is in [`docs/defesas-em-camadas.md`](docs/defesas-em-camadas.md) (in Portuguese). Spec: [004, guardrails and graph](specs/004-guardrails-e-grafo/spec.md).
 
 ## Eval gate
 
-O CI ([`ci.yml`](.github/workflows/ci.yml)) roda typecheck, testes sem rede, o eval gate no perfil fake e a matriz de camadas, e publica o relatório do eval como artefato. Qualquer métrica abaixo do limiar reprova o build. Os números estão em [Início rápido](#eval-gate-em-um-comando).
+CI ([`ci.yml`](.github/workflows/ci.yml)) runs typecheck, offline tests, the eval gate on the fake profile and the layer matrix, and publishes the eval report as an artifact. Any metric below its threshold fails the build. The numbers are in [Eval gate in one command](#eval-gate-in-one-command).
 
-- **Natureza.** *Mecanismo* é medido de verdade mesmo no fake: recuperação, decisão do limiar, bloqueios. *Contrato (fixture)* prova que fixtures, embedder e pipeline estão em sincronia; como a fixture escrita pelo autor já codifica a rota, as citações e a SQL, esse 1,00 não é qualidade de geração. Os contratos continuam reprovando o CI se quebrarem.
-- **O rótulo FAKE** significa: geração roteirizada; recuperação, limiar, validação e bloqueio medidos de verdade. Só `npm run eval -- --live` mede as 7 métricas com um modelo real, com limiares mais frouxos para as métricas de geração ([`eval/thresholds.json`](eval/thresholds.json)).
-- **Limiar ajustado em 12 itens de calibração.** `npm run calibrate` varre o limiar de recusa só no split `calibration` (separação das medianas 0,176, limiar 0,18). A primeira calibração reprovou, e o embedder foi corrigido sem mudar nenhuma pergunta ([incidente](docs/incidents/2026-10-04-calibracao-hash-v1.md)).
-- **O 0,04 do `falseBlockRate`** é o `docs-003` (cenário 10): uma pergunta legítima cuja fixture encena o modelo complacente e termina bloqueada pela guarda de saída. O item não foi reescrito para "passar" ([incidente](docs/incidents/2026-10-04-falso-bloqueio-docs-003-no-eval-fake.md)).
-- **Regra do projeto:** é proibido reescrever perguntas-ouro ou fixtures para uma métrica passar.
+- **Nature.** A *mechanism* (*mecanismo* in the report) is really measured even on the fake: retrieval, threshold decision, blocks. A *fixture contract* (*contrato (fixture)*) proves that fixtures, embedder and pipeline are in sync; since the author-written fixture already encodes the route, citations and SQL, that 1.00 is not generation quality. The contracts still fail CI if they break.
+- **The FAKE label** means: scripted generation; retrieval, threshold, validation and blocking really measured. Only `npm run eval -- --live` measures the 7 metrics with a real model, with looser thresholds for the generation metrics ([`eval/thresholds.json`](eval/thresholds.json)).
+- **Threshold tuned on 12 calibration items.** `npm run calibrate` sweeps the refusal threshold only on the `calibration` split (median separation 0.176, threshold 0.18). The first calibration failed, and the embedder was fixed without changing any question ([incident](docs/incidents/2026-10-04-calibracao-hash-v1.md)).
+- **The 0.04 in `falseBlockRate`** is `docs-003` (scenario 10): a legitimate question whose fixture stages the compliant model and ends up blocked by the output guard. The item was not rewritten to "pass" ([incident](docs/incidents/2026-10-04-falso-bloqueio-docs-003-no-eval-fake.md)).
+- **Project rule:** rewriting golden questions or fixtures to make a metric pass is forbidden.
 
 <details>
-<summary>Limiares por perfil (<code>eval/thresholds.json</code>)</summary>
+<summary>Thresholds per profile (<code>eval/thresholds.json</code>)</summary>
 
-| métrica | fake | live |
+| metric | fake | live |
 |---|---|---|
 | routeAccuracy | = 1.00 | >= 0.85 |
 | recallAt3 | >= 0.90 | >= 0.90 |
@@ -428,48 +428,48 @@ O CI ([`ci.yml`](.github/workflows/ci.yml)) roda typecheck, testes sem rede, o e
 </details>
 
 <details>
-<summary>O que o fake prova e o que não prova</summary>
+<summary>What the fake proves and what it does not</summary>
 
-O provedor `fake` substitui **só a chamada ao modelo**: cada resposta vem de uma fixture em `fixtures/llm/`, indexada pela pergunta normalizada, e pergunta sem fixture dá erro (422 na API), nunca uma resposta genérica.
+The `fake` provider replaces **only the model call**: each answer comes from a fixture in `fixtures/llm/`, indexed by the normalized question, and a question without a fixture yields an error (422 in the API), never a generic answer.
 
-O que o fake prova:
+What the fake proves:
 
-- o fluxo do grafo, os tetos (3 correções, 8 chamadas por requisição, 25 passos) e o tratamento de erro de cada nó;
-- os contratos de saída do modelo (todo JSON passa por schema Zod);
-- a recuperação e o limiar de recusa, medidos de verdade com o embedder lexical;
-- a validação e a execução de SQL, o authorizer, os guardrails, a guarda de saída, retry, fallback e ledger.
+- the graph flow, the caps (3 corrections, 8 calls per request, 25 steps) and each node's error handling;
+- the model output contracts (every JSON goes through a Zod schema);
+- retrieval and the refusal threshold, really measured with the lexical embedder;
+- SQL validation and execution, the authorizer, the guardrails, the output guard, retry, fallback and ledger.
 
-O que o fake **não** prova:
+What the fake does **not** prove:
 
-- a qualidade da geração (se um modelo real escreve a SQL certa, cita os trechos certos, recusa quando deve);
-- o roteamento de perguntas novas, fora das fixtures;
-- o comportamento do classificador por modelo, que não roda com o fake.
+- generation quality (whether a real model writes the right SQL, cites the right passages, refuses when it should);
+- routing of new questions outside the fixtures;
+- the behavior of the model classifier, which does not run with the fake.
 
 </details>
 
-## Modelo real via OpenRouter
+## Real model via OpenRouter
 
 ```bash
-cp .env.example .env      # preencha OPENROUTER_API_KEY
-npm start                 # ou: npm run ask -- "Qual foi o faturamento por canal em 2025?"
-npm run eval -- --live    # relatório rotulado LIVE, com os limiares do perfil live
-npm run test:live         # testes live (pulados sem chave)
+cp .env.example .env      # fill in OPENROUTER_API_KEY
+npm start                 # or: npm run ask -- "Qual foi o faturamento por canal em 2025?"
+npm run eval -- --live    # report labeled LIVE, with the live profile thresholds
+npm run test:live         # live tests (skipped without a key)
 ```
 
-Com chave, o provedor passa a `openrouter` (`openai/gpt-oss-120b`, fallback `google/gemini-2.5-flash`) e o guardrail passa a `rules+model` (`openai/gpt-oss-safeguard-20b`). Os IDs e preços foram conferidos no catálogo público do OpenRouter em 2026-10-04 (`config/model-prices.json`).
+With a key, the provider switches to `openrouter` (`openai/gpt-oss-120b`, fallback `google/gemini-2.5-flash`) and the guardrail switches to `rules+model` (`openai/gpt-oss-safeguard-20b`). The IDs and prices were checked against OpenRouter's public catalog on 2026-10-04 (`config/model-prices.json`).
 
-O cliente usa o SDK `openai` com `baseURL`, `maxRetries: 0` e retry próprio: o `LlmClient` faz backoff, fallback de modelo, parse com Zod (um retry de parse) e conta execuções lógicas contra o teto de 8 por requisição; saída truncada não tem retry. Toda a configuração está documentada em [`.env.example`](.env.example), e as assinaturas de API conferidas no projeto, em [`docs/notas-de-api.md`](docs/notas-de-api.md).
+The client uses the `openai` SDK with `baseURL`, `maxRetries: 0` and its own retry: `LlmClient` does backoff, model fallback, Zod parsing (one parse retry) and counts logical executions against the cap of 8 per request; truncated output is not retried. All configuration is documented in [`.env.example`](.env.example), and the API signatures checked in the project are in [`docs/notas-de-api.md`](docs/notas-de-api.md) (in Portuguese).
 
-## Observabilidade
+## Observability
 
-- **`requestId`** em toda resposta (`X-Request-Id`), aceito do cliente se tiver formato válido ou trocado por um UUID, com o aviso `request_id_replaced`.
-- **Ledger em SQLite** (`app.db`): uma linha por requisição e uma por chamada ao modelo, com prompt e versão, modelo, tentativas, retries, fallback, tokens, custo e latência.
-- **`GET /stats?since=15m|1h|24h|7d`**: total de requisições por rota e por status, `errorRate`, latência P50 e P95 (*nearest rank*), chamadas ao LLM, falhas, retries, fallbacks, tokens e custo (marcado como fictício no fake).
-- **Logger JSON** em stderr, com chaves mascaradas.
+- **`requestId`** on every response (`X-Request-Id`), accepted from the client if it has a valid format or replaced by a UUID, with the `request_id_replaced` warning.
+- **SQLite ledger** (`app.db`): one row per request and one per model call, with prompt and version, model, attempts, retries, fallback, tokens, cost and latency.
+- **`GET /stats?since=15m|1h|24h|7d`**: total requests by route and by status, `errorRate`, P50 and P95 latency (*nearest rank*), LLM calls, failures, retries, fallbacks, tokens and cost (flagged as fictional on the fake).
+- **JSON logger** on stderr, with masked keys.
 
-A demo imprime o resumo do `/stats` na última linha. A vitrine de observabilidade e resiliência do trio de projetos é o `incident-copilot`; aqui esses padrões aparecem de forma enxuta.
+The demo prints the `/stats` summary on its last line. The observability and resilience showcase of the project trio is `incident-copilot`; here these patterns appear in a lean form.
 
-## Testes e qualidade
+## Tests and quality
 
 ```text
 ℹ tests 571
@@ -477,96 +477,96 @@ A demo imprime o resumo do `/stats` na última linha. A vitrine de observabilida
 ℹ fail 0
 ```
 
-- **Pirâmide:** testes de unidade, de integração do grafo (`tests/int/`), ponta a ponta da API, CLI, página e eval (`tests/e2e/`) e live opcionais (`tests/live/`).
-- **Sem rede:** `npm test` roda com `tests/helpers/no-network.ts`, que bloqueia conexões de rede; processos filhos herdam o bloqueio por `NODE_OPTIONS`.
-- **SDD:** cada feature tem uma spec em `specs/00N-*/spec.md` com critérios EARS (`SQL-05`, `GRD-04`...). O teste do critério leva o ID no começo do nome e é escrito antes do código; `tests/unit/ears-coverage.unit.test.ts` falha se algum ID ficar sem um teste assim.
-- **Agentes:** [`AGENTS.md`](AGENTS.md) traz comandos, regras de TypeScript sem build, onde fica cada coisa, como acrescentar uma pergunta e as proibições (não editar golden para passar métrica, não relaxar a política SQL, não acrescentar dependência).
-- **Hook:** `npm run hooks:install` liga o `.githooks/pre-commit`, que roda `npm run typecheck` e `npm test`.
-- **Verificação completa:** `npm run typecheck && npm test && npm run eval && npm run layers` (o mesmo que o CI roda).
-- **Incidentes:** problemas reais da construção, com causa e teste que impede a volta, ficam em [`docs/incidents/`](docs/incidents/README.md).
+- **Pyramid:** unit tests, graph integration tests (`tests/int/`), end-to-end tests of the API, CLI, page and eval (`tests/e2e/`), and optional live tests (`tests/live/`).
+- **No network:** `npm test` runs with `tests/helpers/no-network.ts`, which blocks network connections; child processes inherit the block through `NODE_OPTIONS`.
+- **SDD:** each feature has a spec in `specs/00N-*/spec.md` with EARS criteria (`SQL-05`, `GRD-04`...). The criterion's test carries the ID at the start of its name and is written before the code; `tests/unit/ears-coverage.unit.test.ts` fails if any ID is left without such a test.
+- **Agents:** [`AGENTS.md`](AGENTS.md) provides commands, rules for TypeScript without a build, where everything lives, how to add a question and the prohibitions (do not edit golden questions to pass a metric, do not relax the SQL policy, do not add a dependency).
+- **Hook:** `npm run hooks:install` enables `.githooks/pre-commit`, which runs `npm run typecheck` and `npm test`.
+- **Full verification:** `npm run typecheck && npm test && npm run eval && npm run layers` (the same thing CI runs).
+- **Incidents:** real problems from the build, with cause and the test that keeps them from coming back, live in [`docs/incidents/`](docs/incidents/README.md).
 
-## Estrutura do repositório
+## Repository structure
 
 ```text
-specs/              constituição e 5 specs com critérios EARS
+specs/              constitution and 5 specs with EARS criteria
 src/
-  graph/            estado, roteamento, grafo e os 12 nós
-  llm/              providers fake e OpenRouter, LlmClient, budget, preços
-  rag/ embeddings/  chunker, embedder hash-v1, vector store, sanitizador, citações
-  sql/              seed, lexer, validador, conexão somente leitura, executor
-  guardrails/       regras, classificador por modelo, guarda de saída
-  prompts/v1/       prompts versionados
-  eval/             golden, métricas, relatório, calibração, matriz de camadas
+  graph/            state, routing, graph and the 12 nodes
+  llm/              fake and OpenRouter providers, LlmClient, budget, prices
+  rag/ embeddings/  chunker, hash-v1 embedder, vector store, sanitizer, citations
+  sql/              seed, lexer, validator, read-only connection, executor
+  guardrails/       rules, model classifier, output guard
+  prompts/v1/       versioned prompts
+  eval/             golden, metrics, report, calibration, layer matrix
   obs/              ledger, stats, logger
-  cli/ web/         CLIs e página estática
-data/kb/            8 documentos da empresa fictícia
-fixtures/llm/       respostas roteirizadas do fake, uma por pergunta
+  cli/ web/         CLIs and static page
+data/kb/            8 documents of the fictional company
+fixtures/llm/       scripted fake responses, one per question
 eval/               golden.v1.json, attacks.v1.json, thresholds.json, reports/
-tests/              unit, int (grafo), e2e (API, CLI, eval), live (opcional)
-docs/               notas de API, incidentes, ADR, decisões, capturas
+tests/              unit, int (graph), e2e (API, CLI, eval), live (optional)
+docs/               API notes, incidents, ADR, decisions, screenshots
 ```
 
-## A empresa fictícia
+## The fictional company
 
-A **Moenda Lunar Cafés Especiais** é um e-commerce de cafés especiais inventado para o projeto (uma busca em 2026-10-04 não achou empresa real com esse nome; detalhes em [`docs/notas-de-api.md`](docs/notas-de-api.md#nome-da-empresa)).
+**Moenda Lunar Cafés Especiais** is a specialty-coffee e-commerce invented for the project (a search on 2026-10-04 found no real company with that name; details in [`docs/notas-de-api.md`](docs/notas-de-api.md#nome-da-empresa)).
 
-- **Documentos:** 8 políticas em `data/kb/`: sobre a empresa, trocas e devoluções, garantia de equipamentos, frete e prazos, pagamentos e reembolsos, clube de assinatura, privacidade e dados e cafeterias parceiras. Este último traz, de propósito, um parágrafo com instrução embutida e o canário `LUA-CHEIA-100`, para testar injeção indireta.
-- **Vendas:** banco gerado por seed determinístico (semente fixa 20251) com 5 tabelas (`customers`, `products`, `orders`, `order_items`, `customer_contacts`), pedidos só de 2025 e valores em centavos inteiros. `customer_contacts` e `customers.name` existem para provar que o authorizer protege dados pessoais.
+- **Documents:** 8 policies in `data/kb/`: about the company, exchanges and returns, equipment warranty, shipping and deadlines, payments and refunds, subscription club, privacy and data, and partner coffee shops. The last one deliberately carries a paragraph with an embedded instruction and the canary `LUA-CHEIA-100`, to test indirect injection.
+- **Sales:** a database generated by a deterministic seed (fixed seed 20251) with 5 tables (`customers`, `products`, `orders`, `order_items`, `customer_contacts`), orders from 2025 only and values in integer cents. `customer_contacts` and `customers.name` exist to prove that the authorizer protects personal data.
 
-## Aulas do curso aplicadas
+## Course lessons applied
 
-Projeto derivado de um curso de IA. Só IDs e temas; nenhum trecho ou exemplo de aula está neste repositório. O mapa de cada tema para o código está em [`docs/aulas-do-curso.md`](docs/aulas-do-curso.md).
+A project derived from an AI course. Only IDs and topics; no excerpt or example from a lesson is in this repository. The map from each topic to the code is in [`docs/aulas-do-curso.md`](docs/aulas-do-curso.md) (in Portuguese).
 
-| Aulas | Tema |
+| Lessons | Topic |
 |---|---|
-| 198068, 198069, 198082 | Prompt como configuração versionada; contrato anti-alucinação |
-| 198077, 198078, 198079 | Provedor OpenAI-compatível, OpenRouter, troca de modelo por configuração |
-| 198080, 198081, 198082 | RAG com chunking, top-k, score mínimo e recusa |
-| 198062 | Calibrar limiar por experimento |
-| 200953, 200954 | Config fail-fast, serviço injetável, `app.inject` |
-| 200955 a 200959 | `StateGraph`, arestas condicionais, rota de fallback |
-| 200960 a 200963 | Saída estruturada com `safeParse`; "o LLM extrai, o código decide" |
-| 200969 a 200972 | Guardrail antes do roteador; system prompt não é firewall |
-| 200973 a 200978 | Text-to-query com schema real, validação, correção com teto, `no_results` |
-| 200968, 200980 | Avaliador com limiar no CI; asserção de estrutura |
-| 221503 a 221507 | SDD com constituição, specs EARS, instruções curtas, pre-commit |
-| 221514 | Contrato HTTP estável (400, 422, 504) |
-| 221515, 221516 | `node:sqlite`, `:memory:` nos testes, seed idempotente |
-| 221519, 221521 | Interface de embedder, cosseno, corte de relevância |
-| 221522 | Estimar tokens antes de enviar |
-| 221524 | Roteador com motivo e override; retry, fallback e 503 |
-| 221525 | `requestId`, logger JSON, `/stats`; escrita como faixa 4 de autonomia |
+| 198068, 198069, 198082 | Prompt as versioned configuration; anti-hallucination contract |
+| 198077, 198078, 198079 | OpenAI-compatible provider, OpenRouter, switching models by configuration |
+| 198080, 198081, 198082 | RAG with chunking, top-k, minimum score and refusal |
+| 198062 | Calibrating a threshold by experiment |
+| 200953, 200954 | Fail-fast config, injectable service, `app.inject` |
+| 200955 to 200959 | `StateGraph`, conditional edges, fallback route |
+| 200960 to 200963 | Structured output with `safeParse`; "the LLM extracts, the code decides" |
+| 200969 to 200972 | Guardrail before the router; the system prompt is not a firewall |
+| 200973 to 200978 | Text-to-query with a real schema, validation, correction with a cap, `no_results` |
+| 200968, 200980 | Evaluator with a threshold in CI; structure assertion |
+| 221503 to 221507 | SDD with a constitution, EARS specs, short instructions, pre-commit |
+| 221514 | Stable HTTP contract (400, 422, 504) |
+| 221515, 221516 | `node:sqlite`, `:memory:` in tests, idempotent seed |
+| 221519, 221521 | Embedder interface, cosine, relevance cutoff |
+| 221522 | Estimating tokens before sending |
+| 221524 | Router with reason and override; retry, fallback and 503 |
+| 221525 | `requestId`, JSON logger, `/stats`; writing as autonomy tier 4 |
 
-## O que mudei em relação à aula
+## What I changed from the lessons
 
-Os projetos de referência do curso (aulas citadas por ID) foram adaptados assim:
+The course's reference projects (lessons cited by ID) were adapted as follows:
 
-| Na aula | Aqui | Aulas |
+| In the lesson | Here | Lessons |
 |---|---|---|
-| Neo4j em Docker | `node:sqlite`, tanto para vetores quanto para vendas | 198081; 200973 a 200978 |
-| Text-to-Cypher com `EXPLAIN` | Text-to-SQL com `EXPLAIN QUERY PLAN`, authorizer com allowlist de tabela, coluna e função, `query_only` e lexer | 200973 a 200978 |
-| Planner multi-step | Uma pergunta gera uma consulta | 200974 |
-| `ChatOpenAI` e `@openrouter/sdk` | SDK `openai` com `baseURL` e um `LlmClient` próprio, com retry, fallback, custo e teto por requisição | 198077 a 198079; 200954 |
-| `RunnableSequence` com `ChainState` | Grafo LangGraph único com roteador e reducers explícitos | 198081, 198082; 200955 a 200963 |
-| Embeddings `@xenova/transformers` fp32 | Interface `Embedder` com um TF-IDF lexical determinístico; o MiniLM ficou como extensão opcional | 198081; 221519, 221521 |
-| Chunks de 1000 caracteres | 600 com overlap de 100, cortados por seção | 198081, 198082 |
-| Score fixo de 0,5 | Limiar ajustado num split de calibração | 198081, 198082; 198062 |
-| Testes contra modelos gratuitos reais | Fake roteirizado com `test:live` opcional; o caminho de correção da SQL agora é testado | 200978 |
-| Guardrail só com modelo | Regras, modelo opcional, sanitização de documentos, guarda de saída e uma matriz de camadas | 200969 a 200972 |
-| Zod v3 | Zod v4 | 200973 a 200978 |
-| Langfuse | Ledger próprio com `/stats` enxuto | 200980; 221525 |
+| Neo4j in Docker | `node:sqlite`, for both vectors and sales | 198081; 200973 to 200978 |
+| Text-to-Cypher with `EXPLAIN` | Text-to-SQL with `EXPLAIN QUERY PLAN`, an authorizer with a table, column and function allowlist, `query_only` and a lexer | 200973 to 200978 |
+| Multi-step planner | One question generates one query | 200974 |
+| `ChatOpenAI` and `@openrouter/sdk` | `openai` SDK with `baseURL` and a custom `LlmClient`, with retry, fallback, cost and a per-request cap | 198077 to 198079; 200954 |
+| `RunnableSequence` with `ChainState` | A single LangGraph graph with a router and explicit reducers | 198081, 198082; 200955 to 200963 |
+| `@xenova/transformers` fp32 embeddings | `Embedder` interface with a deterministic lexical TF-IDF; MiniLM stayed as an optional extension | 198081; 221519, 221521 |
+| 1000-character chunks | 600 with an overlap of 100, split by section | 198081, 198082 |
+| Fixed score of 0.5 | Threshold tuned on a calibration split | 198081, 198082; 198062 |
+| Tests against real free models | Scripted fake with optional `test:live`; the SQL correction path is now tested | 200978 |
+| Guardrail with a model only | Rules, optional model, document sanitization, output guard and a layer matrix | 200969 to 200972 |
+| Zod v3 | Zod v4 | 200973 to 200978 |
+| Langfuse | Own ledger with a lean `/stats` | 200980; 221525 |
 
-## Limitações
+## Limitations
 
-- **Nenhuma execução com modelo real ainda.** O perfil `live` do eval e o `test:live` existem, mas não foram rodados (sem chave no ambiente de construção). Os números acima são do perfil FAKE. O schema enviado em `json_schema` com `strict: true` vai sem `minLength`/`maxLength`, que a documentação do modo strict da OpenAI não aceita; os limites continuam no Zod. Se um provedor ainda recusar o schema, `LLM_STRUCTURED_MODE=json_object` é a saída, mas isso não foi conferido contra a rede.
-- **Perguntas híbridas** (documentos e dados na mesma frase): o roteador escolhe a intenção dominante.
-- **Prazo e memória da SQL:** a SQL gerada roda num processo filho, um pedido por vez, que leva `SIGKILL` depois de `SQL_TIMEOUT_MS` (5 s). Uma consulta pesada não trava mais o servidor, mas ocupa a fila e um núcleo até o prazo, e a primeira consulta paga uns 40 ms para subir o filho. O prazo não limita memória: o que segura as funções de texto é o teto de 100.000 bytes por valor, e não há limite de RSS para o filho (`PRAGMA hard_heap_limit` não é aplicado no SQLite do Node, compilado sem contabilidade de memória).
-- **Disponibilidade com `rules+model`:** o modelo de segurança não tem fallback e falha fechado. Se ele cair, toda pergunta responde 503 até ele voltar; `GUARDRAIL_MODE=rules` tira essa dependência, ao custo da camada por modelo.
-- **`SELECT *` em `customers` é bloqueio:** a expansão do `*` lê `customers.name`, que o authorizer nega, e violação de política não vai para correção. O glossário enviado ao modelo pede para listar as colunas, mas nenhuma pergunta-ouro mede quantas vezes um modelo real escreve `c.*`.
-- **Sem memória entre perguntas** (multi-turno), sem autenticação, rate limit nem multiusuário: a API é local e de demonstração.
-- **Fidelidade** verificada por mecanismo (citação válida, guarda de saída, recusa), não por um LLM juiz.
-- **Embedder lexical:** o MiniLM entra no marco opcional M9 pela interface `Embedder` ([ADR 001](docs/adr/001-embedder-plugavel.md)).
+- **No run with a real model yet.** The `live` eval profile and `test:live` exist but have not been run (no key in the build environment). The numbers above are from the FAKE profile. The schema sent in `json_schema` with `strict: true` goes without `minLength`/`maxLength`, which OpenAI's strict mode documentation does not accept; the limits remain in Zod. If a provider still rejects the schema, `LLM_STRUCTURED_MODE=json_object` is the way out, but this was not checked against the network.
+- **Hybrid questions** (documents and data in the same sentence): the router picks the dominant intent.
+- **SQL deadline and memory:** the generated SQL runs in a child process, one request at a time, which gets `SIGKILL` after `SQL_TIMEOUT_MS` (5 s). A heavy query no longer freezes the server, but it occupies the queue and a core until the deadline, and the first query pays about 40 ms to start the child. The deadline does not limit memory: what holds back the text functions is the 100,000-byte per-value cap, and there is no RSS limit for the child (`PRAGMA hard_heap_limit` is not applied in Node's SQLite, which is compiled without memory accounting).
+- **Availability with `rules+model`:** the safety model has no fallback and fails closed. If it goes down, every question answers 503 until it returns; `GUARDRAIL_MODE=rules` removes that dependency, at the cost of the model layer.
+- **`SELECT *` on `customers` is a block:** the expansion of `*` reads `customers.name`, which the authorizer denies, and a policy violation does not go to correction. The glossary sent to the model asks it to list the columns, but no golden question measures how often a real model writes `c.*`.
+- **No memory between questions** (multi-turn), no authentication, rate limit or multi-user support: the API is local and for demonstration.
+- **Faithfulness** is verified by mechanism (valid citation, output guard, refusal), not by an LLM judge.
+- **Lexical embedder:** MiniLM comes in with the optional milestone M9 through the `Embedder` interface ([ADR 001](docs/adr/001-embedder-plugavel.md)).
 
-## Licença
+## License
 
-Código sob a [licença MIT](LICENSE). A Moenda Lunar Cafés Especiais, seus documentos, clientes e vendas são fictícios; qualquer semelhança com empresas reais é coincidência.
+Code under the [MIT license](LICENSE). Moenda Lunar Cafés Especiais, its documents, customers and sales are fictional; any resemblance to real companies is coincidence.
